@@ -6,16 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>Realm Cocoa笔记 | Zach的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="#Realm Cocoa笔记">
+  <meta name="description" content="Realm Cocoa笔记开篇在知道Realm之前用过SQLite，也学习过Core Data，效果都不是很理想，一来是因为在开发过程中并没有需要用到数据库的地方（学生党），二来呢是本身比较懒，看到Core Data那么多东西，又用不到，学一下又忘了，就没有深入学习。直到有一天看到了Realm，嗯，这真的是一个好东西，今天看了看文档，感觉简单易用，遂决定写一下笔记。
+ModelRealm上的模型定">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Realm Cocoa笔记">
 <meta property="og:url" content="http://yoursite.com/2016/03/26/Realm Cocoa笔记/index.html">
 <meta property="og:site_name" content="Zach的博客">
-<meta property="og:description" content="#Realm Cocoa笔记">
-<meta property="og:updated_time" content="2016-03-26T14:41:59.000Z">
+<meta property="og:description" content="Realm Cocoa笔记开篇在知道Realm之前用过SQLite，也学习过Core Data，效果都不是很理想，一来是因为在开发过程中并没有需要用到数据库的地方（学生党），二来呢是本身比较懒，看到Core Data那么多东西，又用不到，学一下又忘了，就没有深入学习。直到有一天看到了Realm，嗯，这真的是一个好东西，今天看了看文档，感觉简单易用，遂决定写一下笔记。
+ModelRealm上的模型定">
+<meta property="og:updated_time" content="2016-03-26T14:59:25.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Realm Cocoa笔记">
-<meta name="twitter:description" content="#Realm Cocoa笔记">
+<meta name="twitter:description" content="Realm Cocoa笔记开篇在知道Realm之前用过SQLite，也学习过Core Data，效果都不是很理想，一来是因为在开发过程中并没有需要用到数据库的地方（学生党），二来呢是本身比较懒，看到Core Data那么多东西，又用不到，学一下又忘了，就没有深入学习。直到有一天看到了Realm，嗯，这真的是一个好东西，今天看了看文档，感觉简单易用，遂决定写一下笔记。
+ModelRealm上的模型定">
   
     <link rel="alternative" href="/atom.xml" title="Zach的博客" type="application/atom+xml">
   
@@ -209,7 +212,9 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>#Realm Cocoa笔记</p>
+        <h1 id="Realm_Cocoa_u7B14_u8BB0"><a href="#Realm_Cocoa_u7B14_u8BB0" class="headerlink" title="Realm Cocoa笔记"></a>Realm Cocoa笔记</h1><h2 id="u5F00_u7BC7"><a href="#u5F00_u7BC7" class="headerlink" title="开篇"></a>开篇</h2><p>在知道Realm之前用过<code>SQLite</code>，也学习过<code>Core Data</code>，效果都不是很理想，一来是因为在开发过程中并没有需要用到数据库的地方（学生党），<br>二来呢是本身比较懒，看到<code>Core Data</code>那么多东西，又用不到，学一下又忘了，就没有深入学习。直到有一天看到了Realm，嗯，这真的是一个好东西，<br>今天看了看文档，感觉简单易用，遂决定写一下笔记。</p>
+<h2 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h2><p>Realm上的模型定义和普通的OC的类定义一样，只要继承自<code>RMLObject</code>即可</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10;@interface Dog : RLMObject&#10;&#10;@property NSString *name;&#10;@property NSInteger age;&#10;&#10;@property (readonly) NSArray *owners;&#10;&#10;@end</span><br></pre></td></tr></table></figure>
 
       
     </div>
