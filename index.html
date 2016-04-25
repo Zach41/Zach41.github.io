@@ -229,6 +229,138 @@
             
               
                 
+                <a class="post-title-link" href="/2016/04/25/FBKVOController源码阅读笔记/" itemprop="url">
+                  FBKVOController源码阅读笔记
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">發表於</span>
+            <time itemprop="dateCreated" datetime="2016-04-25T00:00:00+08:00" content="2016-04-25">
+              2016-04-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0"><a href="#FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0" class="headerlink" title="FBKVOController 源码阅读笔记"></a>FBKVOController 源码阅读笔记</h1><p>FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。</p>
+<h3 id="u7ED3_u6784_u5206_u6790"><a href="#u7ED3_u6784_u5206_u6790" class="headerlink" title="结构分析"></a>结构分析</h3><p>FBKVOController主要由以下三个部分组成：</p>
+<ol>
+<li>FBKVOInfo</li>
+<li>FBKVOSharedController</li>
+<li>FBKVOControlller</li>
+</ol>
+<h4 id="FBKVOInfo"><a href="#FBKVOInfo" class="headerlink" title="FBKVOInfo"></a>FBKVOInfo</h4><p><code>FBKVOInfo</code>用来作为KVO中的Context，它的定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@implementation _FBKVOInfo&#10;&#123;&#10;@public&#10;  __weak FBKVOController *_controller;&#10;  NSString *_keyPath;&#10;  NSKeyValueObservingOptions _options;&#10;  SEL _action;&#10;  void *_context;&#10;  FBKVONotificationBlock _block;&#10;  _FBKVOInfoState _state;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p><code>_FBKVOInfoState</code>的定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef NS_ENUM(uint8_t, _FBKVOInfoState) &#123;&#10;  _FBKVOInfoStateInitial = 0,&#10;&#10;  // whether the observer registration in Foundation has completed&#10;  _FBKVOInfoStateObserving,&#10;&#10;  // whether `unobserve` was called before observer registration in Foundation has completed&#10;  // this could happen when `NSKeyValueObservingOptionInitial` is one of the NSKeyValueObservingOptions&#10;  _FBKVOInfoStateNotObserving,&#10;&#125;;</span><br></pre></td></tr></table></figure>
+<p>以上的定义基本可以后名字推断，就不再赘述。</p>
+<h3 id="FBKVOSharedController"><a href="#FBKVOSharedController" class="headerlink" title="FBKVOSharedController"></a>FBKVOSharedController</h3><p>FBKVOSharedController是一个单例，所有的观察信息以FBKVOInfo的形式交由其处理，FBKVOSharedController内部实现了KVO机制，当FBKVOInfo中的keypath对应的属性发生改变，那么对应的回调就会被执行。</p>
+<p>具体的代码如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observeValueForKeyPath:(nullable NSString *)keyPath&#10;                      ofObject:(nullable id)object&#10;                        change:(nullable NSDictionary&#60;NSString *, id&#62; *)change&#10;                       context:(nullable void *)context&#10;&#123;&#10;  NSAssert(context, @&#34;missing context keyPath:%@ object:%@ change:%@&#34;, keyPath, object, change);&#10;  &#10;  _FBKVOInfo *info;&#10;  &#10;  &#123;&#10;    // lookup context in registered infos, taking out a strong reference only if it exists&#10;    OSSpinLockLock(&#38;_lock);&#10;    info = [_infos member:(__bridge id)context];&#10;    OSSpinLockUnlock(&#38;_lock);&#10;  &#125;&#10;  &#10;  if (nil != info) &#123;&#10;    &#10;    // take strong reference to controller&#10;    FBKVOController *controller = info-&#62;_controller;&#10;    if (nil != controller) &#123;&#10;      &#10;      // take strong reference to observer&#10;      id observer = controller.observer;&#10;      if (nil != observer) &#123;&#10;        &#10;        // dispatch custom block or action, fall back to default action&#10;        if (info-&#62;_block) &#123;&#10;          info-&#62;_block(observer, object, change);&#10;        &#125; else if (info-&#62;_action) &#123;&#10;#pragma clang diagnostic push&#10;#pragma clang diagnostic ignored &#34;-Warc-performSelector-leaks&#34;&#10;          [observer performSelector:info-&#62;_action withObject:change withObject:object];&#10;#pragma clang diagnostic pop&#10;        &#125; else &#123;&#10;          [observer observeValueForKeyPath:keyPath ofObject:object change:change context:info-&#62;_context];&#10;        &#125;&#10;      &#125;&#10;    &#125;&#10;  &#125;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>FBKVOSharedController还定义了以下三个方法，用于添加删除FBKVOInfo到其维护的一个NSHashTabe<_fbkvoinfo *="">中。</_fbkvoinfo></p>
+<p>代码如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observe:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object infos:(nullable NSSet&#60;_FBKVOInfo *&#62; *)infos</span><br></pre></td></tr></table></figure>
+<h3 id="FBKVOController"><a href="#FBKVOController" class="headerlink" title="FBKVOController"></a>FBKVOController</h3><p>FBKVOController内部维护了一个NSMapTable<id, nshasktable<_fbkvoinfo="" *=""> *&gt;用于建立一个被观察对象和被观察对象的KVOInfos（一个被观察对象可以又许多keypath被观察）的映射。</id,></p>
+<p>除此之外，FBKVOController只是简单的地调用FBKVOSharedController提供的方法来添加/删除观察对象。</p>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/04/20/Web_xml标签记录/" itemprop="url">
                   Web.xml标签记录
                 </a>
@@ -534,7 +666,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-count">3</span>
               <span class="site-state-item-name">文章</span>
             </a>
           </div>

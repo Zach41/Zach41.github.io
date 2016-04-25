@@ -1,0 +1,608 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="program," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="FBKVOController 源码阅读笔记FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。
+结构分析FBKVOController主要由以下三个部分组成：
+
+FBKVOInfo
+FBKVOSharedController
+FBKVOControlller
+
+FBKVOInfoFBKVOInfo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FBKVOController源码阅读笔记">
+<meta property="og:url" content="http://yoursite.com/2016/04/25/FBKVOController源码阅读笔记/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="FBKVOController 源码阅读笔记FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。
+结构分析FBKVOController主要由以下三个部分组成：
+
+FBKVOInfo
+FBKVOSharedController
+FBKVOControlller
+
+FBKVOInfoFBKVOInfo">
+<meta property="og:updated_time" content="2016-04-25T03:45:36.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FBKVOController源码阅读笔记">
+<meta name="twitter:description" content="FBKVOController 源码阅读笔记FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。
+结构分析FBKVOController主要由以下三个部分组成：
+
+FBKVOInfo
+FBKVOSharedController
+FBKVOControlller
+
+FBKVOInfoFBKVOInfo">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> FBKVOController源码阅读笔记 | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">一名学生，程序员，用脚步丈量大地的旅人</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首頁
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            歸檔
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            標籤
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                FBKVOController源码阅读笔记
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">發表於</span>
+            <time itemprop="dateCreated" datetime="2016-04-25T00:00:00+08:00" content="2016-04-25">
+              2016-04-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Objective-C</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0"><a href="#FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0" class="headerlink" title="FBKVOController 源码阅读笔记"></a>FBKVOController 源码阅读笔记</h1><p>FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。</p>
+<h3 id="u7ED3_u6784_u5206_u6790"><a href="#u7ED3_u6784_u5206_u6790" class="headerlink" title="结构分析"></a>结构分析</h3><p>FBKVOController主要由以下三个部分组成：</p>
+<ol>
+<li>FBKVOInfo</li>
+<li>FBKVOSharedController</li>
+<li>FBKVOControlller</li>
+</ol>
+<h4 id="FBKVOInfo"><a href="#FBKVOInfo" class="headerlink" title="FBKVOInfo"></a>FBKVOInfo</h4><p><code>FBKVOInfo</code>用来作为KVO中的Context，它的定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@implementation _FBKVOInfo&#10;&#123;&#10;@public&#10;  __weak FBKVOController *_controller;&#10;  NSString *_keyPath;&#10;  NSKeyValueObservingOptions _options;&#10;  SEL _action;&#10;  void *_context;&#10;  FBKVONotificationBlock _block;&#10;  _FBKVOInfoState _state;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p><code>_FBKVOInfoState</code>的定义如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef NS_ENUM(uint8_t, _FBKVOInfoState) &#123;&#10;  _FBKVOInfoStateInitial = 0,&#10;&#10;  // whether the observer registration in Foundation has completed&#10;  _FBKVOInfoStateObserving,&#10;&#10;  // whether `unobserve` was called before observer registration in Foundation has completed&#10;  // this could happen when `NSKeyValueObservingOptionInitial` is one of the NSKeyValueObservingOptions&#10;  _FBKVOInfoStateNotObserving,&#10;&#125;;</span><br></pre></td></tr></table></figure>
+<p>以上的定义基本可以后名字推断，就不再赘述。</p>
+<h3 id="FBKVOSharedController"><a href="#FBKVOSharedController" class="headerlink" title="FBKVOSharedController"></a>FBKVOSharedController</h3><p>FBKVOSharedController是一个单例，所有的观察信息以FBKVOInfo的形式交由其处理，FBKVOSharedController内部实现了KVO机制，当FBKVOInfo中的keypath对应的属性发生改变，那么对应的回调就会被执行。</p>
+<p>具体的代码如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observeValueForKeyPath:(nullable NSString *)keyPath&#10;                      ofObject:(nullable id)object&#10;                        change:(nullable NSDictionary&#60;NSString *, id&#62; *)change&#10;                       context:(nullable void *)context&#10;&#123;&#10;  NSAssert(context, @&#34;missing context keyPath:%@ object:%@ change:%@&#34;, keyPath, object, change);&#10;  &#10;  _FBKVOInfo *info;&#10;  &#10;  &#123;&#10;    // lookup context in registered infos, taking out a strong reference only if it exists&#10;    OSSpinLockLock(&#38;_lock);&#10;    info = [_infos member:(__bridge id)context];&#10;    OSSpinLockUnlock(&#38;_lock);&#10;  &#125;&#10;  &#10;  if (nil != info) &#123;&#10;    &#10;    // take strong reference to controller&#10;    FBKVOController *controller = info-&#62;_controller;&#10;    if (nil != controller) &#123;&#10;      &#10;      // take strong reference to observer&#10;      id observer = controller.observer;&#10;      if (nil != observer) &#123;&#10;        &#10;        // dispatch custom block or action, fall back to default action&#10;        if (info-&#62;_block) &#123;&#10;          info-&#62;_block(observer, object, change);&#10;        &#125; else if (info-&#62;_action) &#123;&#10;#pragma clang diagnostic push&#10;#pragma clang diagnostic ignored &#34;-Warc-performSelector-leaks&#34;&#10;          [observer performSelector:info-&#62;_action withObject:change withObject:object];&#10;#pragma clang diagnostic pop&#10;        &#125; else &#123;&#10;          [observer observeValueForKeyPath:keyPath ofObject:object change:change context:info-&#62;_context];&#10;        &#125;&#10;      &#125;&#10;    &#125;&#10;  &#125;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>FBKVOSharedController还定义了以下三个方法，用于添加删除FBKVOInfo到其维护的一个NSHashTabe<_fbkvoinfo *="">中。</_fbkvoinfo></p>
+<p>代码如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observe:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object infos:(nullable NSSet&#60;_FBKVOInfo *&#62; *)infos</span><br></pre></td></tr></table></figure>
+<h3 id="FBKVOController"><a href="#FBKVOController" class="headerlink" title="FBKVOController"></a>FBKVOController</h3><p>FBKVOController内部维护了一个NSMapTable<id, nshasktable<_fbkvoinfo="" *=""> *&gt;用于建立一个被观察对象和被观察对象的KVOInfos（一个被观察对象可以又许多keypath被观察）的映射。</id,></p>
+<p>除此之外，FBKVOController只是简单的地调用FBKVOSharedController提供的方法来添加/删除观察对象。</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/program/" rel="tag">#program</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/20/Web_xml标签记录/" rel="next" title="Web.xml标签记录">
+                <i class="fa fa-chevron-left"></i> Web.xml标签记录
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目錄
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            本站概覽
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-name">文章</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分類</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">標籤</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0"><span class="nav-number">1.</span> <span class="nav-text">FBKVOController 源码阅读笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u7ED3_u6784_u5206_u6790"><span class="nav-number">1.0.1.</span> <span class="nav-text">结构分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#FBKVOInfo"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">FBKVOInfo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FBKVOSharedController"><span class="nav-number">1.0.2.</span> <span class="nav-text">FBKVOSharedController</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FBKVOController"><span class="nav-number">1.0.3.</span> <span class="nav-text">FBKVOController</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 強力驅動
+</div>
+
+<div class="theme-info">
+  主題 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
