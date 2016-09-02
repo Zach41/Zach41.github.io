@@ -239,6 +239,180 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/02/Signal/" itemprop="url">
+                  Signal
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">發表於</span>
+            <time itemprop="dateCreated" datetime="2016-09-02T00:00:00+08:00" content="2016-09-02">
+              2016-09-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1"><a href="#Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1" class="headerlink" title="Signal, Linux进程间通信"></a>Signal, Linux进程间通信</h1><p>信号（Signal）是Linux的一种进程间通信机制，信号由内核或者其他进程发送给接收进程，接收到信号的进程相应地采取行动来处理信号。信号是一种软中断，即当一个进程收到一个信号时，它停止自己的执行流程，转而去处理信号。<br>值得注意的是信号是可重入的，即信号处理程序可以被其他信号中断。</p>
+<h3 id="u4FE1_u53F7_u7684_u79CD_u7C7B"><a href="#u4FE1_u53F7_u7684_u79CD_u7C7B" class="headerlink" title="信号的种类"></a>信号的种类</h3><p>常用的信号并不是很多，信号的名称在<code>&lt;signal.h&gt;</code>中定义，常用的信号及解释如下：</p>
+<ul>
+<li>SIGALRM：由<code>alarm()</code>系统调用发送给接收进程，<code>alarm()</code>系统调用可以定时发送一个SIGALRM信号给进程，以触发某个定时操作。</li>
+<li>SIGHUP：该信号表示某一个操作关闭了终端，运行在该终端下的程序会收到SIGHUP信号，默认的信号处理程序会结束收到的信号的程序。</li>
+<li>SIGINT：用户输入了Ctrl-C就会发送一个SIGINT给前台应用。</li>
+<li>SIGILL：这是一个异常信号，表示系统执行时遇到了一个非法程序，当加载动态链接一个被破坏的函数库时可能会产生该信号。注意，这个信号不能被捕获或者忽略，一般在shell中用于强制终止异常程序。</li>
+<li>SIGABRT：程序中调用<code>abort()</code>系统调用会产生一个SIGABRT信号</li>
+<li>SIGSEGV：这也是一个异常信号，当程序访问了一个不属于它的内存空间是内核会发送一个SIGSEGV信号给程序。</li>
+<li>SIGPIPE：Broken Pipe，如果程序尝试往管道写入数据，而管道并没有与之对应的读数据的进程，就会产生SIGPIPE信号。</li>
+<li>SIGTREM：这个信号告诉进程结束自身的运行，<code>kill</code>命令默认发送SIGTERM信号</li>
+<li>SIGHLD：当一个子进程结束运行时，父进程就会收到一个SIGHLD信号。</li>
+<li>SIGUSR1 &amp; SIGUSR2：用户可自定义的信号。</li>
+</ul>
+<p>注意<code>SIGILL</code>和<code>SIGSTOP</code>（用于调试）的处理行为不能被更改。</p>
+<h3 id="u4FE1_u53F7_u7684_u5904_u7406"><a href="#u4FE1_u53F7_u7684_u5904_u7406" class="headerlink" title="信号的处理"></a>信号的处理</h3><h4 id="signal_u51FD_u6570"><a href="#signal_u51FD_u6570" class="headerlink" title="signal函数"></a>signal函数</h4><p><code>signal</code>函数是一个年代久远的信号处理函数，其函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*handler)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br></pre></td></tr></table></figure>
+<p>可以看到，signal是一个函数，其返回值是一个函数指针，signal函数注册一个新的信号处理函数，并返回原先注册的信号处理函数。</p>
+<p>一个<code>signal</code>函数的例子如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sig_handler</span><span class="params">(<span class="keyword">int</span> signum)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Receive Signal : %d\n"</span>, signum);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    signal(SIGINT, sig_handler);</span><br><span class="line">    sleep(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果截图：<br><img src="/2016/09/02/Signal/signal_test.png" alt="signal_test.png" title=""></p>
+<p>可以看到当我们按下<code>Ctrl-C</code>时触发了自定义的信号处理函数。</p>
+<h4 id="sigaction_u51FD_u6570"><a href="#sigaction_u51FD_u6570" class="headerlink" title="sigaction函数"></a>sigaction函数</h4><p><code>signal</code>函数的行为根据UNIX版本的不同而不同，在不同的Linux版本中亦是如此。所以我们应该使用一个更加健壮的接口－－sigaction函数。sigaction的原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaction</span><span class="params">(<span class="keyword">int</span> signum, <span class="keyword">const</span> <span class="keyword">struct</span> sigaction *act, <span class="keyword">struct</span> sigaction *oldact)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>sigaction</code>的结构定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> sigaction &#123;</span><br><span class="line">	<span class="keyword">void</span>     (*sa_handler)(<span class="keyword">int</span>);</span><br><span class="line">	<span class="keyword">void</span>     (*sa_sigaction)(<span class="keyword">int</span>, <span class="keyword">siginfo_t</span> *, <span class="keyword">void</span> *);</span><br><span class="line">	<span class="keyword">sigset_t</span>   sa_mask;</span><br><span class="line">	<span class="keyword">int</span>        sa_flags;</span><br><span class="line">	<span class="keyword">void</span>     (*sa_restorer)(<span class="keyword">void</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>sa_flags</code>被设置成<code>SA_SIGINFO</code>时，信号处理函数是<code>sa_sigaction</code>函数，否则是<code>sa_handler</code>函数。<code>sa_flags</code>的其他值的解释如下：</p>
+<ul>
+<li>SA_NOCLDSTOP：子进程停止时不产生SIGHLD信号</li>
+<li>SA_RESETHAND：将对此信号的处理方式在信号处理函数入口处重置为SIG_DFL</li>
+<li>SA_RESTART：重启可中断的函数而不是给出EINTER错误</li>
+<li>SA_NODEFER：捕获到信号时不将它添加到屏蔽字中。</li>
+</ul>
+<p>当我们使用<code>sa_sigaction</code>函数作为信号处理函数时，我们可以得到发送信号的进程的更多信息，信息存储在<code>siginfo_t</code>中，其结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">siginfo_t</span> &#123;</span><br><span class="line">	<span class="keyword">int</span>      si_signo;    <span class="comment">/* Signal number */</span></span><br><span class="line">    <span class="keyword">int</span>      si_errno;    <span class="comment">/* An errno value */</span></span><br><span class="line">    <span class="keyword">int</span>      si_code;     <span class="comment">/* Signal code */</span></span><br><span class="line">    <span class="keyword">int</span>      si_trapno;   <span class="comment">/* Trap number that caused</span><br><span class="line">                                      hardware-generated signal</span><br><span class="line">                                      (unused on most architectures) */</span></span><br><span class="line">	<span class="keyword">pid_t</span>    si_pid;      <span class="comment">/* Sending process ID */</span></span><br><span class="line">    <span class="keyword">uid_t</span>    si_uid;      <span class="comment">/* Real user ID of sending process */</span></span><br><span class="line">    <span class="keyword">int</span>      si_status;   <span class="comment">/* Exit value or signal */</span></span><br><span class="line">    <span class="keyword">clock_t</span>  si_utime;    <span class="comment">/* User time consumed */</span></span><br><span class="line">    <span class="keyword">clock_t</span>  si_stime;    <span class="comment">/* System time </span><br><span class="line">	sigval_t si_value;    <span class="comment">/* Signal value */</span></span><br><span class="line">    int      si_int;      <span class="comment">/* POSIX.1b signal */</span></span><br><span class="line">    void    *si_ptr;      <span class="comment">/* POSIX.1b signal */</span></span><br><span class="line">    int      si_overrun;  <span class="comment">/* Timer overrun count; POSIX.1b timers */</span></span><br><span class="line">    int      si_timerid;  <span class="comment">/* Timer ID; POSIX.1b timers */</span></span><br><span class="line">    void    *si_addr;     <span class="comment">/* Memory location which caused fault */</span></span><br><span class="line">    long     si_band;     <span class="comment">/* Band event (was int in</span><br><span class="line">                                      glibc 2.3.2 and earlier) */</span></span><br><span class="line">	int      si_fd;       <span class="comment">/* File descriptor */</span></span><br><span class="line">    short    si_addr_lsb; <span class="comment">/* Least significant bit of address</span><br><span class="line">                                        (since Linux 2.6.32) */</span></span><br><span class="line">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><code>sa_mask</code>中设置被进程屏蔽的信号。</p>
+<p>一个使用<code>sigaction</code>的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sig_handler</span><span class="params">(<span class="keyword">int</span> signum)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Receive signal : %d\n"</span>, signum);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> sigaction act;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;act, <span class="number">0</span>, <span class="keyword">sizeof</span>(act));</span><br><span class="line"></span><br><span class="line">    act.sa_handler = sig_handler;</span><br><span class="line">    act.sa_flags   = SA_RESETHAND;</span><br><span class="line">    <span class="comment">/* 清除屏蔽字 */</span></span><br><span class="line">    sigemptyset(&amp;act.sa_mask);</span><br><span class="line"></span><br><span class="line">    sigaction(SIGINT, &amp;act, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Test\n"</span>);</span><br><span class="line">	sleep(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果如下：</p>
+<img src="/2016/09/02/Signal/sigaction_test.png" alt="sigaction_test.png" title="">
+<p>可以看到，程序第一次收到SIGINT信号时执行的是自定义的信号处理函数，第二次就被重置为默认的信号处理函数了。</p>
+<h4 id="kill_u51FD_u6570"><a href="#kill_u51FD_u6570" class="headerlink" title="kill函数"></a>kill函数</h4><p><code>kill</code>系统调用函数的原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">kill</span><span class="params">(pid_t pid, <span class="keyword">int</span> sig)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>它的作用是发送一个信号（由sig参数指定）给一个特定进程。默认发送<code>SIGTERM</code>信号。</p>
+<h4 id="u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570"><a href="#u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570" class="headerlink" title="信号集处理函数"></a>信号集处理函数</h4><p>信号集处理函数主要用于处理<code>sigset_t</code>，从而让进程屏蔽某些信号。函数的原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigemptyset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigfillset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaddset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigdelset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigismember</span><span class="params">(sigset_t *sigset, <span class="keyword">int</span> signal)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigpromask</span><span class="params">(<span class="keyword">int</span> how, <span class="keyword">const</span> sigset_t *<span class="built_in">set</span>, sigset_t *osigset)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigpending</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigsuspend</span><span class="params">(<span class="keyword">const</span> sigset_t *)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>sigpromask</code>可以根据<code>how</code>指定的值来修改进程的信号屏蔽字。如果<code>set</code>参数为空，则<code>how</code>没有意义，但是如果此时<code>osigset</code>不为空，那么当前信号屏蔽字保存在<code>osigset</code>指向的地址中。</p>
+<p><code>how</code>的不同取值和对应的操作：</p>
+<ul>
+<li>SIG_BLOCK：把参数set中的信号加入到进程的信号屏蔽字中</li>
+<li>SIG_SETMASK：把进程的信号屏蔽字设置为set中的信号</li>
+<li>SIG_UNBLOCK：从进程的信号屏蔽字中删除set中指定的信号</li>
+</ul>
+<p>注意，调用这个函数才能修改进程的信号屏蔽字，它之前的函数都只是改变一个变量，对进程的信号屏蔽字并没有直接影响。</p>
+<p><code>sigpending</code>函数将被阻塞的信号中停留在待处理状态的信号写入参数指定的地址中。</p>
+<p><code>sigsuspend</code>函数首先将进程的屏蔽字换成参数指定的信号，然后挂起进程。</p>
+<p>一个例子实验一下以上的函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span>  </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">handler</span><span class="params">(<span class="keyword">int</span> sig)</span>  </span><br><span class="line"></span>&#123;  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Handle the signal %d\n"</span>, sig);  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span>  </span><br><span class="line"></span>&#123;  </span><br><span class="line">    <span class="keyword">sigset_t</span> sigset;<span class="comment">//用于记录屏蔽字  </span></span><br><span class="line">    <span class="keyword">sigset_t</span> ign;<span class="comment">//用于记录被阻塞的信号集  </span></span><br><span class="line">    <span class="keyword">struct</span> sigaction act;  </span><br><span class="line">    <span class="comment">//清空信号集  </span></span><br><span class="line">    sigemptyset(&amp;sigset);  </span><br><span class="line">    sigemptyset(&amp;ign);  </span><br><span class="line">    <span class="comment">//向信号集中添加信号SIGINT  </span></span><br><span class="line">    sigaddset(&amp;sigset, SIGINT);  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">//设置处理函数和信号集      </span></span><br><span class="line">    act.sa_handler = handler;  </span><br><span class="line">    sigemptyset(&amp;act.sa_mask);  </span><br><span class="line">    act.sa_flags = <span class="number">0</span>;  </span><br><span class="line">    sigaction(SIGINT, &amp;act, <span class="number">0</span>);  </span><br><span class="line">  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Wait the signal SIGINT...\n"</span>);  </span><br><span class="line">    pause();<span class="comment">//挂起进程，等待信号  </span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">//设置进程屏蔽字，在本例中为屏蔽SIGINT   </span></span><br><span class="line">    sigprocmask(SIG_SETMASK, &amp;sigset, <span class="number">0</span>);     </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Please press Ctrl+c in 10 seconds...\n"</span>);  </span><br><span class="line">    sleep(<span class="number">10</span>);  </span><br><span class="line">    <span class="comment">//测试SIGINT是否被屏蔽  </span></span><br><span class="line">    sigpending(&amp;ign);  </span><br><span class="line">    <span class="keyword">if</span>(sigismember(&amp;ign, SIGINT))  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"The SIGINT signal has ignored\n"</span>);  </span><br><span class="line">    <span class="comment">//在信号集中删除信号SIGINT  </span></span><br><span class="line">    sigdelset(&amp;sigset, SIGINT);  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Wait the signal SIGINT...\n"</span>);  </span><br><span class="line">    <span class="comment">//将进程的屏蔽字重新设置，即取消对SIGINT的屏蔽  </span></span><br><span class="line">    <span class="comment">//并挂起进程  </span></span><br><span class="line">    sigsuspend(&amp;sigset);  </span><br><span class="line">  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"The app will exit in 5 seconds!\n"</span>);  </span><br><span class="line">    sleep(<span class="number">5</span>);  </span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<img src="/2016/09/02/Signal/sigset_test.png" alt="sigset_test.png" title="">
+<p>可以看到当我们屏蔽了SIGINT信号后，如果SIGINT发送给进程，那么信号就被阻塞编程待处理状态，当我们取消对信号的阻塞后该信号马上就被处理，于是程序就马上打印</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The app will exit in 5 seconds!</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/08/30/Unix套接字编程基础/" itemprop="url">
                   Unix套接字编程基础
                 </a>
@@ -969,7 +1143,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-count">6</span>
               <span class="site-state-item-name">文章</span>
             </a>
           </div>
