@@ -101,7 +101,7 @@
     motion: true,
     duoshuo: {
       userId: 0,
-      author: '博主'
+      author: 'Author'
     }
   };
 </script>
@@ -166,7 +166,7 @@
             
               <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
             
-            首頁
+            Home
           </a>
         </li>
       
@@ -176,7 +176,7 @@
             
               <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
             
-            分類
+            Categorias
           </a>
         </li>
       
@@ -186,7 +186,7 @@
             
               <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
             
-            歸檔
+            Arquivos
           </a>
         </li>
       
@@ -196,7 +196,7 @@
             
               <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
             
-            標籤
+            Tags
           </a>
         </li>
       
@@ -239,6 +239,126 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/04/Interaction Transition/" itemprop="url">
+                  Interaction Transition
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Postado em</span>
+            <time itemprop="dateCreated" datetime="2016-09-04T00:00:00+08:00" content="2016-09-04">
+              2016-09-04
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">Em</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Swift/" itemprop="url" rel="index">
+                    <span itemprop="name">Swift</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Interaction_Transition"><a href="#Interaction_Transition" class="headerlink" title="Interaction Transition"></a>Interaction Transition</h1><p>为了自定义交互式的过渡动画，<code>UIViewControllerTransitioningDelegate</code>对象必须实现对应的协议方法，<code>interactionControllerForPresentation(_:)</code>和<code>interactionControllerForDismissal(_:)</code>。交互控制根据用户的手势输入来更新自定义的过渡动画，<br>而自定的过度动画是实现了<code>UIViewControllerAnimatedTransitioning</code>协议的对象，关于该协议这里就不再说明了。</p>
+<p>Apple提供了一个交互式控制器的具体实现<code>UIPercentDrivenInteractiveTransition</code>，在大多数情况下，我们的交互式控制器只要继承它，然后加入自己的手势交互就好了。</p>
+<p>在我们的手势交互逻辑中，根据用户的输入，我们利用以下几个方法来实时更新动画：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">updateInteractiveTransition</span><span class="params">(<span class="number">_</span> percentComplete: CGFloat)</span></span></span><br><span class="line"></span><br><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">cancelInteractiveTransition</span><span class="params">()</span></span></span><br><span class="line"></span><br><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">finishInteractiveTransition</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure>
+<p>一个简单的例子如下：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> UIKit</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SwipeInteractionController</span>: <span class="title">UIPercentDrivenInteractiveTransition</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> interactionInProgress : <span class="type">Bool</span> = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">var</span> shouldCompleteTransition : <span class="type">Bool</span> = <span class="literal">false</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">weak</span> <span class="keyword">var</span> viewController : <span class="type">UIViewController</span>!</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">wireToViewController</span><span class="params">(viewController : UIViewController!)</span></span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.viewController = viewController</span><br><span class="line">        prepareGestureRecognizerInView(viewController.view)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">handleGesture</span><span class="params">(gestureRecognizer : UIScreenEdgePanGestureRecognizer)</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> translation = gestureRecognizer.translationInView(gestureRecognizer.view!.superview)</span><br><span class="line">        <span class="keyword">var</span> progress = translation.x / <span class="number">200.0</span></span><br><span class="line">        progress = <span class="type">CGFloat</span>(fminf(fmaxf(<span class="type">Float</span>(progress), <span class="number">0.0</span>), <span class="number">1.0</span>))</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">switch</span> gestureRecognizer.state &#123;</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Began</span>:</span><br><span class="line">            interactionInProgress = <span class="literal">true</span></span><br><span class="line">            viewController.dismissViewControllerAnimated(<span class="literal">true</span>, completion: <span class="literal">nil</span>)</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Changed</span>:</span><br><span class="line">            shouldCompleteTransition = progress &gt; <span class="number">0.5</span></span><br><span class="line">            updateInteractiveTransition(progress)</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Cancelled</span>:</span><br><span class="line">            shouldCompleteTransition = <span class="literal">false</span></span><br><span class="line">            interactionInProgress = <span class="literal">false</span></span><br><span class="line">            cancelInteractiveTransition()</span><br><span class="line">        <span class="keyword">case</span> .<span class="type">Ended</span>:</span><br><span class="line">            interactionInProgress = <span class="literal">false</span></span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> shouldCompleteTransition &#123;</span><br><span class="line">                finishInteractiveTransition()</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                cancelInteractiveTransition()</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">"Unsupported"</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// MARK: private </span></span><br><span class="line">    <span class="keyword">private</span> <span class="func"><span class="keyword">func</span> <span class="title">prepareGestureRecognizerInView</span><span class="params">(view : UIView)</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> edgeRecognizer = <span class="type">UIScreenEdgePanGestureRecognizer</span>(target: <span class="keyword">self</span>, action: #selector(handleGesture))</span><br><span class="line">        edgeRecognizer.edges = <span class="type">UIRectEdge</span>.<span class="type">Left</span></span><br><span class="line">        view.addGestureRecognizer(edgeRecognizer)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在定义了这个Animator之后，只要在另外一个对象（实现了UIViewControllerTransitioningDelegate协议）的<code>interactionControllerForDismissal(_:)</code>返回这个类的实例即可。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">interactionControllerForDismissal</span><span class="params">(animator: UIViewControllerAnimatedTransitioning)</span></span> -&gt; <span class="type">UIViewControllerInteractiveTransitioning</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> swipeAnimator.interactionInProgress ? swipeAnimator : <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/09/02/Signal/" itemprop="url">
                   Signal
                 </a>
@@ -252,7 +372,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">發表於</span>
+            <span class="post-meta-item-text">Postado em</span>
             <time itemprop="dateCreated" datetime="2016-09-02T00:00:00+08:00" content="2016-09-02">
               2016-09-02
             </time>
@@ -264,7 +384,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分類於</span>
+              <span class="post-meta-item-text">Em</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
                   <a href="/categories/Unix/" itemprop="url" rel="index">
@@ -426,7 +546,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">發表於</span>
+            <span class="post-meta-item-text">Postado em</span>
             <time itemprop="dateCreated" datetime="2016-08-30T00:00:00+08:00" content="2016-08-30">
               2016-08-30
             </time>
@@ -438,7 +558,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分類於</span>
+              <span class="post-meta-item-text">Em</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
                   <a href="/categories/Unix/" itemprop="url" rel="index">
@@ -580,7 +700,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">發表於</span>
+            <span class="post-meta-item-text">Postado em</span>
             <time itemprop="dateCreated" datetime="2016-05-26T00:00:00+08:00" content="2016-05-26">
               2016-05-26
             </time>
@@ -592,7 +712,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分類於</span>
+              <span class="post-meta-item-text">Em</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
                   <a href="/categories/Swift/" itemprop="url" rel="index">
@@ -720,7 +840,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">發表於</span>
+            <span class="post-meta-item-text">Postado em</span>
             <time itemprop="dateCreated" datetime="2016-05-23T00:00:00+08:00" content="2016-05-23">
               2016-05-23
             </time>
@@ -732,7 +852,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分類於</span>
+              <span class="post-meta-item-text">Em</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
                   <a href="/categories/Swift/" itemprop="url" rel="index">
@@ -856,7 +976,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">發表於</span>
+            <span class="post-meta-item-text">Postado em</span>
             <time itemprop="dateCreated" datetime="2016-04-25T00:00:00+08:00" content="2016-04-25">
               2016-04-25
             </time>
@@ -868,7 +988,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分類於</span>
+              <span class="post-meta-item-text">Em</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
                   <a href="/categories/Objective-C/" itemprop="url" rel="index">
@@ -988,7 +1108,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">發表於</span>
+            <span class="post-meta-item-text">Postado em</span>
             <time itemprop="dateCreated" datetime="2016-04-20T00:00:00+08:00" content="2016-04-20">
               2016-04-20
             </time>
@@ -1000,7 +1120,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">分類於</span>
+              <span class="post-meta-item-text">Em</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
                   <a href="/categories/Spring-MVC/" itemprop="url" rel="index">
@@ -1143,16 +1263,16 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
-              <span class="site-state-item-name">文章</span>
+              <span class="site-state-item-count">7</span>
+              <span class="site-state-item-name">publicações</span>
             </a>
           </div>
 
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">4</span>
-                <span class="site-state-item-name">分類</span>
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">categorias</span>
               </a>
             </div>
           
@@ -1161,7 +1281,7 @@
             <div class="site-state-item site-state-tags">
               <a href="/tags">
                 <span class="site-state-item-count">1</span>
-                <span class="site-state-item-name">標籤</span>
+                <span class="site-state-item-name">tags</span>
               </a>
             </div>
           
@@ -1205,11 +1325,11 @@
 </div>
 
 <div class="powered-by">
-  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 強力驅動
+  Desenvolvido com amor com <a class="theme-link" href="http://hexo.io">Hexo</a>
 </div>
 
 <div class="theme-info">
-  主題 -
+  Tema -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
     NexT.Muse
   </a>
