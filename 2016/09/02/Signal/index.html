@@ -91,7 +91,7 @@
 <meta property="og:image" content="http://yoursite.com/2016/09/02/Signal/signal_test.png">
 <meta property="og:image" content="http://yoursite.com/2016/09/02/Signal/sigaction_test.png">
 <meta property="og:image" content="http://yoursite.com/2016/09/02/Signal/sigset_test.png">
-<meta property="og:updated_time" content="2016-09-02T15:40:13.000Z">
+<meta property="og:updated_time" content="2016-09-07T10:19:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Signal">
 <meta name="twitter:description" content="Signal, Linux进程间通信信号（Signal）是Linux的一种进程间通信机制，信号由内核或者其他进程发送给接收进程，接收到信号的进程相应地采取行动来处理信号。信号是一种软中断，即当一个进程收到一个信号时，它停止自己的执行流程，转而去处理信号。值得注意的是信号是可重入的，即信号处理程序可以被其他信号中断。
@@ -108,7 +108,7 @@
     motion: true,
     duoshuo: {
       userId: 0,
-      author: 'Author'
+      author: '博主'
     }
   };
 </script>
@@ -171,7 +171,7 @@
             
               <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
             
-            Home
+            首頁
           </a>
         </li>
       
@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
             
-            Categorias
+            分類
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
             
-            Arquivos
+            歸檔
           </a>
         </li>
       
@@ -201,7 +201,7 @@
             
               <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
             
-            Tags
+            標籤
           </a>
         </li>
       
@@ -254,7 +254,7 @@
             <span class="post-meta-item-icon">
               <i class="fa fa-calendar-o"></i>
             </span>
-            <span class="post-meta-item-text">Postado em</span>
+            <span class="post-meta-item-text">發表於</span>
             <time itemprop="dateCreated" datetime="2016-09-02T00:00:00+08:00" content="2016-09-02">
               2016-09-02
             </time>
@@ -266,7 +266,7 @@
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
-              <span class="post-meta-item-text">Em</span>
+              <span class="post-meta-item-text">分類於</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
                   <a href="/categories/Unix/" itemprop="url" rel="index">
@@ -317,6 +317,13 @@
 <li>SIGUSR1 &amp; SIGUSR2：用户可自定义的信号。</li>
 </ul>
 <p>注意<code>SIGILL</code>和<code>SIGSTOP</code>（用于调试）的处理行为不能被更改。</p>
+<h3 id="POSIX_u4FE1_u53F7_u7684_u8BED_u4E49"><a href="#POSIX_u4FE1_u53F7_u7684_u8BED_u4E49" class="headerlink" title="POSIX信号的语义"></a>POSIX信号的语义</h3><p>符合POSIX的系统上信号的处理总结为：</p>
+<ul>
+<li>一旦安装了信号处理函数，它就一直安装着</li>
+<li>在一个信号处理函数运行期间，正被递交的信号是阻塞的。而且安装处理函数时，POSIX保证传递给<code>sigaction</code>的<code>sa_mask</code>信号集中指定的任何信号都是被阻塞的。</li>
+<li>如果一个信号在被阻塞期间产生了一次或多次，那么该信号在被解阻塞之后通常只递交一次，也就是说，Unix信号默认是不排队的。</li>
+<li>利用sigprocmask函数选择性地阻塞或解阻塞一组信号是可能的，我们可以在一段临界代码执行期间，防止捕获某些信号，以此保护这段代码。</li>
+</ul>
 <h3 id="u4FE1_u53F7_u7684_u5904_u7406"><a href="#u4FE1_u53F7_u7684_u5904_u7406" class="headerlink" title="信号的处理"></a>信号的处理</h3><h4 id="signal_u51FD_u6570"><a href="#signal_u51FD_u6570" class="headerlink" title="signal函数"></a>signal函数</h4><p><code>signal</code>函数是一个年代久远的信号处理函数，其函数原型如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*handler)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br></pre></td></tr></table></figure>
 <p>可以看到，signal是一个函数，其返回值是一个函数指针，signal函数注册一个新的信号处理函数，并返回原先注册的信号处理函数。</p>
@@ -452,10 +459,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            Tabela de Conteúdo
+            文章目錄
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview">
-            Visão Geral
+            本站概覽
           </li>
         </ul>
       
@@ -472,15 +479,15 @@
           <div class="site-state-item site-state-posts">
             <a href="/archives">
               <span class="site-state-item-count">7</span>
-              <span class="site-state-item-name">publicações</span>
+              <span class="site-state-item-name">文章</span>
             </a>
           </div>
 
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">5</span>
-                <span class="site-state-item-name">categorias</span>
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分類</span>
               </a>
             </div>
           
@@ -489,7 +496,7 @@
             <div class="site-state-item site-state-tags">
               <a href="/tags">
                 <span class="site-state-item-count">1</span>
-                <span class="site-state-item-name">tags</span>
+                <span class="site-state-item-name">標籤</span>
               </a>
             </div>
           
@@ -517,7 +524,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1"><span class="nav-number">1.</span> <span class="nav-text">Signal, Linux进程间通信</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u4FE1_u53F7_u7684_u79CD_u7C7B"><span class="nav-number">1.0.1.</span> <span class="nav-text">信号的种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4FE1_u53F7_u7684_u5904_u7406"><span class="nav-number">1.0.2.</span> <span class="nav-text">信号的处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#signal_u51FD_u6570"><span class="nav-number">1.0.2.1.</span> <span class="nav-text">signal函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigaction_u51FD_u6570"><span class="nav-number">1.0.2.2.</span> <span class="nav-text">sigaction函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kill_u51FD_u6570"><span class="nav-number">1.0.2.3.</span> <span class="nav-text">kill函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570"><span class="nav-number">1.0.2.4.</span> <span class="nav-text">信号集处理函数</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1"><span class="nav-number">1.</span> <span class="nav-text">Signal, Linux进程间通信</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u4FE1_u53F7_u7684_u79CD_u7C7B"><span class="nav-number">1.0.1.</span> <span class="nav-text">信号的种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#POSIX_u4FE1_u53F7_u7684_u8BED_u4E49"><span class="nav-number">1.0.2.</span> <span class="nav-text">POSIX信号的语义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4FE1_u53F7_u7684_u5904_u7406"><span class="nav-number">1.0.3.</span> <span class="nav-text">信号的处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#signal_u51FD_u6570"><span class="nav-number">1.0.3.1.</span> <span class="nav-text">signal函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sigaction_u51FD_u6570"><span class="nav-number">1.0.3.2.</span> <span class="nav-text">sigaction函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kill_u51FD_u6570"><span class="nav-number">1.0.3.3.</span> <span class="nav-text">kill函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570"><span class="nav-number">1.0.3.4.</span> <span class="nav-text">信号集处理函数</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
@@ -544,11 +551,11 @@
 </div>
 
 <div class="powered-by">
-  Desenvolvido com amor com <a class="theme-link" href="http://hexo.io">Hexo</a>
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 強力驅動
 </div>
 
 <div class="theme-info">
-  Tema -
+  主題 -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
     NexT.Muse
   </a>
