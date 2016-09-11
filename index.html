@@ -249,6 +249,153 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/11/UIStackView初探/" itemprop="url">
+                  UIStackView初探
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-11T00:00:00+08:00" content="2016-09-11">
+              2016-09-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/iOS9-Features/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS9 Features</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/11/UIStackView初探/" class="leancloud_visitors" data-flag-title="UIStackView初探">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="UIStackView"><a href="#UIStackView" class="headerlink" title="UIStackView"></a>UIStackView</h1><p>iOS9引入了<code>UIStackView</code>，Apple文档对UIStackView的定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The UIStackView class provides a streamlined interface for laying out a collection of views in either a column or a row. &#10;Stack views let you leverage the power of Auto Layout, creating user interfaces that can dynamically adapt to the device&#8217;s &#10;screen size, and any changes in the available space</span><br></pre></td></tr></table></figure>
+<p>即，利用<code>UIStackView</code>我们可以很方便地垂直或水平排列多个subview。</p>
+<h1 id="u914D_u7F6EUIStackView"><a href="#u914D_u7F6EUIStackView" class="headerlink" title="配置UIStackView"></a>配置UIStackView</h1><p><code>UIStackView</code>有以下几个配置选项让我们来配置它：</p>
+<ol>
+<li><code>Axis</code>：表示水平排列还是垂直排列</li>
+<li><code>Alignment</code>：控制subview的对齐方式</li>
+<li><code>Distribution</code>：控制subview的分布方式</li>
+<li><code>Spacing</code>：subview间的最小距离</li>
+</ol>
+<p><code>Alignment</code>因<code>Axis</code>而异，用图示说明更加形象。</p>
+<h4 id="u6C34_u5E73_u6392_u5217"><a href="#u6C34_u5E73_u6392_u5217" class="headerlink" title="水平排列"></a>水平排列</h4><img src="/2016/09/11/UIStackView初探/align_h.png" alt="align_h.png" title="">
+<h4 id="u5782_u76F4_u6392_u5217"><a href="#u5782_u76F4_u6392_u5217" class="headerlink" title="垂直排列"></a>垂直排列</h4><img src="/2016/09/11/UIStackView初探/align_v1.png" alt="align_v1.png" title="">
+<img src="/2016/09/11/UIStackView初探/align_v2.png" alt="align_v2.png" title="">
+<h4 id="u6CE8_u610F"><a href="#u6CE8_u610F" class="headerlink" title="注意"></a>注意</h4><p><code>UIStackView</code>会被当成一个Container View，它不会像其他UIView一样被渲染，所以类似与设置背景或者是重载drawRect方法都是没有任何效果的。</p>
+<h1 id="u7BA1_u7406Subview"><a href="#u7BA1_u7406Subview" class="headerlink" title="管理Subview"></a>管理Subview</h1><p><code>UIStackView</code>有两个属性</p>
+<ul>
+<li>arrangedSubviews</li>
+<li>subviews</li>
+</ul>
+<p>如果我们想添加一个subview让StackView来管理，只要调用<code>addArrangedSubview(_ view: UIView)</code>或者<code>insertArrangedSubview(_ view: UIView, at stackIndex: Int)</code>即可，但是如果要删除一个被StackView管理的subview，那么我们需要主注意到<br><code>removeArrangedSubview(_ view: UIView)</code>函数只是让对应的subview不让StackView来管理它的约束，它并没有从当前的视图层级从移除，如果要移除视图，我们需要显示调用<code>removeFromSuperview()</code>。</p>
+<h1 id="u7B80_u5355_u7684_u4F8B_u5B50"><a href="#u7B80_u5355_u7684_u4F8B_u5B50" class="headerlink" title="简单的例子"></a>简单的例子</h1><p>参考</p>
+<ul>
+<li><a href="http://code.tutsplus.com/tutorials/ios-9-getting-started-with-uistackview--cms-24193" target="_blank" rel="external">iOS 9: Getting Started with UIStackView</a></li>
+<li><a href="https://www.raywenderlich.com/114552/uistackview-tutorial-introducing-stack-views" target="_blank" rel="external">UIStackView-Tutorial-Introducing-Stack-Views</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/09/09/TCP连接建立和终止/" itemprop="url">
                   TCP连接建立和终止
                 </a>
@@ -1593,166 +1740,13 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/20/Web_xml标签记录/" itemprop="url">
-                  Web.xml标签记录
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-20T00:00:00+08:00" content="2016-04-20">
-              2016-04-20
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Spring-MVC/" itemprop="url" rel="index">
-                    <span itemprop="name">Spring MVC</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/04/20/Web_xml标签记录/" class="leancloud_visitors" data-flag-title="Web.xml标签记录">
-               &nbsp; | &nbsp;
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Web-xml__u6807_u7B7E_u8BB0_u5F55"><a href="#Web-xml__u6807_u7B7E_u8BB0_u5F55" class="headerlink" title="Web.xml 标签记录"></a>Web.xml 标签记录</h1><h3 id="u521D_u59CB_u5316_u8FC7_u7A0B"><a href="#u521D_u59CB_u5316_u8FC7_u7A0B" class="headerlink" title="初始化过程"></a>初始化过程</h3><ol>
-<li>在启动Web项目时，WEB容器会去读取它的配置文件web.xml，读取<listener>和<context-param>两个节点。</context-param></listener></li>
-<li>紧接着，容器创建一个ServletContext实例，这个web项目共享这个servletContext实例</li>
-<li>容器将<context-param>转换维键值对，并交给servletContext。</context-param></li>
-<li>容器创建<listener>中的类实例，创建监听器</listener></li>
-</ol>
-<p>加载的顺序为和标签在文件中出现的顺序是没有关系的（对不同类标签而言），加载的顺序为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">context-param --&#62; listener --&#62; filter --&#62; servlet</span><br></pre></td></tr></table></figure>
-<p>对某类配置节点而言，它们的加载顺序和出现顺序有关。例如若若多个<filter>都映射到了同一个url，那么按照出现的顺序依次做<code>doFilter</code></filter></p>
-<h3 id="Context-param"><a href="#Context-param" class="headerlink" title="Context-param"></a>Context-param</h3><p><code>&lt;Context-param&gt;</code>用来声明应用范围内的上下文初始化参数，一个例子如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;context-param&#62;&#10;&#9;&#60;param-name&#62;contextConfigLocation&#60;/param-name&#62;&#10;&#9;&#60;param-value&#62;contextConfgiLocationValue&#60;/param-value&#62;&#10;&#60;/context-param&#62;</span><br></pre></td></tr></table></figure>
-<ol>
-<li><code>&lt;param-name&gt;</code> 用于声明参数名</li>
-<li><code>&lt;param-value&gt;</code> 用于声明参数值</li>
-</ol>
-<p>而后在Servlet中可以通过以下方式得到初始化参数</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String paramValue = getServletContext().getInitParameter(<span class="string">"contextConfigLocation"</span>)</span><br></pre></td></tr></table></figure>
-<h3 id="listener"><a href="#listener" class="headerlink" title="listener"></a>listener</h3><p><code>&lt;listener&gt;</code>用于注册一个监听器类，当一个事件（在建立、修改和删除会话或者servlet环境）发生时得到通知，可以对时间做出相应的响应。其常与<code>&lt;context-param&gt;</code>一起使用。</p>
-<p>示例如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;!--&#21021;&#22987;&#21270;&#26085;&#24535;&#37197;&#32622;&#25991;&#20214; --&#62;  &#10;&#60;listener&#62;  &#10;    &#60;listener-class&#62;  &#10;        com.myapp.LogbackConfigListener  &#10;    &#60;/listener-class&#62;  &#10;&#60;/listener&#62;  &#10;&#60;context-param&#62;  &#10;    &#60;param-name&#62;logbackConfigLocation&#60;/param-name&#62;  &#10;    &#60;param-value&#62;WEB-INF/logback.xml&#60;/param-value&#62;  &#10;&#60;/context-param&#62;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LogbackConfigListener</span> <span class="keyword">implements</span> <span class="title">ServletContextListener</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(LogbackConfigListener.class);  </span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String CONFIG_LOCATION = <span class="string">"logbackConfigLocation"</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">contextDestroyed</span><span class="params">(ServletContextEvent arg0)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">contextInitialized</span><span class="params">(ServletContextEvent event)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line">        String logbackConfigLocation = event.getServletContext().getInitParameter(CONFIG_LOCATION);  </span><br><span class="line">        String fn = event.getServletContext().getRealPath(logbackConfigLocation);  </span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();  </span><br><span class="line">            loggerContext.reset();  </span><br><span class="line">            JoranConfigurator joranConfigurator = <span class="keyword">new</span> JoranConfigurator();  </span><br><span class="line">            joranConfigurator.setContext(loggerContext);  </span><br><span class="line">            joranConfigurator.doConfigure(fn);  </span><br><span class="line">            logger.debug(<span class="string">"loaded slf4j configure file from &#123;&#125;"</span>, fn);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">catch</span> (JoranException e) &#123;  </span><br><span class="line">            logger.error(<span class="string">"can loading slf4j configure file from "</span> + fn, e);  </span><br><span class="line">        &#125;  </span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="filter"><a href="#filter" class="headerlink" title="filter"></a>filter</h3><p><code>&lt;filter&gt;</code>用于在请求和响应对象被servlet处理之前或者之后，使用过滤器对象对这两个对象进行操作。<code>&lt;filter-class&gt;</code>中指定的过滤器必须继承以下三种方法：</p>
-<ul>
-<li>init(FilterConfig filterConfig)</li>
-<li>doFilter(…): 用于对request，response进行处理，并能通过chain.doFilter(…)将控制权交给下一个过滤器</li>
-<li>destroy(): 资源销毁</li>
-</ul>
-<p>一个用于设置编码的filter配置示例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;filter&#62;&#10;  &#60;filter-name&#62;setCharacterEncoding&#60;/filter-name&#62;&#10;  &#60;filter-class&#62;coreservlet.javaworld.CH11.SetCharacterEncodingFilter&#60;/filter-class&#62;&#10;  &#60;init-param&#62;&#10;     &#60;param-name&#62;encoding&#60;/param-name&#62;&#10;     &#60;param-value&#62;GB2312&#60;/param-value&#62;&#10;  &#60;/init-param&#62;&#10;&#60;/filter&#62;&#10;&#60;filter-mapping&#62;&#10;   &#60;filter-name&#62;setCharacterEncoding&#60;/filter-name&#62;&#10;   &#60;url-pattern&#62;/*&#60;/url-pattern&#62;&#10;&#60;/filter-mapping&#62;</span><br></pre></td></tr></table></figure>
-<h3 id="servlet"><a href="#servlet" class="headerlink" title="servlet"></a>servlet</h3><p>用于配置servlet所对应的URL</p>
-<h3 id="session-config"><a href="#session-config" class="headerlink" title="session-config"></a>session-config</h3><p><code>&lt;session-config&gt;</code>用于定义session的有效期限，单位为分钟</p>
-<h3 id="mime-mapping"><a href="#mime-mapping" class="headerlink" title="mime-mapping"></a>mime-mapping</h3><p><code>&lt;mime-mapping&gt;</code>用于定于扩展名（extension）与MIME类型的对映，如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;mime-mapping&#62;  &#10;   &#60;extension&#62;doc&#60;/extension&#62;  &#10;   &#60;mime-type&#62;application/vnd.ms-word&#60;/mime-type&#62;  &#10;&#60;/mime-mapping&#62;</span><br></pre></td></tr></table></figure>
-<h3 id="welcome-file-list_u4E0Eerror-page"><a href="#welcome-file-list_u4E0Eerror-page" class="headerlink" title="welcome-file-list与error-page"></a>welcome-file-list与error-page</h3><p><code>&lt;welcome-file-list&gt;</code>用于指定WEB应用首页，<code>&lt;erro-page&gt;</code>用于指定对应的错误代码（如404）或者java异常（如java.lang.Exception）对应的页面</p>
-<h3 id="jsp-config"><a href="#jsp-config" class="headerlink" title="jsp-config"></a>jsp-config</h3><p><code>&lt;jsp-config&gt;</code>主要用于设定JSP页面的相关配置。</p>
-<p>一个较为完整的配置如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;jsp-config&#62;&#10;    &#60;taglib&#62;&#10;        &#60;taglib-uri&#62;http://mytaglib.uri&#60;/taglib-uri&#62;&#10;        &#60;taglib-location&#62;/WEB-INF/tlds/MyTaglib.tld&#60;/taglib-location&#62;&#10;    &#60;/taglib&#62;&#10;    &#60;jsp-property-group&#62;&#10;        &#60;description&#62;Special property group for JSP Configuration JSP example.&#60;/description&#62;&#10;        &#60;display-name&#62;JSPConfiguration&#60;/display-name&#62;&#10;        &#60;url-pattern&#62;/jsp/* &#60;/url-pattern&#62;&#10;        &#60;el-ignored&#62;true&#60;/el-ignored&#62;&#10;        &#60;page-encoding&#62;GB2312&#60;/page-encoding&#62;&#10;        &#60;scripting-invalid&#62;true&#60;/scripting-invalid&#62;&#10;        &#60;include-prelude&#62;/include/prelude.jspf&#60;/include-prelude&#62;&#10;        &#60;include-coda&#62;/include/coda.jspf&#60;/include-coda&#62;&#10;    &#60;/jsp-property-group&#62;&#10;&#60;/jsp-config&#62;</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -1791,7 +1785,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-count">11</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1799,7 +1793,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
