@@ -1,0 +1,748 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="system," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="默认权限在Linux下创建一个文件或者目录的默认权限和umask相关，umask指定“当前用户在创建文件或者目录时的权限默认值”。用umask来查看文件或目录的默认权限值：
+1&amp;#10140;  ~ umask&amp;#10;002
+需要注意的是umask指定文件或目录的默认值应该减去的数值。而对于一个文件，默认值是“-rw-rw-rw”，对一个目录，默认值是“drwxrwxrwx”，举例来说，如果当前">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux文件与目录的默认、隐藏和特殊权限">
+<meta property="og:url" content="http://yoursite.com/2016/09/12/Linux文件与目录的默认、隐藏和特殊权限/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="默认权限在Linux下创建一个文件或者目录的默认权限和umask相关，umask指定“当前用户在创建文件或者目录时的权限默认值”。用umask来查看文件或目录的默认权限值：
+1&amp;#10140;  ~ umask&amp;#10;002
+需要注意的是umask指定文件或目录的默认值应该减去的数值。而对于一个文件，默认值是“-rw-rw-rw”，对一个目录，默认值是“drwxrwxrwx”，举例来说，如果当前">
+<meta property="og:updated_time" content="2016-10-04T05:48:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux文件与目录的默认、隐藏和特殊权限">
+<meta name="twitter:description" content="默认权限在Linux下创建一个文件或者目录的默认权限和umask相关，umask指定“当前用户在创建文件或者目录时的权限默认值”。用umask来查看文件或目录的默认权限值：
+1&amp;#10140;  ~ umask&amp;#10;002
+需要注意的是umask指定文件或目录的默认值应该减去的数值。而对于一个文件，默认值是“-rw-rw-rw”，对一个目录，默认值是“drwxrwxrwx”，举例来说，如果当前">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> Linux文件与目录的默认、隐藏和特殊权限 | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Linux文件与目录的默认、隐藏和特殊权限
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-12T00:00:00+08:00" content="2016-09-12">
+              2016-09-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/12/Linux文件与目录的默认、隐藏和特殊权限/" class="leancloud_visitors" data-flag-title="Linux文件与目录的默认、隐藏和特殊权限">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="u9ED8_u8BA4_u6743_u9650"><a href="#u9ED8_u8BA4_u6743_u9650" class="headerlink" title="默认权限"></a>默认权限</h1><p>在Linux下创建一个文件或者目录的默认权限和<code>umask</code>相关，umask指定“当前用户在创建文件或者目录时的权限默认值”。用umask来查看文件或目录的默认权限值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ umask&#10;002</span><br></pre></td></tr></table></figure>
+<p>需要注意的是umask指定文件或目录的默认值应该减去的数值。而对于一个文件，默认值是“-rw-rw-rw”，对一个目录，默认值是“drwxrwxrwx”，举例来说，如果当前用户创建了一个文件，那么文件的权限默认值就是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(-rw-rw-rw-) - (--------w-) =&#62; -rw-rw-r--</span><br></pre></td></tr></table></figure>
+<h1 id="u9690_u85CF_u5C5E_u6027"><a href="#u9690_u85CF_u5C5E_u6027" class="headerlink" title="隐藏属性"></a>隐藏属性</h1><p>可以利用<code>chattr</code>和<code>lsattr</code>来修改和查看文件或目录的隐藏属性。需要注意的是这两个命令只在Ext2/Ext3文件系统上有效。</p>
+<p>命令使用方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chattr [+-=] [ASacdistu] files...</span><br></pre></td></tr></table></figure>
+<p>这里只说明两个参数，其余可以参见manual</p>
+<ul>
+<li>i: 让一个文件不能被删除、改名、设置连接、写入或添加数据。只有root才能设置该属性。</li>
+<li>a: 设置a之后，这个文件只能添加数据，而不能删除也不能修改数据，只有root才能设置该属性。</li>
+</ul>
+<p>lsattr查看隐藏属性，用法简单，可以直接查看manual</p>
+<h1 id="u6587_u4EF6_u7279_u6B8A_u6743_u9650"><a href="#u6587_u4EF6_u7279_u6B8A_u6743_u9650" class="headerlink" title="文件特殊权限"></a>文件特殊权限</h1><p>Linux有三个特殊权限：</p>
+<ul>
+<li>SUID</li>
+<li>SGID</li>
+<li>SBIT</li>
+</ul>
+<h3 id="SUID"><a href="#SUID" class="headerlink" title="SUID"></a>SUID</h3><p>当s标志出现在文件所有者的x权限上时，此时就被成为<code>SET UID</code>，即SUID的特殊权限。</p>
+<p>SUID有这样的功能和限制：</p>
+<ol>
+<li>仅仅对二进制程序有效</li>
+<li>执行者对该程序具有科执行的权限</li>
+<li>本权限仅仅在执行过程中有效</li>
+<li>执行者将拥有该程序所有者的权限（仅在执行过程中）</li>
+</ol>
+<p>举例来说：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ ls -l /usr/bin/passwd &#10;-rwsr-xr-x 1 root root 54256 3&#26376;  29 17:25 /usr/bin/passwd</span><br></pre></td></tr></table></figure>
+<p><code>passwd</code>是一个二进制程序，它的所有者是root，但是当我们用用户身份登入时一样可以执行该程序并修改自己的密码（这回修改/etc/shadow文件）。这是因为<code>passwd</code>拥有SUID权限。</p>
+<h3 id="SGID"><a href="#SGID" class="headerlink" title="SGID"></a>SGID</h3><p>当s标志在用户组的x时，成为<code>SET GID</code>，即SGID。SGID可以作用于一个文件，也可以作用于一个目录。</p>
+<p>当作用于一个文件时：</p>
+<ol>
+<li>SGID对二进制程序有效</li>
+<li>程序执行者对该程序有执行的权限</li>
+<li>执行者在执行的过程中可以得到程序所在用户组的权限。</li>
+</ol>
+<p>当作用于一个目录时：</p>
+<ol>
+<li>用户若对此目录有r和x的权限，该用户能够进入此目录（前提）</li>
+<li>用户在目录下的有效用户组将会变成该目录的用户组</li>
+<li>若用户在此目录下具有w的权限，则用户所创建的文件将与此目录的用户组相同。</li>
+</ol>
+<h3 id="SBIT"><a href="#SBIT" class="headerlink" title="SBIT"></a>SBIT</h3><p>SBIT（Sticky Bit）只对目录有效。它对目录的作用是：</p>
+<ol>
+<li>当用户对此目录有w和x的权限，即具有写入权限时（前提）</li>
+<li>当用户在该目录下创建文件或目录时，仅自己与root才有权限删除该文件。</li>
+</ol>
+<p>如果一个目录D有SBIT权限，当用户A在D下只能对自己创建的文件或目录进程删除、重命名、移动等操作，而无法删除他人的文件。</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/system/" rel="tag">#system</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/11/UIStackView初探/" rel="next" title="UIStackView初探">
+                <i class="fa fa-chevron-left"></i> UIStackView初探
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/13/套接字选项/" rel="prev" title="套接字选项">
+                套接字选项 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#u9ED8_u8BA4_u6743_u9650"><span class="nav-number">1.</span> <span class="nav-text">默认权限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u9690_u85CF_u5C5E_u6027"><span class="nav-number">2.</span> <span class="nav-text">隐藏属性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u6587_u4EF6_u7279_u6B8A_u6743_u9650"><span class="nav-number">3.</span> <span class="nav-text">文件特殊权限</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SUID"><span class="nav-number">3.0.1.</span> <span class="nav-text">SUID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SGID"><span class="nav-number">3.0.2.</span> <span class="nav-text">SGID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SBIT"><span class="nav-number">3.0.3.</span> <span class="nav-text">SBIT</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+</body>
+</html>

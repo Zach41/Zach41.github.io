@@ -1,0 +1,771 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="program," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="修改套接字选项有几种方法来修改和获取套接字的选项：
+
+getsockopt &amp;amp; setsockopt
+fcntl
+ioctl
+
+getsockopt &amp;amp; setsockopt这两个函数仅仅用于套接字。函数原型如下：
+12345#include &amp;lt;sys/socket.h&amp;gt;int getsockopt(int sockfd, int level, int optname,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="套接字选项">
+<meta property="og:url" content="http://yoursite.com/2016/09/13/套接字选项/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="修改套接字选项有几种方法来修改和获取套接字的选项：
+
+getsockopt &amp;amp; setsockopt
+fcntl
+ioctl
+
+getsockopt &amp;amp; setsockopt这两个函数仅仅用于套接字。函数原型如下：
+12345#include &amp;lt;sys/socket.h&amp;gt;int getsockopt(int sockfd, int level, int optname,">
+<meta property="og:image" content="http://yoursite.com/2016/09/13/套接字选项/so_linger.png">
+<meta property="og:image" content="http://yoursite.com/2016/09/13/套接字选项/shutdown_linger.png">
+<meta property="og:updated_time" content="2016-10-04T05:48:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="套接字选项">
+<meta name="twitter:description" content="修改套接字选项有几种方法来修改和获取套接字的选项：
+
+getsockopt &amp;amp; setsockopt
+fcntl
+ioctl
+
+getsockopt &amp;amp; setsockopt这两个函数仅仅用于套接字。函数原型如下：
+12345#include &amp;lt;sys/socket.h&amp;gt;int getsockopt(int sockfd, int level, int optname,">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 套接字选项 | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                套接字选项
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-13T00:00:00+08:00" content="2016-09-13">
+              2016-09-13
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/13/套接字选项/" class="leancloud_visitors" data-flag-title="套接字选项">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="u4FEE_u6539_u5957_u63A5_u5B57_u9009_u9879"><a href="#u4FEE_u6539_u5957_u63A5_u5B57_u9009_u9879" class="headerlink" title="修改套接字选项"></a>修改套接字选项</h1><p>有几种方法来修改和获取套接字的选项：</p>
+<ul>
+<li>getsockopt &amp; setsockopt</li>
+<li>fcntl</li>
+<li>ioctl</li>
+</ul>
+<h3 id="getsockopt__26amp_3B_setsockopt"><a href="#getsockopt__26amp_3B_setsockopt" class="headerlink" title="getsockopt &amp; setsockopt"></a>getsockopt &amp; setsockopt</h3><p>这两个函数仅仅用于套接字。函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getsockopt</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> level, <span class="keyword">int</span> optname, <span class="keyword">void</span> *optval, socklen_t *optlen)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setsockopt</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> level, <span class="keyword">int</span> optname, <span class="keyword">const</span> <span class="keyword">void</span> *optval, socklen_t optlen)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>sockfd必须指向一个已经打开的套接字，level指向系统中解释选项的代码或为通用套接字代码，或为某个特定于协议的代码（如TCP、IPv4、IPv6或SCTP）。</p>
+<p>optval指向某个变量，变量的大小由最后一个参数optlen指定，setsockopt从optval中取得待设置的新值，而getsockopt把获取到的值存入对应的地址中。</p>
+<p>套接字选项粗分为两大基本类型：</p>
+<ul>
+<li>启用或禁止某个特性的标志选项(flag = 0禁止特性，flag = 1开启特性)</li>
+<li>取得并返回我们可以设置或检查的特定值选项，即值选项。</li>
+</ul>
+<p>套接字选项可以参见UNP的P151</p>
+<h1 id="u901A_u7528_u5957_u63A5_u5B57_u9009_u9879_uFF08_u90E8_u5206_uFF09"><a href="#u901A_u7528_u5957_u63A5_u5B57_u9009_u9879_uFF08_u90E8_u5206_uFF09" class="headerlink" title="通用套接字选项（部分）"></a>通用套接字选项（部分）</h1><p>这里仅仅列出部分的通用套接字选项，其实也就是挑了一些自己看得懂的选项记录下。</p>
+<h3 id="SO_BROADCAST"><a href="#SO_BROADCAST" class="headerlink" title="SO_BROADCAST"></a>SO_BROADCAST</h3><p>开启或禁止进程发送广播消息的能力。只有数据报支持广播，并且还是在支持广播消息的网络上（以太网、令牌网络等）。</p>
+<h3 id="SO_DEBUG"><a href="#SO_DEBUG" class="headerlink" title="SO_DEBUG"></a>SO_DEBUG</h3><p>仅由TCP支持，当给一个TCP套接字开启本选项时，内核将为TCP在该套接字发送和接收的所有分组保留详细的跟踪信息，这些信息保存在内核的某个环形缓冲区中，并可使用trpt程序进行检查。</p>
+<h3 id="SO_ERROR"><a href="#SO_ERROR" class="headerlink" title="SO_ERROR"></a>SO_ERROR</h3><p>当一个套接字上发生错误时，内核将套接字的名为so_error的变量设置为标准的Unix Exxx值中的一个，它被成为该套接字的待处理错误(pending error)，内核以以下方式通知进程这个错误：</p>
+<ol>
+<li>如果进程阻塞在套接字的select调用上，那么无论是检查可读条件还是可读可写条件，select均返回并设置其中一个或所有的条件。</li>
+<li>如果进程使用信号驱动I/O模型，那么进程或进程组就会接收到内核产生的SIGIO信息。</li>
+</ol>
+<p>进程在被内核通知之后，可以通过访问SO_ERROR套接字选项获得so_error的值，由getsockopt返回的整数即待处理错误，随后so_error由内核复位成0。</p>
+<p>这个套接字选项可以获取，但是不能设置。</p>
+<h3 id="SO_KEEPALIVE"><a href="#SO_KEEPALIVE" class="headerlink" title="SO_KEEPALIVE"></a>SO_KEEPALIVE</h3><p>给一个套接字设置保持存活(keep-alive)选项后，如果2小时内在该套接字的任意一个方向上没有数据交换，那么TCP就会自动给对端发送一个保持存活的探测分节(keep-alive probe)，这是一个对端必须响应的TCP分节，它<br>会导致以下三种情况之一：</p>
+<ol>
+<li>对端以期望的ACK响应，一切正常</li>
+<li>对端以RST响应，对端已经崩溃并重启，套接字的待处理错误被置为ECONNRESET，套接字本身被关闭。</li>
+<li>对端对保持存活的探测分节没有响应，TCP间隔一段时间再次发送探测分节，多次之后若还是没有响应，则放弃套接字的待处理错误被置为ETIMEOUT，如果收到一个ICMP错误作为某个探测分节的响应，就返回相应的错误，套接字本身被关闭。</li>
+</ol>
+<h3 id="SO_LINGER"><a href="#SO_LINGER" class="headerlink" title="SO_LINGER"></a>SO_LINGER</h3><p>指定close函数对面向连接的协议(TCP和SCTP)如何操作。默认的行为是立即返回，如果这时候发送缓冲区有数据残留，系统会尝试把数据发送给对方。选项要求用户进程和内核间传递如下结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> linger &#123;</span><br><span class="line">	<span class="keyword">int</span> l_onoff;</span><br><span class="line">	<span class="keyword">int</span> l_linger;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>如果l_onoff = 0，l_linger被忽略，选项关闭</li>
+<li>l_onoff非0，<ul>
+<li>l_linger = 0，那么TCP丢弃发送缓冲区内的任何数据，并发送一个RST给对端，不会再有四次挥手。</li>
+<li>l_linger不为0，进程被阻塞，知道所有发送缓冲区的数据都发送完毕并被对方确认，或者是超过了l_linger指定的时间，如果超时，close返回EWOULDBLOCK错误。</li>
+</ul>
+</li>
+</ol>
+<p>假设客户在发送玩数据后调用了close函数，close可能在服务器读套接字接收缓冲区中的剩余数据之前就返回，在应用程序读数据之前服务器可能就会崩溃，而客户进程永远不会知道。<br>如果设置了SO_LINGER套接字，那么在调用close函数后，应用进程阻塞一段时间，等待数据全部发送并被对方确认（如图所示）。但是这里还有一个问题，延滞的时间可能不够，close仍然会返回EWOULDBLOCK错误，而且close的成功返回只是告诉我们先前发送的数据已经由对方确认，并不能告诉我们应用进程是否读取了数据。</p>
+<img src="/2016/09/13/套接字选项/so_linger.png" alt="so_linger.png" title="">
+<p>让客户进程知道服务器已经读取数据的一个方法是改用shutdown（设置SHUT_WR），改用之后的流程如下图：</p>
+<img src="/2016/09/13/套接字选项/shutdown_linger.png" alt="shutdown_linger.png" title="">
+<p>另外一个方法是应用程序自己做确认。客户在向服务器发送完数据后，调用read来读取一个字节</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span> ack;</span><br><span class="line"></span><br><span class="line">Write(sockfd, data, nbytes);</span><br><span class="line">n = read(sockfd, &amp;ack, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>服务器读取来自客户端的数据后发回一个字节的ACK。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nbytes = Read(sockfd, buff, <span class="keyword">sizeof</span>(buff));</span><br><span class="line"></span><br><span class="line">Write(sockfd, <span class="string">""</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="SO_RCVBUF__26amp_3B_SO_SNDBUF"><a href="#SO_RCVBUF__26amp_3B_SO_SNDBUF" class="headerlink" title="SO_RCVBUF &amp; SO_SNDBUF"></a>SO_RCVBUF &amp; SO_SNDBUF</h3><p>每一个套接字有一个发送和接收缓冲区，可以利用SO_RCVBUF和SO_SNDBUF选项来修改默认的缓冲区大小。需要注意的是，由于TCP的窗口规模是在建立连接时用SYN分节与对端呼唤a的都的。对于客户端，意味着<br>SO_RCVBUF必须在connect调用之前设置；对于服务端，该选项必须在调用Listen之前设置。</p>
+<h3 id="SO_RCVLOWAT__26amp_3B_SO_SNDLOWAT"><a href="#SO_RCVLOWAT__26amp_3B_SO_SNDLOWAT" class="headerlink" title="SO_RCVLOWAT &amp; SO_SNDLOWAT"></a>SO_RCVLOWAT &amp; SO_SNDLOWAT</h3><p>每一个套接字还有一个接收和发送低水位标志，由select使用，用SO_RCVLOWAT和SO_SNDLOWAT可以修改低水位标志的值。</p>
+<p>接收低水位标志是让select返回可读时套接字接收缓冲区所需要的最少的数据量。<br>发送低水位标志是让select返回可写是套接字发送缓冲区可存入的最少数据量。</p>
+<p>两个低水位的默认值都为1</p>
+<h3 id="SO_RCVTIMEO__26amp_3B_SO_SNDTIMEO"><a href="#SO_RCVTIMEO__26amp_3B_SO_SNDTIMEO" class="headerlink" title="SO_RCVTIMEO &amp; SO_SNDTIMEO"></a>SO_RCVTIMEO &amp; SO_SNDTIMEO</h3><p>这两个选项允许我们给套接字的接收和发送设置一个超时值。</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/program/" rel="tag">#program</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/12/Linux文件与目录的默认、隐藏和特殊权限/" rel="next" title="Linux文件与目录的默认、隐藏和特殊权限">
+                <i class="fa fa-chevron-left"></i> Linux文件与目录的默认、隐藏和特殊权限
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/19/系统服务——daemon/" rel="prev" title="系统服务——daemon">
+                系统服务——daemon <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#u4FEE_u6539_u5957_u63A5_u5B57_u9009_u9879"><span class="nav-number">1.</span> <span class="nav-text">修改套接字选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#getsockopt__26amp_3B_setsockopt"><span class="nav-number">1.0.1.</span> <span class="nav-text">getsockopt & setsockopt</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u901A_u7528_u5957_u63A5_u5B57_u9009_u9879_uFF08_u90E8_u5206_uFF09"><span class="nav-number">2.</span> <span class="nav-text">通用套接字选项（部分）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_BROADCAST"><span class="nav-number">2.0.1.</span> <span class="nav-text">SO_BROADCAST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_DEBUG"><span class="nav-number">2.0.2.</span> <span class="nav-text">SO_DEBUG</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_ERROR"><span class="nav-number">2.0.3.</span> <span class="nav-text">SO_ERROR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_KEEPALIVE"><span class="nav-number">2.0.4.</span> <span class="nav-text">SO_KEEPALIVE</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_LINGER"><span class="nav-number">2.0.5.</span> <span class="nav-text">SO_LINGER</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_RCVBUF__26amp_3B_SO_SNDBUF"><span class="nav-number">2.0.6.</span> <span class="nav-text">SO_RCVBUF & SO_SNDBUF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_RCVLOWAT__26amp_3B_SO_SNDLOWAT"><span class="nav-number">2.0.7.</span> <span class="nav-text">SO_RCVLOWAT & SO_SNDLOWAT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SO_RCVTIMEO__26amp_3B_SO_SNDTIMEO"><span class="nav-number">2.0.8.</span> <span class="nav-text">SO_RCVTIMEO & SO_SNDTIMEO</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+</body>
+</html>

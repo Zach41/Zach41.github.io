@@ -1,0 +1,738 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="program," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="daemon什么是daemon简单来说，系统为了某些功能必须提供一些服务，这个服务我们称之为service，但是service的提供需要进程的运行，所以实现这个service的程序我们称之为daemon。我们不必区分daemon与service，或者说可以将他们视为等同的。因为没有daemon在后台运行就不会有这个serivce。daemon没有控制终端，所以当有事发生时，它们需要有消息输出的方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="系统服务——daemon">
+<meta property="og:url" content="http://yoursite.com/2016/09/19/系统服务——daemon/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="daemon什么是daemon简单来说，系统为了某些功能必须提供一些服务，这个服务我们称之为service，但是service的提供需要进程的运行，所以实现这个service的程序我们称之为daemon。我们不必区分daemon与service，或者说可以将他们视为等同的。因为没有daemon在后台运行就不会有这个serivce。daemon没有控制终端，所以当有事发生时，它们需要有消息输出的方法">
+<meta property="og:updated_time" content="2016-10-04T05:48:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="系统服务——daemon">
+<meta name="twitter:description" content="daemon什么是daemon简单来说，系统为了某些功能必须提供一些服务，这个服务我们称之为service，但是service的提供需要进程的运行，所以实现这个service的程序我们称之为daemon。我们不必区分daemon与service，或者说可以将他们视为等同的。因为没有daemon在后台运行就不会有这个serivce。daemon没有控制终端，所以当有事发生时，它们需要有消息输出的方法">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 系统服务——daemon | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                系统服务——daemon
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-19T00:00:00+08:00" content="2016-09-19">
+              2016-09-19
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/19/系统服务——daemon/" class="leancloud_visitors" data-flag-title="系统服务——daemon">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="daemon"><a href="#daemon" class="headerlink" title="daemon"></a>daemon</h1><h3 id="u4EC0_u4E48_u662Fdaemon"><a href="#u4EC0_u4E48_u662Fdaemon" class="headerlink" title="什么是daemon"></a>什么是daemon</h3><p>简单来说，系统为了某些功能必须提供一些服务，这个服务我们称之为<code>service</code>，但是service的提供需要进程的运行，所以实现这个service的程序我们称之为<code>daemon</code>。我们不必<br>区分daemon与service，或者说可以将他们视为等同的。因为没有daemon在后台运行就不会有这个serivce。daemon没有控制终端，所以当有事发生时，它们需要有消息输出的方法可用。<br><code>syslog</code>函数是输出这些消息的标准方法，它把这些消息发送给<code>syslogd</code>守护进程。</p>
+<p>syslogd的函数原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">syslog</span><span class="params">(<span class="keyword">int</span> priority, <span class="keyword">const</span> <span class="keyword">char</span> *message, ...)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>priority</code>由level和facility组成，具体可以查看UNP P288。</p>
+<h3 id="daemon_u7684_u4E3B_u8981_u5206_u7C7B"><a href="#daemon_u7684_u4E3B_u8981_u5206_u7C7B" class="headerlink" title="daemon的主要分类"></a>daemon的主要分类</h3><p>如果按照启动与管理方式分类：</p>
+<ul>
+<li>stand alone：这种类型的daemon不必通过其他机制来管理，可以自行启动，一旦启动就常驻内存。其最大的优点是由于一直在内存内持续的提供服务，因此对于客户的请求响应较快。常见的<br>stand alone的daemon有ftp、httpd等。</li>
+<li>super daemon：一个特殊的daemon来统一管理其他的daemon。这一种服务的启动方式通过同一个daemon来负责唤起服务。这个特殊的daemon被称为super daemon。早期的super daemon是inetd，现在<br>Linux下是xinetd。当客户没有请求时，对应的服务未启动，只有当客户有对应的请求来到时，super daemon才会唤醒相应的服务，当请求完成之后，被唤醒的这个服务也会关闭并释放资源。该机制的优点在于：１）super daemon<br>可以具有安全管控机制；２）服务在请求结束后就关闭，不会一直占用资源。缺点在于对于请求的响应较慢。</li>
+</ul>
+<p>如果按照工作形态分类：</p>
+<ul>
+<li>signal-control：这种daemon通过信号来管理，只要有任何客户端的请求进来，它就会立即启动取处理。</li>
+<li>interval-control：这种daemon每隔一段时间就主动取执行某项工作。</li>
+</ul>
+<h3 id="u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C"><a href="#u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C" class="headerlink" title="将一个程序作为daemon运行"></a>将一个程序作为daemon运行</h3><p>Linux提供了<code>daemon</code>函数将一个普通进程转变为守护进程运行。它的原理和这里给出的<code>daemon_init</code>函数大同小异。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">daemon_init</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *pname, <span class="keyword">int</span> facility)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* child continues */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* become session leader */</span></span><br><span class="line">    <span class="keyword">if</span> (setsid() &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 必须忽略SIGHUP，否则当会话头进程终止时，会话中的所有进程都收到SIGHUP信号 */</span></span><br><span class="line">    Signal(SIGHUP, SIG_IGN);</span><br><span class="line">    <span class="comment">/* 再次Fork，使得进程不再是会话头 */</span></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    daemon_proc = <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    chdir(<span class="string">"/"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXFD; i++)</span><br><span class="line">	close(i);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* redirec stdin, stdout and stderr to '/dev/null' */</span></span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDONLY);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line"></span><br><span class="line">    openlog(pname, LOG_PID, facility);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>首先是fork，在fork结束之后，父进程终止，子进程自动在后台运行。另外，由于子进程继承了父进程的进程组ID，这保证了子进程不是一个进程组的头进程，这为下面的setsid做了准备。</li>
+<li>setsid，其用于创建一个新的会话，当前进程变为新的会话的会话头进程以及新进程组的进程组头进程，从而不再有控制终端。</li>
+<li>忽略SIGHUP信号并再次fork，再次fork保证本守护进程不会是会话头进程，那么即使将来打开了一个终端设备，也不会自动获得控制终端。因为当没有控制终端的会话头进程打开一个终端设备时，该终端会自动成为<br>这个会话头进程的控制终端。忽略SIGHUP信号是因为当会话头进程终止时，其会话中的所有进程（再次fork产生的子进程）都收到SIGHUP信号。</li>
+<li>将stdin、stdout以及stderr重定向到/dev/null，打开这些描述符的理由在于，守护进程调用的那些假设能从这三个描述符读写的库函数不会因为这些描述符未打开而失败。</li>
+<li>调用syslog处理函数。</li>
+</ol>
+<p>既然守护进程在没有控制终端的环境下运行，那么它绝对不会收到来自内核的SIGHUP信号，许多守护进程因此把这个信号作为来自系统管理员的一个通知，表示其配置文件已经发生变化，守护进程应该重新读入配置文件。</p>
+<h1 id="Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F"><a href="#Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F" class="headerlink" title="Linux下daemon的启动脚本和启动方式"></a>Linux下daemon的启动脚本和启动方式</h1><h3 id="u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E"><a href="#u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E" class="headerlink" title="配置文件位置"></a>配置文件位置</h3><p>通常daemon的启动脚本放在/etc/init.d/目录下，启动脚本可以进程环境检测、配置文件分析、PID文件放置以及相关重要交换文件的锁操作。</p>
+<p>super daemon的配置文件放置在/etc/xinetd.d/目录和/etc/xinetd.conf中。</p>
+<p>在/etc/目录下还有各自服务的配置文件</p>
+<p>/var/lib/目录下是一些会产生数据的服务放置产生的数据库的位置，数据库管理系统MySQL的数据库默认写入/var/lib/mysql。</p>
+<p>/var/run/目录下存放各服务程序的PID记录。</p>
+<p>对于stand alone的daemon，我们即可执行/etc/init.d/目录下的脚本来启动它，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ /etc/init.d/mysql start</span><br></pre></td></tr></table></figure>
+<p>也可以利用service命令（实际上它也是一个stand alone的服务）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service mysql start</span><br></pre></td></tr></table></figure>
+<h3 id="super_daemon_u914D_u7F6E_u6587_u4EF6"><a href="#super_daemon_u914D_u7F6E_u6587_u4EF6" class="headerlink" title="super daemon配置文件"></a>super daemon配置文件</h3><p>Linux下super daemon由xinetd这个进程实现，它不仅可以启动其他daemon，还可以进行安全性或者其他管理机制的控制。xinetd的默认配置存放在/etc/xinetd.conf中，由xinetd启动的服务程序的配置放置在/etc/xinetd.d目录下。<br>如果一个服务的配置文件没有xinetd.conf中指定的参数，那么该服务对应的参数就以xinetd.conf中的为准。具体的参数说明可以参加《鸟哥——基础篇》P559。一个简单的daytime服务配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service mydaytime&#10;&#123;&#10;        disable         = no&#10;        socket_type     = stream&#10;        wait            = no&#10;        user            = root&#10;        server          = /home/zach41/Desktop/unp/unpv13e/inetd/daytimetcpsrv3&#10;        log_on_failure  = USERID&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>这之后我们还需要修改/etc/services文件，分配一个端口来提供daytime服务。具体就是添加如下一行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mydaytime    9999/tcp</span><br></pre></td></tr></table></figure>
+<p>这样配置之后，我们重启xinetd服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service xinetd restart&#10;&#10140;  ~ sudo netstat -tnlp | grep 9999&#10;[sudo] password for zach41: &#10;tcp        0      0 0.0.0.0:9999            0.0.0.0:*               LISTEN      15914/xinetd</span><br></pre></td></tr></table></figure>
+<p>可以看到xinetd进程在监听9999端口。</p>
+<p>我们运行一个daytime客户端程序</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  names git:(master) &#10007; ./daytimetcpcli2 0.0.0.0 9999&#10;trying 0.0.0.0:9999&#10;Mon Sep 19 18:43:04 2016</span><br></pre></td></tr></table></figure>
+<h3 id="daytime_daemon_u7A0B_u5E8F"><a href="#daytime_daemon_u7A0B_u5E8F" class="headerlink" title="daytime daemon程序"></a>daytime daemon程序</h3><p>最后这里给出daytimeserver的代码，这是由xinetd作为守护进程启动的时间获取服务器程序。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span></span><br><span class="line"><span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">socklen_t</span>		len;</span><br><span class="line">	<span class="keyword">struct</span> sockaddr	*cliaddr;</span><br><span class="line">	<span class="keyword">char</span>			buff[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span>			ticks;</span><br><span class="line"></span><br><span class="line">	daemon_inetd(argv[<span class="number">0</span>], <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	cliaddr = Malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage));</span><br><span class="line">	len = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage);</span><br><span class="line">	Getpeername(<span class="number">0</span>, cliaddr, &amp;len);</span><br><span class="line">	err_msg(<span class="string">"connection from %s"</span>, Sock_ntop(cliaddr, len));</span><br><span class="line"></span><br><span class="line">    ticks = time(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">snprintf</span>(buff, <span class="keyword">sizeof</span>(buff), <span class="string">"%.24s\r\n"</span>, ctime(&amp;ticks));</span><br><span class="line">    Write(<span class="number">0</span>, buff, <span class="built_in">strlen</span>(buff));</span><br><span class="line"></span><br><span class="line">	Close(<span class="number">0</span>);	<span class="comment">/* close TCP connection */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到所有套接字的创建代码(tcp_listen和accept的调用)都不见了，这些步骤都有xinetd执行，我们使用描述符0指代已由xinetd接受的TCP连接（套接字描述符被复制到描述符0, 1, 2）。daemon_init只是负责设置daemon_proc<br>标志以及调用openlog，从而发送日志信息给syslogd守护进程。</p>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/program/" rel="tag">#program</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/13/套接字选项/" rel="next" title="套接字选项">
+                <i class="fa fa-chevron-left"></i> 套接字选项
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/19/IPv4与IPv6的户操作性/" rel="prev" title="IPv4与IPv6的户操作性">
+                IPv4与IPv6的户操作性 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#daemon"><span class="nav-number">1.</span> <span class="nav-text">daemon</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u4EC0_u4E48_u662Fdaemon"><span class="nav-number">1.0.1.</span> <span class="nav-text">什么是daemon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#daemon_u7684_u4E3B_u8981_u5206_u7C7B"><span class="nav-number">1.0.2.</span> <span class="nav-text">daemon的主要分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C"><span class="nav-number">1.0.3.</span> <span class="nav-text">将一个程序作为daemon运行</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F"><span class="nav-number">2.</span> <span class="nav-text">Linux下daemon的启动脚本和启动方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E"><span class="nav-number">2.0.1.</span> <span class="nav-text">配置文件位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#super_daemon_u914D_u7F6E_u6587_u4EF6"><span class="nav-number">2.0.2.</span> <span class="nav-text">super daemon配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#daytime_daemon_u7A0B_u5E8F"><span class="nav-number">2.0.3.</span> <span class="nav-text">daytime daemon程序</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+</body>
+</html>
