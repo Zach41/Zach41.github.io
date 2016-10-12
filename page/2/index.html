@@ -249,6 +249,156 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/09/TCP连接建立和终止/" itemprop="url">
+                  TCP连接建立和终止
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-09T00:00:00+08:00" content="2016-09-09">
+              2016-09-09
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/09/TCP连接建立和终止/" class="leancloud_visitors" data-flag-title="TCP连接建立和终止">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62" class="headerlink" title="TCP连接的建立和终止"></a>TCP连接的建立和终止</h1><h3 id="TCP_u8FDE_u63A5_u5EFA_u7ACB"><a href="#TCP_u8FDE_u63A5_u5EFA_u7ACB" class="headerlink" title="TCP连接建立"></a>TCP连接建立</h3><p>建立一个TCP连接的过程图示如下（图片均来源于网络…）：</p>
+<img src="/2016/09/09/TCP连接建立和终止/shakehand3.jpg" alt="shakehand3.jpg" title="">
+<ol>
+<li>服务器在连接建立之前必须准备好接收客户发来的连接，这一般通过创建套接字，绑定服务器地址、监听套接字来完成，即<code>socket</code>，<code>bind</code>，<code>listen</code>三个函数。这一个过程被成为被动打开。</li>
+<li>客户通过<code>connect</code>函数发起主动打开，客户会发送一个SYN分节，它告诉服务器客户将在连接中发送的数据的初始序列号，通常该分节不带数据，其所在IP数据只含有一个IP首部、一个TCP首部以及可能的TCP选项。</li>
+<li>服务器收到客户发来的SYN分节后，服务器必须确认该分节，同时服务器发送一个自己的SYN分节，它含有服务器将在该连接中发送的数据的初始序列号。</li>
+<li>客户收到服务器发回的消息后，确认服务器的分节，连接建立。</li>
+</ol>
+<p>从图中可以看到ACK是SYN分节的序列号加１，类似的，FIN分节的ACK也是FIN分节的序列号加１。</p>
+<h3 id="TCP_u8FDE_u63A5_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7EC8_u6B62" class="headerlink" title="TCP连接终止"></a>TCP连接终止</h3><p>TCP终止一个连接需要４个分节。</p>
+<p>终止一个连接的图示如下：</p>
+<img src="/2016/09/09/TCP连接建立和终止/shakehand4.jpg" alt="shakehand4.jpg" title="">
+<ol>
+<li>某个应用首先调用close，该端主动关闭，发送一个FIN分节</li>
+<li>接收到FIN分节的对端执行被动关闭，这个FIN由TCP确认，FIN分节的接收也作为一个文件结束符（EOF）传递给接收端应用进程。</li>
+<li>一段时间之后，接收到这个文件结束符的引用进程将调用close关闭它的套接字，这会导致它也发送一个FIN分节。</li>
+<li>接收这个最终FIN的对端发送一个ACK确认这个FIN分节。</li>
+</ol>
+<h3 id="u8FDE_u63A5_u548C_u7EC8_u6B62"><a href="#u8FDE_u63A5_u548C_u7EC8_u6B62" class="headerlink" title="连接和终止"></a>连接和终止</h3><p>一个完整的连接和终止的过程示意：</p>
+<img src="/2016/09/09/TCP连接建立和终止/full_process.jpg" alt="full_process.jpg" title="">
+<p>一个完整的TCP状态转换图：</p>
+<img src="/2016/09/09/TCP连接建立和终止/state.jpg" alt="state.jpg" title="">
+<h4 id="TIME_WAIT"><a href="#TIME_WAIT" class="headerlink" title="TIME_WAIT"></a>TIME_WAIT</h4><p>TCP终止中，执行了主动关闭的那端在接收到对端发来的FIN分节和发送对应的ACK之后就进入了TIME_WAIT状态，该状态的持续时间是2个MSL（maximum segment lifetime）。它的存在有两个理由：</p>
+<ol>
+<li>可靠地实现TCP全双工连接的终止</li>
+<li>允许老的重复分节在网络中消逝</li>
+</ol>
+<p>对于第一个理由，如果最后的ACK丢失了，那么服务器需要重发FIN，因此客户必须维护状态信息，以允许它发送最终的那个ACK，如果客户不维护状态信息，那么客户在收到服务器重传的FIN后将直接相应RST，这个分节将会被服务器解释为一个错误。</p>
+<p>对于第二个理由，假设在一个连接被终止了马上又发起来一个相同IP和端口上的连接，后一个连接成为前一个连接的化身，TCP必须防止老的连接的分组在老连接结束之后再现，以防止其被误解为新的连接的分组。TCP不会让处于TIME_WAIT状态的连接发起新的化身，既然TIME_WAIT的时间是MSL的2倍，这就足以让某个方向上的分组最多存活MSL时间即被丢弃，另外一个方向上的应答最多存活MSL时间也被丢弃。通过这种方式，老的重复分组在网络中都已经消逝。</p>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/09/09/IO模型/" itemprop="url">
                   I/O模型
                 </a>
@@ -1645,7 +1795,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">19</span>
+              <span class="site-state-item-count">20</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1662,7 +1812,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
