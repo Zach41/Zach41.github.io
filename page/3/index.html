@@ -64,7 +64,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="program," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -80,34 +80,15 @@
 
 
 
-<meta name="description" content="Web.xml 标签记录初始化过程
-在启动Web项目时，WEB容器会去读取它的配置文件web.xml，读取和两个节点。
-紧接着，容器创建一个ServletContext实例，这个web项目共享这个servletContext实例
-容器将转换维键值对，并交给servletContext。
-容器创建中的类实例，创建监听器
-
-加载的顺序为和标签在文件中出现的顺序是没有关系的（对不同类标签而言），加载的顺">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Web.xml标签记录">
-<meta property="og:url" content="http://yoursite.com/2016/04/20/Web_xml标签记录/index.html">
+<meta name="description">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Zach的博客">
+<meta property="og:url" content="http://yoursite.com/page/3/index.html">
 <meta property="og:site_name" content="Zach的博客">
-<meta property="og:description" content="Web.xml 标签记录初始化过程
-在启动Web项目时，WEB容器会去读取它的配置文件web.xml，读取和两个节点。
-紧接着，容器创建一个ServletContext实例，这个web项目共享这个servletContext实例
-容器将转换维键值对，并交给servletContext。
-容器创建中的类实例，创建监听器
-
-加载的顺序为和标签在文件中出现的顺序是没有关系的（对不同类标签而言），加载的顺">
-<meta property="og:updated_time" content="2016-04-20T08:44:39.000Z">
+<meta property="og:description">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Web.xml标签记录">
-<meta name="twitter:description" content="Web.xml 标签记录初始化过程
-在启动Web项目时，WEB容器会去读取它的配置文件web.xml，读取和两个节点。
-紧接着，容器创建一个ServletContext实例，这个web项目共享这个servletContext实例
-容器将转换维键值对，并交给servletContext。
-容器创建中的类实例，创建监听器
-
-加载的顺序为和标签在文件中出现的顺序是没有关系的（对不同类标签而言），加载的顺">
+<meta name="twitter:title" content="Zach的博客">
+<meta name="twitter:description">
 
 
 
@@ -125,7 +106,7 @@
   };
 </script>
 
-  <title> Web.xml标签记录 | Zach的博客 </title>
+  <title> Zach的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -146,7 +127,9 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left page-post-detail ">
+  <div class="container one-collumn sidebar-position-left 
+   page-home 
+ ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -243,9 +226,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-
-  <div id="posts" class="posts-expand">
+  <section id="posts" class="posts-expand">
     
+      
 
   
   
@@ -265,7 +248,10 @@
             
             
               
-                Web.xml标签记录
+                
+                <a class="post-title-link" href="/2016/04/20/Web_xml标签记录/" itemprop="url">
+                  Web.xml标签记录
+                </a>
               
             
           </h1>
@@ -333,7 +319,9 @@
       
 
       
-        <h1 id="Web-xml__u6807_u7B7E_u8BB0_u5F55"><a href="#Web-xml__u6807_u7B7E_u8BB0_u5F55" class="headerlink" title="Web.xml 标签记录"></a>Web.xml 标签记录</h1><h3 id="u521D_u59CB_u5316_u8FC7_u7A0B"><a href="#u521D_u59CB_u5316_u8FC7_u7A0B" class="headerlink" title="初始化过程"></a>初始化过程</h3><ol>
+        
+          
+            <h1 id="Web-xml__u6807_u7B7E_u8BB0_u5F55"><a href="#Web-xml__u6807_u7B7E_u8BB0_u5F55" class="headerlink" title="Web.xml 标签记录"></a>Web.xml 标签记录</h1><h3 id="u521D_u59CB_u5316_u8FC7_u7A0B"><a href="#u521D_u59CB_u5316_u8FC7_u7A0B" class="headerlink" title="初始化过程"></a>初始化过程</h3><ol>
 <li>在启动Web项目时，WEB容器会去读取它的配置文件web.xml，读取<listener>和<context-param>两个节点。</context-param></listener></li>
 <li>紧接着，容器创建一个ServletContext实例，这个web项目共享这个servletContext实例</li>
 <li>容器将<context-param>转换维键值对，并交给servletContext。</context-param></li>
@@ -370,57 +358,40 @@
 <h3 id="jsp-config"><a href="#jsp-config" class="headerlink" title="jsp-config"></a>jsp-config</h3><p><code>&lt;jsp-config&gt;</code>主要用于设定JSP页面的相关配置。</p>
 <p>一个较为完整的配置如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#60;jsp-config&#62;&#10;    &#60;taglib&#62;&#10;        &#60;taglib-uri&#62;http://mytaglib.uri&#60;/taglib-uri&#62;&#10;        &#60;taglib-location&#62;/WEB-INF/tlds/MyTaglib.tld&#60;/taglib-location&#62;&#10;    &#60;/taglib&#62;&#10;    &#60;jsp-property-group&#62;&#10;        &#60;description&#62;Special property group for JSP Configuration JSP example.&#60;/description&#62;&#10;        &#60;display-name&#62;JSPConfiguration&#60;/display-name&#62;&#10;        &#60;url-pattern&#62;/jsp/* &#60;/url-pattern&#62;&#10;        &#60;el-ignored&#62;true&#60;/el-ignored&#62;&#10;        &#60;page-encoding&#62;GB2312&#60;/page-encoding&#62;&#10;        &#60;scripting-invalid&#62;true&#60;/scripting-invalid&#62;&#10;        &#60;include-prelude&#62;/include/prelude.jspf&#60;/include-prelude&#62;&#10;        &#60;include-coda&#62;/include/coda.jspf&#60;/include-coda&#62;&#10;    &#60;/jsp-property-group&#62;&#10;&#60;/jsp-config&#62;</span><br></pre></td></tr></table></figure>
+          
+        
       
     </div>
     
     <div>
       
-        
-      
     </div>
 
     <div>
-      
-        
       
     </div>
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/program/" rel="tag">#program</a>
-          
-        </div>
+
       
 
       
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-          </div>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/04/25/FBKVOController源码阅读笔记/" rel="prev" title="FBKVOController源码阅读笔记">
-                FBKVOController源码阅读笔记 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
       
-
-      
+        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
+    
+  </section>
 
-    <div class="post-spread">
-      
-    </div>
-  </div>
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+  </nav>
+
 
 
           </div>
@@ -428,10 +399,6 @@
 
 
           
-  <div class="comments" id="comments">
-    
-  </div>
-
 
         </div>
         
@@ -451,17 +418,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel ">
+      <section class="site-overview sidebar-panel  sidebar-panel-active ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.JPG"
@@ -511,17 +469,6 @@
 
       </section>
 
-      
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-            
-              
-            
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Web-xml__u6807_u7B7E_u8BB0_u5F55"><span class="nav-number">1.</span> <span class="nav-text">Web.xml 标签记录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u521D_u59CB_u5316_u8FC7_u7A0B"><span class="nav-number">1.0.1.</span> <span class="nav-text">初始化过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Context-param"><span class="nav-number">1.0.2.</span> <span class="nav-text">Context-param</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#listener"><span class="nav-number">1.0.3.</span> <span class="nav-text">listener</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filter"><span class="nav-number">1.0.4.</span> <span class="nav-text">filter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#servlet"><span class="nav-number">1.0.5.</span> <span class="nav-text">servlet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#session-config"><span class="nav-number">1.0.6.</span> <span class="nav-text">session-config</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mime-mapping"><span class="nav-number">1.0.7.</span> <span class="nav-text">mime-mapping</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#welcome-file-list_u4E0Eerror-page"><span class="nav-number">1.0.8.</span> <span class="nav-text">welcome-file-list与error-page</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#jsp-config"><span class="nav-number">1.0.9.</span> <span class="nav-text">jsp-config</span></a></li></ol></li></ol></li></ol></div>
-            
-          </div>
-        </section>
       
 
     </div>
@@ -618,10 +565,6 @@
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
-
-
 
   
 
