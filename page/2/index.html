@@ -249,6 +249,352 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/13/套接字选项/" itemprop="url">
+                  套接字选项
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-13T00:00:00+08:00" content="2016-09-13">
+              2016-09-13
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/13/套接字选项/" class="leancloud_visitors" data-flag-title="套接字选项">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="u4FEE_u6539_u5957_u63A5_u5B57_u9009_u9879"><a href="#u4FEE_u6539_u5957_u63A5_u5B57_u9009_u9879" class="headerlink" title="修改套接字选项"></a>修改套接字选项</h1><p>有几种方法来修改和获取套接字的选项：</p>
+<ul>
+<li>getsockopt &amp; setsockopt</li>
+<li>fcntl</li>
+<li>ioctl</li>
+</ul>
+<h3 id="getsockopt__26amp_3B_setsockopt"><a href="#getsockopt__26amp_3B_setsockopt" class="headerlink" title="getsockopt &amp; setsockopt"></a>getsockopt &amp; setsockopt</h3><p>这两个函数仅仅用于套接字。函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getsockopt</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> level, <span class="keyword">int</span> optname, <span class="keyword">void</span> *optval, socklen_t *optlen)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setsockopt</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> level, <span class="keyword">int</span> optname, <span class="keyword">const</span> <span class="keyword">void</span> *optval, socklen_t optlen)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>sockfd必须指向一个已经打开的套接字，level指向系统中解释选项的代码或为通用套接字代码，或为某个特定于协议的代码（如TCP、IPv4、IPv6或SCTP）。</p>
+<p>optval指向某个变量，变量的大小由最后一个参数optlen指定，setsockopt从optval中取得待设置的新值，而getsockopt把获取到的值存入对应的地址中。</p>
+<p>套接字选项粗分为两大基本类型：</p>
+<ul>
+<li>启用或禁止某个特性的标志选项(flag = 0禁止特性，flag = 1开启特性)</li>
+<li>取得并返回我们可以设置或检查的特定值选项，即值选项。</li>
+</ul>
+<p>套接字选项可以参见UNP的P151</p>
+<h1 id="u901A_u7528_u5957_u63A5_u5B57_u9009_u9879_uFF08_u90E8_u5206_uFF09"><a href="#u901A_u7528_u5957_u63A5_u5B57_u9009_u9879_uFF08_u90E8_u5206_uFF09" class="headerlink" title="通用套接字选项（部分）"></a>通用套接字选项（部分）</h1><p>这里仅仅列出部分的通用套接字选项，其实也就是挑了一些自己看得懂的选项记录下。</p>
+<h3 id="SO_BROADCAST"><a href="#SO_BROADCAST" class="headerlink" title="SO_BROADCAST"></a>SO_BROADCAST</h3><p>开启或禁止进程发送广播消息的能力。只有数据报支持广播，并且还是在支持广播消息的网络上（以太网、令牌网络等）。</p>
+<h3 id="SO_DEBUG"><a href="#SO_DEBUG" class="headerlink" title="SO_DEBUG"></a>SO_DEBUG</h3><p>仅由TCP支持，当给一个TCP套接字开启本选项时，内核将为TCP在该套接字发送和接收的所有分组保留详细的跟踪信息，这些信息保存在内核的某个环形缓冲区中，并可使用trpt程序进行检查。</p>
+<h3 id="SO_ERROR"><a href="#SO_ERROR" class="headerlink" title="SO_ERROR"></a>SO_ERROR</h3><p>当一个套接字上发生错误时，内核将套接字的名为so_error的变量设置为标准的Unix Exxx值中的一个，它被成为该套接字的待处理错误(pending error)，内核以以下方式通知进程这个错误：</p>
+<ol>
+<li>如果进程阻塞在套接字的select调用上，那么无论是检查可读条件还是可读可写条件，select均返回并设置其中一个或所有的条件。</li>
+<li>如果进程使用信号驱动I/O模型，那么进程或进程组就会接收到内核产生的SIGIO信息。</li>
+</ol>
+<p>进程在被内核通知之后，可以通过访问SO_ERROR套接字选项获得so_error的值，由getsockopt返回的整数即待处理错误，随后so_error由内核复位成0。</p>
+<p>这个套接字选项可以获取，但是不能设置。</p>
+<h3 id="SO_KEEPALIVE"><a href="#SO_KEEPALIVE" class="headerlink" title="SO_KEEPALIVE"></a>SO_KEEPALIVE</h3><p>给一个套接字设置保持存活(keep-alive)选项后，如果2小时内在该套接字的任意一个方向上没有数据交换，那么TCP就会自动给对端发送一个保持存活的探测分节(keep-alive probe)，这是一个对端必须响应的TCP分节，它<br>会导致以下三种情况之一：</p>
+<ol>
+<li>对端以期望的ACK响应，一切正常</li>
+<li>对端以RST响应，对端已经崩溃并重启，套接字的待处理错误被置为ECONNRESET，套接字本身被关闭。</li>
+<li>对端对保持存活的探测分节没有响应，TCP间隔一段时间再次发送探测分节，多次之后若还是没有响应，则放弃套接字的待处理错误被置为ETIMEOUT，如果收到一个ICMP错误作为某个探测分节的响应，就返回相应的错误，套接字本身被关闭。</li>
+</ol>
+<h3 id="SO_LINGER"><a href="#SO_LINGER" class="headerlink" title="SO_LINGER"></a>SO_LINGER</h3><p>指定close函数对面向连接的协议(TCP和SCTP)如何操作。默认的行为是立即返回，如果这时候发送缓冲区有数据残留，系统会尝试把数据发送给对方。选项要求用户进程和内核间传递如下结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> linger &#123;</span><br><span class="line">	<span class="keyword">int</span> l_onoff;</span><br><span class="line">	<span class="keyword">int</span> l_linger;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>如果l_onoff = 0，l_linger被忽略，选项关闭</li>
+<li>l_onoff非0，<ul>
+<li>l_linger = 0，那么TCP丢弃发送缓冲区内的任何数据，并发送一个RST给对端，不会再有四次挥手。</li>
+<li>l_linger不为0，进程被阻塞，知道所有发送缓冲区的数据都发送完毕并被对方确认，或者是超过了l_linger指定的时间，如果超时，close返回EWOULDBLOCK错误。</li>
+</ul>
+</li>
+</ol>
+<p>假设客户在发送玩数据后调用了close函数，close可能在服务器读套接字接收缓冲区中的剩余数据之前就返回，在应用程序读数据之前服务器可能就会崩溃，而客户进程永远不会知道。<br>如果设置了SO_LINGER套接字，那么在调用close函数后，应用进程阻塞一段时间，等待数据全部发送并被对方确认（如图所示）。但是这里还有一个问题，延滞的时间可能不够，close仍然会返回EWOULDBLOCK错误，而且close的成功返回只是告诉我们先前发送的数据已经由对方确认，并不能告诉我们应用进程是否读取了数据。</p>
+<img src="/2016/09/13/套接字选项/so_linger.png" alt="so_linger.png" title="">
+<p>让客户进程知道服务器已经读取数据的一个方法是改用shutdown（设置SHUT_WR），改用之后的流程如下图：</p>
+<img src="/2016/09/13/套接字选项/shutdown_linger.png" alt="shutdown_linger.png" title="">
+<p>另外一个方法是应用程序自己做确认。客户在向服务器发送完数据后，调用read来读取一个字节</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span> ack;</span><br><span class="line"></span><br><span class="line">Write(sockfd, data, nbytes);</span><br><span class="line">n = read(sockfd, &amp;ack, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>服务器读取来自客户端的数据后发回一个字节的ACK。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nbytes = Read(sockfd, buff, <span class="keyword">sizeof</span>(buff));</span><br><span class="line"></span><br><span class="line">Write(sockfd, <span class="string">""</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="SO_RCVBUF__26amp_3B_SO_SNDBUF"><a href="#SO_RCVBUF__26amp_3B_SO_SNDBUF" class="headerlink" title="SO_RCVBUF &amp; SO_SNDBUF"></a>SO_RCVBUF &amp; SO_SNDBUF</h3><p>每一个套接字有一个发送和接收缓冲区，可以利用SO_RCVBUF和SO_SNDBUF选项来修改默认的缓冲区大小。需要注意的是，由于TCP的窗口规模是在建立连接时用SYN分节与对端呼唤a的都的。对于客户端，意味着<br>SO_RCVBUF必须在connect调用之前设置；对于服务端，该选项必须在调用Listen之前设置。</p>
+<h3 id="SO_RCVLOWAT__26amp_3B_SO_SNDLOWAT"><a href="#SO_RCVLOWAT__26amp_3B_SO_SNDLOWAT" class="headerlink" title="SO_RCVLOWAT &amp; SO_SNDLOWAT"></a>SO_RCVLOWAT &amp; SO_SNDLOWAT</h3><p>每一个套接字还有一个接收和发送低水位标志，由select使用，用SO_RCVLOWAT和SO_SNDLOWAT可以修改低水位标志的值。</p>
+<p>接收低水位标志是让select返回可读时套接字接收缓冲区所需要的最少的数据量。<br>发送低水位标志是让select返回可写是套接字发送缓冲区可存入的最少数据量。</p>
+<p>两个低水位的默认值都为1</p>
+<h3 id="SO_RCVTIMEO__26amp_3B_SO_SNDTIMEO"><a href="#SO_RCVTIMEO__26amp_3B_SO_SNDTIMEO" class="headerlink" title="SO_RCVTIMEO &amp; SO_SNDTIMEO"></a>SO_RCVTIMEO &amp; SO_SNDTIMEO</h3><p>这两个选项允许我们给套接字的接收和发送设置一个超时值。</p>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/09/12/Linux文件与目录的默认、隐藏和特殊权限/" itemprop="url">
+                  Linux文件与目录的默认、隐藏和特殊权限
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-12T00:00:00+08:00" content="2016-09-12">
+              2016-09-12
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/12/Linux文件与目录的默认、隐藏和特殊权限/" class="leancloud_visitors" data-flag-title="Linux文件与目录的默认、隐藏和特殊权限">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="u9ED8_u8BA4_u6743_u9650"><a href="#u9ED8_u8BA4_u6743_u9650" class="headerlink" title="默认权限"></a>默认权限</h1><p>在Linux下创建一个文件或者目录的默认权限和<code>umask</code>相关，umask指定“当前用户在创建文件或者目录时的权限默认值”。用umask来查看文件或目录的默认权限值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ umask&#10;002</span><br></pre></td></tr></table></figure>
+<p>需要注意的是umask指定文件或目录的默认值应该减去的数值。而对于一个文件，默认值是“-rw-rw-rw”，对一个目录，默认值是“drwxrwxrwx”，举例来说，如果当前用户创建了一个文件，那么文件的权限默认值就是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(-rw-rw-rw-) - (--------w-) =&#62; -rw-rw-r--</span><br></pre></td></tr></table></figure>
+<h1 id="u9690_u85CF_u5C5E_u6027"><a href="#u9690_u85CF_u5C5E_u6027" class="headerlink" title="隐藏属性"></a>隐藏属性</h1><p>可以利用<code>chattr</code>和<code>lsattr</code>来修改和查看文件或目录的隐藏属性。需要注意的是这两个命令只在Ext2/Ext3文件系统上有效。</p>
+<p>命令使用方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chattr [+-=] [ASacdistu] files...</span><br></pre></td></tr></table></figure>
+<p>这里只说明两个参数，其余可以参见manual</p>
+<ul>
+<li>i: 让一个文件不能被删除、改名、设置连接、写入或添加数据。只有root才能设置该属性。</li>
+<li>a: 设置a之后，这个文件只能添加数据，而不能删除也不能修改数据，只有root才能设置该属性。</li>
+</ul>
+<p>lsattr查看隐藏属性，用法简单，可以直接查看manual</p>
+<h1 id="u6587_u4EF6_u7279_u6B8A_u6743_u9650"><a href="#u6587_u4EF6_u7279_u6B8A_u6743_u9650" class="headerlink" title="文件特殊权限"></a>文件特殊权限</h1><p>Linux有三个特殊权限：</p>
+<ul>
+<li>SUID</li>
+<li>SGID</li>
+<li>SBIT</li>
+</ul>
+<h3 id="SUID"><a href="#SUID" class="headerlink" title="SUID"></a>SUID</h3><p>当s标志出现在文件所有者的x权限上时，此时就被成为<code>SET UID</code>，即SUID的特殊权限。</p>
+<p>SUID有这样的功能和限制：</p>
+<ol>
+<li>仅仅对二进制程序有效</li>
+<li>执行者对该程序具有科执行的权限</li>
+<li>本权限仅仅在执行过程中有效</li>
+<li>执行者将拥有该程序所有者的权限（仅在执行过程中）</li>
+</ol>
+<p>举例来说：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ ls -l /usr/bin/passwd &#10;-rwsr-xr-x 1 root root 54256 3&#26376;  29 17:25 /usr/bin/passwd</span><br></pre></td></tr></table></figure>
+<p><code>passwd</code>是一个二进制程序，它的所有者是root，但是当我们用用户身份登入时一样可以执行该程序并修改自己的密码（这回修改/etc/shadow文件）。这是因为<code>passwd</code>拥有SUID权限。</p>
+<h3 id="SGID"><a href="#SGID" class="headerlink" title="SGID"></a>SGID</h3><p>当s标志在用户组的x时，成为<code>SET GID</code>，即SGID。SGID可以作用于一个文件，也可以作用于一个目录。</p>
+<p>当作用于一个文件时：</p>
+<ol>
+<li>SGID对二进制程序有效</li>
+<li>程序执行者对该程序有执行的权限</li>
+<li>执行者在执行的过程中可以得到程序所在用户组的权限。</li>
+</ol>
+<p>当作用于一个目录时：</p>
+<ol>
+<li>用户若对此目录有r和x的权限，该用户能够进入此目录（前提）</li>
+<li>用户在目录下的有效用户组将会变成该目录的用户组</li>
+<li>若用户在此目录下具有w的权限，则用户所创建的文件将与此目录的用户组相同。</li>
+</ol>
+<h3 id="SBIT"><a href="#SBIT" class="headerlink" title="SBIT"></a>SBIT</h3><p>SBIT（Sticky Bit）只对目录有效。它对目录的作用是：</p>
+<ol>
+<li>当用户对此目录有w和x的权限，即具有写入权限时（前提）</li>
+<li>当用户在该目录下创建文件或目录时，仅自己与root才有权限删除该文件。</li>
+</ol>
+<p>如果一个目录D有SBIT权限，当用户A在D下只能对自己创建的文件或目录进程删除、重命名、移动等操作，而无法删除他人的文件。</p>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/09/11/UIStackView初探/" itemprop="url">
                   UIStackView初探
                 </a>
@@ -1454,292 +1800,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/23/Swift Collections/" itemprop="url">
-                  Swift Collections
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-23T00:00:00+08:00" content="2016-05-23">
-              2016-05-23
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Swift/" itemprop="url" rel="index">
-                    <span itemprop="name">Swift</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/05/23/Swift Collections/" class="leancloud_visitors" data-flag-title="Swift Collections">
-               &nbsp; | &nbsp;
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Swift_Collections"><a href="#Swift_Collections" class="headerlink" title="Swift Collections"></a>Swift Collections</h1><p>在Swift中自定义一个CollectionType或者是SequenceType类型的数据结构需要实现对应的协议。这里首先给出一个自定义的SequenceType类型的数据结构，然后我们再来逐步分解代码解析之。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Array</span> </span>&#123;</span><br><span class="line">    <span class="keyword">subscript</span>(safe index: <span class="type">Int</span>) -&gt; <span class="type">Element</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> index&gt;=<span class="number">0</span> &amp;&amp; index&lt;<span class="built_in">count</span> ? <span class="keyword">self</span>[index] : <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ArrayGenerator</span>&lt;<span class="title">T</span>&gt;: <span class="title">GeneratorType</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> array: [<span class="type">T</span>]</span><br><span class="line">    <span class="keyword">var</span> currentIndex = <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="number">_</span> array:[<span class="type">T</span>]) &#123;</span><br><span class="line">        <span class="keyword">self</span>.array = array</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">mutating</span> <span class="func"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.array[safe: currentIndex++]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Section</span>&lt;<span class="title">T</span>&gt; : <span class="title">SequenceType</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> title: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> elements: [<span class="type">T</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">subscript</span>(index: <span class="type">Int</span>) -&gt; <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> elements[safe: index]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">generate</span><span class="params">()</span></span> -&gt; <span class="type">ArrayGenerator</span>&lt;<span class="type">T</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">ArrayGenerator</span>(elements)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>Sequence在Swift中的定义：</p>
-<pre><code>A type that can be ietrated in a `for...in` loop
-</code></pre><p>要成为一个Sequence，必须实现SequenceType协议，该协议要求实现一个方法以返回一个Generator，而一个Generator又实现了一个GeneratorType的协议，它封装了我们自定的Sequence类型里面的数据，并且保留了迭代的过程。</p>
-<p>在上述代码中，我们首先定一个一个ArrayGenerator作为我们的Generator，然后在我们自定的Section类型中实现generate方法，返回我们的Generator，这样我们就可以在for…in中使用我们的Section了。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> elements = [<span class="string">"hello"</span>, <span class="string">"world"</span>, <span class="string">"haha"</span>]</span><br><span class="line"><span class="keyword">let</span> section = <span class="type">Section</span>(title: <span class="string">"Test"</span>, elements: elements)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> e <span class="keyword">in</span> section &#123;</span><br><span class="line">    <span class="built_in">print</span>(e)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> generator = section.generate()</span><br><span class="line"><span class="keyword">while</span> <span class="keyword">let</span> e = generator.next() &#123;</span><br><span class="line">    <span class="built_in">print</span>(e)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>上述代码中，for…in和while循环实际上是一样的。</p>
-<p>在实现SequenceType以后，我们还自动获得了许多方法，比如：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">section.<span class="built_in">sort</span>() <span class="comment">// ["haha", "hello", "world"]</span></span><br><span class="line">section.<span class="built_in">maxElement</span>() <span class="comment">// "world"</span></span><br><span class="line">section.<span class="built_in">minElement</span>() <span class="comment">// "haha"</span></span><br></pre></td></tr></table></figure>
-<p>因为字符串是可比较的，所以上述三个方法均可返回正确的数值。</p>
-<p>在讨论SequenceType之后，我们来看看CollectionType的定义：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">CollectionType</span>: <span class="title">Indexable</span>, <span class="title">SequenceType</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>所以要定义一个CollectionType类型的数据结构，只要我们的Section再实现Indexable协议即可。我们改写Section的代码。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Section</span>&lt;<span class="title">T</span>&gt; : <span class="title">CollectionType</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> title: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> elements: [<span class="type">T</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">subscript</span>(safe index: <span class="type">Int</span>) -&gt; <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> index&gt;=<span class="number">0</span> &amp;&amp; index&lt;elements.<span class="built_in">count</span> ? elements[index] : <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">generate</span><span class="params">()</span></span> -&gt; <span class="type">ArrayGenerator</span>&lt;<span class="type">T</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">ArrayGenerator</span>(elements)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> startIndex: <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> endIndex: <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> elements.<span class="built_in">count</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">subscript</span>(index: <span class="type">Int</span>) -&gt; <span class="type">T</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> elements[index]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>由于遵守Indexable协议的类型必须实现一个下标脚本，其返回值是一个non-optinal的值，所以我们需要改写Section为上述形式。</p>
-<p>至此我们就创建了一个CollectionType类型的Section。</p>
-<p>在这里需要额外说一点：在我们用下标语法来取值的时候，swift中的array和dictionary的行为是不一致的，举个栗子：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="string">"h"</span>, <span class="string">"e"</span>, <span class="string">"l"</span>];</span><br><span class="line"><span class="keyword">let</span> dict = [<span class="string">"hello"</span>:<span class="number">1</span>, <span class="string">"world"</span>:<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">dict[<span class="string">"haha"</span>]    <span class="comment">// nil</span></span><br><span class="line">arr[<span class="number">3</span>]     <span class="comment">// error</span></span><br></pre></td></tr></table></figure>
-<p>字典和数组都是实现了CollectionType协议，换言之，它们都实现了返回一个non-optional的下表脚本，那为什么上述代码中字典返回nil呢？我们看字典的下表语法：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Dictionary</span>&lt;<span class="title">Key</span> : <span class="title">Hashable</span>, <span class="title">Value</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">subscript</span>(key: <span class="type">Key</span>) -&gt; <span class="type">Value</span>?</span><br><span class="line">    <span class="keyword">subscript</span>(position: <span class="type">DictionaryIndex</span>&lt;<span class="type">Key</span>, <span class="type">Value</span>&gt;) -&gt; (<span class="type">Key</span>, <span class="type">Value</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>实际上在字典中返回non-optional的是第二个脚本。所以当我们按照以下方法来操作字典时就会报错。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> startIndex = dict.startIndex</span><br><span class="line">dict[startIndex.advancedBy(<span class="number">3</span>)]    <span class="comment">// error</span></span><br></pre></td></tr></table></figure>
-<p>Indexable要求返回一个non-optional的值仅仅为了性能，毕竟直接crash比检查一个index的有效性快。</p>
-
-          
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/25/FBKVOController源码阅读笔记/" itemprop="url">
-                  FBKVOController源码阅读笔记
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-25T00:00:00+08:00" content="2016-04-25">
-              2016-04-25
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Objective-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Objective-C</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/04/25/FBKVOController源码阅读笔记/" class="leancloud_visitors" data-flag-title="FBKVOController源码阅读笔记">
-               &nbsp; | &nbsp;
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0"><a href="#FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0" class="headerlink" title="FBKVOController 源码阅读笔记"></a>FBKVOController 源码阅读笔记</h1><p>FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。</p>
-<h3 id="u7ED3_u6784_u5206_u6790"><a href="#u7ED3_u6784_u5206_u6790" class="headerlink" title="结构分析"></a>结构分析</h3><p>FBKVOController主要由以下三个部分组成：</p>
-<ol>
-<li>FBKVOInfo</li>
-<li>FBKVOSharedController</li>
-<li>FBKVOControlller</li>
-</ol>
-<h4 id="FBKVOInfo"><a href="#FBKVOInfo" class="headerlink" title="FBKVOInfo"></a>FBKVOInfo</h4><p><code>FBKVOInfo</code>用来作为KVO中的Context，它的定义如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@implementation _FBKVOInfo&#10;&#123;&#10;@public&#10;  __weak FBKVOController *_controller;&#10;  NSString *_keyPath;&#10;  NSKeyValueObservingOptions _options;&#10;  SEL _action;&#10;  void *_context;&#10;  FBKVONotificationBlock _block;&#10;  _FBKVOInfoState _state;&#10;&#125;</span><br></pre></td></tr></table></figure>
-<p><code>_FBKVOInfoState</code>的定义如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef NS_ENUM(uint8_t, _FBKVOInfoState) &#123;&#10;  _FBKVOInfoStateInitial = 0,&#10;&#10;  // whether the observer registration in Foundation has completed&#10;  _FBKVOInfoStateObserving,&#10;&#10;  // whether `unobserve` was called before observer registration in Foundation has completed&#10;  // this could happen when `NSKeyValueObservingOptionInitial` is one of the NSKeyValueObservingOptions&#10;  _FBKVOInfoStateNotObserving,&#10;&#125;;</span><br></pre></td></tr></table></figure>
-<p>以上的定义基本可以后名字推断，就不再赘述。</p>
-<h3 id="FBKVOSharedController"><a href="#FBKVOSharedController" class="headerlink" title="FBKVOSharedController"></a>FBKVOSharedController</h3><p>FBKVOSharedController是一个单例，所有的观察信息以FBKVOInfo的形式交由其处理，FBKVOSharedController内部实现了KVO机制，当FBKVOInfo中的keypath对应的属性发生改变，那么对应的回调就会被执行。</p>
-<p>具体的代码如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observeValueForKeyPath:(nullable NSString *)keyPath&#10;                      ofObject:(nullable id)object&#10;                        change:(nullable NSDictionary&#60;NSString *, id&#62; *)change&#10;                       context:(nullable void *)context&#10;&#123;&#10;  NSAssert(context, @&#34;missing context keyPath:%@ object:%@ change:%@&#34;, keyPath, object, change);&#10;  &#10;  _FBKVOInfo *info;&#10;  &#10;  &#123;&#10;    // lookup context in registered infos, taking out a strong reference only if it exists&#10;    OSSpinLockLock(&#38;_lock);&#10;    info = [_infos member:(__bridge id)context];&#10;    OSSpinLockUnlock(&#38;_lock);&#10;  &#125;&#10;  &#10;  if (nil != info) &#123;&#10;    &#10;    // take strong reference to controller&#10;    FBKVOController *controller = info-&#62;_controller;&#10;    if (nil != controller) &#123;&#10;      &#10;      // take strong reference to observer&#10;      id observer = controller.observer;&#10;      if (nil != observer) &#123;&#10;        &#10;        // dispatch custom block or action, fall back to default action&#10;        if (info-&#62;_block) &#123;&#10;          info-&#62;_block(observer, object, change);&#10;        &#125; else if (info-&#62;_action) &#123;&#10;#pragma clang diagnostic push&#10;#pragma clang diagnostic ignored &#34;-Warc-performSelector-leaks&#34;&#10;          [observer performSelector:info-&#62;_action withObject:change withObject:object];&#10;#pragma clang diagnostic pop&#10;        &#125; else &#123;&#10;          [observer observeValueForKeyPath:keyPath ofObject:object change:change context:info-&#62;_context];&#10;        &#125;&#10;      &#125;&#10;    &#125;&#10;  &#125;&#10;&#125;</span><br></pre></td></tr></table></figure>
-<p>FBKVOSharedController还定义了以下三个方法，用于添加删除FBKVOInfo到其维护的一个NSHashTabe<_fbkvoinfo *="">中。</_fbkvoinfo></p>
-<p>代码如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observe:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object infos:(nullable NSSet&#60;_FBKVOInfo *&#62; *)infos</span><br></pre></td></tr></table></figure>
-<h3 id="FBKVOController"><a href="#FBKVOController" class="headerlink" title="FBKVOController"></a>FBKVOController</h3><p>FBKVOController内部维护了一个NSMapTable<id, nshasktable<_fbkvoinfo="" *=""> *&gt;用于建立一个被观察对象和被观察对象的KVOInfos（一个被观察对象可以又许多keypath被观察）的映射。</id,></p>
-<p>除此之外，FBKVOController只是简单的地调用FBKVOSharedController提供的方法来添加/删除观察对象。</p>
-
-          
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1785,7 +1845,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">21</span>
+              <span class="site-state-item-count">23</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1793,7 +1853,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">10</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1802,7 +1862,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-count">25</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
