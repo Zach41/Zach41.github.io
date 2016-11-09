@@ -249,8 +249,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/09/21/用线程处理客户请求/" itemprop="url">
-                  用线程处理客户请求
+                <a class="post-title-link" href="/2016/09/19/系统服务——daemon/" itemprop="url">
+                  系统服务——daemon
                 </a>
               
             
@@ -263,8 +263,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-21T00:00:00+08:00" content="2016-09-21">
-              2016-09-21
+            <time itemprop="dateCreated" datetime="2016-09-19T00:00:00+08:00" content="2016-09-19">
+              2016-09-19
             </time>
           </span>
 
@@ -297,7 +297,7 @@
 
           
           
-             <span id="/2016/09/21/用线程处理客户请求/" class="leancloud_visitors" data-flag-title="用线程处理客户请求">
+             <span id="/2016/09/19/系统服务——daemon/" class="leancloud_visitors" data-flag-title="系统服务——daemon">
                &nbsp; | &nbsp;
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -321,78 +321,51 @@
       
         
           
-            <h1 id="u7EBF_u7A0B"><a href="#u7EBF_u7A0B" class="headerlink" title="线程"></a>线程</h1><p>传统的UNIX模型中，如果需要异步地完成一个任务，通常我们只要fork一个进程就可以了，但是fork进程存在以下两个问题：</p>
+            <h1 id="daemon"><a href="#daemon" class="headerlink" title="daemon"></a>daemon</h1><h3 id="u4EC0_u4E48_u662Fdaemon"><a href="#u4EC0_u4E48_u662Fdaemon" class="headerlink" title="什么是daemon"></a>什么是daemon</h3><p>简单来说，系统为了某些功能必须提供一些服务，这个服务我们称之为<code>service</code>，但是service的提供需要进程的运行，所以实现这个service的程序我们称之为<code>daemon</code>。我们不必<br>区分daemon与service，或者说可以将他们视为等同的。因为没有daemon在后台运行就不会有这个serivce。daemon没有控制终端，所以当有事发生时，它们需要有消息输出的方法可用。<br><code>syslog</code>函数是输出这些消息的标准方法，它把这些消息发送给<code>syslogd</code>守护进程。</p>
+<p>syslogd的函数原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">syslog</span><span class="params">(<span class="keyword">int</span> priority, <span class="keyword">const</span> <span class="keyword">char</span> *message, ...)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>priority</code>由level和facility组成，具体可以查看UNP P288。</p>
+<h3 id="daemon_u7684_u4E3B_u8981_u5206_u7C7B"><a href="#daemon_u7684_u4E3B_u8981_u5206_u7C7B" class="headerlink" title="daemon的主要分类"></a>daemon的主要分类</h3><p>如果按照启动与管理方式分类：</p>
+<ul>
+<li>stand alone：这种类型的daemon不必通过其他机制来管理，可以自行启动，一旦启动就常驻内存。其最大的优点是由于一直在内存内持续的提供服务，因此对于客户的请求响应较快。常见的<br>stand alone的daemon有ftp、httpd等。</li>
+<li>super daemon：一个特殊的daemon来统一管理其他的daemon。这一种服务的启动方式通过同一个daemon来负责唤起服务。这个特殊的daemon被称为super daemon。早期的super daemon是inetd，现在<br>Linux下是xinetd。当客户没有请求时，对应的服务未启动，只有当客户有对应的请求来到时，super daemon才会唤醒相应的服务，当请求完成之后，被唤醒的这个服务也会关闭并释放资源。该机制的优点在于：１）super daemon<br>可以具有安全管控机制；２）服务在请求结束后就关闭，不会一直占用资源。缺点在于对于请求的响应较慢。</li>
+</ul>
+<p>如果按照工作形态分类：</p>
+<ul>
+<li>signal-control：这种daemon通过信号来管理，只要有任何客户端的请求进来，它就会立即启动取处理。</li>
+<li>interval-control：这种daemon每隔一段时间就主动取执行某项工作。</li>
+</ul>
+<h3 id="u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C"><a href="#u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C" class="headerlink" title="将一个程序作为daemon运行"></a>将一个程序作为daemon运行</h3><p>Linux提供了<code>daemon</code>函数将一个普通进程转变为守护进程运行。它的原理和这里给出的<code>daemon_init</code>函数大同小异。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">daemon_init</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *pname, <span class="keyword">int</span> facility)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* child continues */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* become session leader */</span></span><br><span class="line">    <span class="keyword">if</span> (setsid() &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 必须忽略SIGHUP，否则当会话头进程终止时，会话中的所有进程都收到SIGHUP信号 */</span></span><br><span class="line">    Signal(SIGHUP, SIG_IGN);</span><br><span class="line">    <span class="comment">/* 再次Fork，使得进程不再是会话头 */</span></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    daemon_proc = <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    chdir(<span class="string">"/"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXFD; i++)</span><br><span class="line">	close(i);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* redirec stdin, stdout and stderr to '/dev/null' */</span></span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDONLY);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line"></span><br><span class="line">    openlog(pname, LOG_PID, facility);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <ol>
-<li>fork的代价是昂贵的。fork需要把父进程的内存映像复制到子进程，并在子进程中复制所有的描述符，虽然现在的实现是写时复制，但是fork一样是昂贵的。</li>
-<li>fork返回之后父子进程通信需要利用IPC机制，比较费力。</li>
+<li>首先是fork，在fork结束之后，父进程终止，子进程自动在后台运行。另外，由于子进程继承了父进程的进程组ID，这保证了子进程不是一个进程组的头进程，这为下面的setsid做了准备。</li>
+<li>setsid，其用于创建一个新的会话，当前进程变为新的会话的会话头进程以及新进程组的进程组头进程，从而不再有控制终端。</li>
+<li>忽略SIGHUP信号并再次fork，再次fork保证本守护进程不会是会话头进程，那么即使将来打开了一个终端设备，也不会自动获得控制终端。因为当没有控制终端的会话头进程打开一个终端设备时，该终端会自动成为<br>这个会话头进程的控制终端。忽略SIGHUP信号是因为当会话头进程终止时，其会话中的所有进程（再次fork产生的子进程）都收到SIGHUP信号。</li>
+<li>将stdin、stdout以及stderr重定向到/dev/null，打开这些描述符的理由在于，守护进程调用的那些假设能从这三个描述符读写的库函数不会因为这些描述符未打开而失败。</li>
+<li>调用syslog处理函数。</li>
 </ol>
-<p>线程被称为<code>lightweight process</code>，同一进程可以创建多个线程，这些线程共享进程内的全局内存，这使得线程通信变得容易。同时，线程创建的代码大大小于进程创建。但是线程也存在同步的问题。</p>
-<p>同一进程内的所有线程共享全局变量外，还共享：</p>
-<ul>
-<li>进程指令</li>
-<li>大多数数据</li>
-<li>打开的文件（描述符）</li>
-<li>信号处理函数和信号变量</li>
-<li>当前工作目录</li>
-<li>用户ID和组ID</li>
-</ul>
-<p>每个线程也有各自的：</p>
-<ul>
-<li>线程ID</li>
-<li>寄存器集合，包括程序计数器和栈指针</li>
-<li>栈，存放局部变量和返回地址</li>
-<li>errno</li>
-<li>信号掩码</li>
-<li>优先级</li>
-</ul>
-<h1 id="u7EBF_u7A0B_u64CD_u7EB5_u51FD_u6570"><a href="#u7EBF_u7A0B_u64CD_u7EB5_u51FD_u6570" class="headerlink" title="线程操纵函数"></a>线程操纵函数</h1><h3 id="u521B_u5EFA_u7EBF_u7A0B"><a href="#u521B_u5EFA_u7EBF_u7A0B" class="headerlink" title="创建线程"></a>创建线程</h3><p>函数原型为：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line"></span><br><span class="line">int pthread_create(pthread_t *tid, pthread_attr_t *attr, void *(*func)(void *), void *arg);</span><br><span class="line"></span><br><span class="line">/× 成功返回0，否则返回正的Exxx值×/</span><br></pre></td></tr></table></figure>
-<p>进程内的线程有一个线程ID标志，由tid返回。每个线程有许多属性：优先级、初始栈大小、是否应该成为一个守护进程等，若attr为NULL，则取默认值。线程的执行逻辑由func函数指针指定，函数接收一个void指针的<br>参数，第四个参数就是我们传递的参数，如果需要传递多个参数，把参数打包进一个结构指针即可。</p>
-<h3 id="u7B49_u5F85_u7EBF_u7A0B_u7ED3_u675F"><a href="#u7B49_u5F85_u7EBF_u7A0B_u7ED3_u675F" class="headerlink" title="等待线程结束"></a>等待线程结束</h3><p>利用pthread_join等待一个给定线程终止（是的，不能等待任意一个线程终止，如果需要，必须利用其他手段）。函数原型为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_join</span><span class="params">(pthread_t *tid, <span class="keyword">void</span> **status)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值 */</span></span><br></pre></td></tr></table></figure>
-<p>status通常是创建线程时func函数的返回值。</p>
-<h3 id="u7EBF_u7A0B_u7EC8_u6B62"><a href="#u7EBF_u7A0B_u7EC8_u6B62" class="headerlink" title="线程终止"></a>线程终止</h3><p>让一个线程终止的方法之一是调用pthread_exit，函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pthread_exit</span><span class="params">(<span class="keyword">void</span> *status)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>status不能局限于要终止的线程的对象，因为当线程终止时，对象也将消失。如果该线程未曾脱离（下面会说到），它的线程ID和退出状态将一直留存到调用进程内的某个其他线程对它调用pthread_join。</p>
-<p>让一个线程终止的另外的两个方法：</p>
-<ul>
-<li>启动线程的函数可以返回，其返回值就是相应线程的终止状态。</li>
-<li>如果进程的main函数返回或者任何线程调用了exit，整个进程就终止，其中包括它的任何线程。</li>
-</ul>
-<h3 id="pthread_self_u4E0Epthread_detach_u51FD_u6570"><a href="#pthread_self_u4E0Epthread_detach_u51FD_u6570" class="headerlink" title="pthread_self与pthread_detach函数"></a>pthread_self与pthread_detach函数</h3><p>pthread_self返回进程内该线程的ID，pthread_detach后，线程像守护进程一样，当它们终止时，所有的资源都被释放，不需要某个其他进程调用pthread_join。函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">pthread_t</span> pthread_self(<span class="keyword">void</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_detach</span><span class="params">(pthread_t tid)</span></span>;        <span class="comment">/* 成功返回0，否则返回正的Exxx值 */</span></span><br></pre></td></tr></table></figure>
-<p>一般情况下，上述函数的调用情况是</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pthread_detach(pthread_self());</span><br></pre></td></tr></table></figure>
-<p>以此，线程让自己脱离。</p>
-<h1 id="u7EBF_u7A0B_u5B89_u5168_u51FD_u6570"><a href="#u7EBF_u7A0B_u5B89_u5168_u51FD_u6570" class="headerlink" title="线程安全函数"></a>线程安全函数</h1><p>当一个函数修改了全局变量，那么这个函数不是线程安全的，换句话说该函数不可重入。考虑以下的例子：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> listenfd, connfd;</span><br><span class="line">	</span><br><span class="line">	...</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		len = addrlen;</span><br><span class="line">		connfd = Accept(listenfd, cliaddr, &amp;len);</span><br><span class="line">		Pthread_create(&amp;tid, <span class="literal">NULL</span>, doit, &amp;connfd);</span><br><span class="line">	&#125;	</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span>* <span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> connfd;</span><br><span class="line">	</span><br><span class="line">	connfd = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看起来上述代码是没有问题的，但是考虑这样一种情况：</p>
-<ol>
-<li>accept返回，主线程调用pthread_create创建一个新的线程</li>
-<li>调度新创建的线程执行，但是并没有执行到给connfd赋值就被切换了。</li>
-<li>另一个连接就绪，accept返回，返回的描述符存入connfd</li>
-<li>先前切换的线程被调度执行，这时候它所得到的connfd却并不是第一个连接的描述符了。</li>
-</ol>
-<p>POSIX要求许多函数是线程安全的，即它们都是可重入的，这个要求通过对我们透明的库函数内部执行某种形式的同步达到，线程安全函数见UNP P542。</p>
-<h1 id="u7EBF_u7A0B_u7279_u5B9A_u6570_u636E"><a href="#u7EBF_u7A0B_u7279_u5B9A_u6570_u636E" class="headerlink" title="线程特定数据"></a>线程特定数据</h1><p>把一个未线程化的程序转换成使用线程的版本时，有时会碰到因其中有函数使用静态变量而引起的一个常见变成错误。解决这样的错误有许多方法，这里我们介绍使用<code>线程特定数据</code>的方法。</p>
-<p>每个系统支持优先数量的线程特定数据，POSIX要求这个限制不小于128.系统为每个进程维护一个我们称之为Key的结构数据，如图所示：</p>
-<img src="/2016/09/21/用线程处理客户请求/key_tsd.png" alt="key_tsd.png" title="">
-<p>flag表示该项是否被使用，析构函数用于线程终止时释放线程占用的数据内存，由编程人员指定。</p>
-<p>这个Key是进程范围内的，即所有线程共享该数组。除此之外，系统还为每个线程维护特定于线程的Pthread结构，其部分内容是我们称之为pkey数据的128个元素的指针数组。如下所示：</p>
-<img src="/2016/09/21/用线程处理客户请求/pkey_tsd.png" alt="pkey_tsd.png" title="">
-<p>pkey数组的所有元素都被初始化为空指针，这128个指针和进程内的128个可能的Key是逐一关联的。</p>
-<p>举一个例子来说明线程特定的数据如何使用：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_key_t</span> rl_key;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_once_t</span> rl_once = PTHREAD_ONCE_INIT;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_destructor</span><span class="params">(<span class="keyword">void</span> *ptr)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">free</span>(ptr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_once</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    Pthread_key_create(&amp;rl_key, readline_destructor);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ssize_t</span> thread_readline(<span class="keyword">int</span> fd, <span class="keyword">void</span> *vptr, <span class="keyword">size_t</span> maxlen) &#123;</span><br><span class="line">	...</span><br><span class="line">	</span><br><span class="line">	pthread_once(&amp;rl_once, readline_once);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> ((ptr = pthread_getspecific(rl_key)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		ptr = Malloc(...);</span><br><span class="line">		pthread_setspecific(rl_key, ptr);</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">/* use values pointed to by ptr */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当进程内第一个线程调用thread_readline时，一个Key被创建，同时注册对应的析构函数。之后进程内线程的状态如下：</p>
-<img src="/2016/09/21/用线程处理客户请求/thread_statues1.png" alt="thread_statues1.png" title="">
-<p>这时候如果有另外一个线程调用thread_readline，那么pthread_once之前执行过一次，Key已经创建（这两次析构函数是一样的），线程取该Key对应的内存指针，返回为空，于是线程创建一个新的内存区域。进程内线程的状态变为如下所示：</p>
-<img src="/2016/09/21/用线程处理客户请求/thread_statues2.png" alt="thread_statues2.png" title="">
-<p>可以看到每一个线程有特定于线程自身的缓冲区域，这样就不会发生同步的问题。</p>
-<p>可以给出用到的函数原型：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#include d.h&gt;</span><br><span class="line"></span><br><span class="line">int pthread_once(pthread_once_t *onceptr, void (*init)(void));</span><br><span class="line"></span><br><span class="line">int pthread_key_create(pthread_key_t *keyptr, void (*destructor) (void *));</span><br><span class="line"></span><br><span class="line">void *pthread_getspecific(pthread_key_t key);</span><br><span class="line"></span><br><span class="line">void *pthread_setspecific(pthread_key_t key, const void *value);</span><br></pre></td></tr></table></figure>
-<p>注意pthread_once_t类型的变量在传入pthread_once函数之前，要初始化为PTHREAD_ONCE_INIT。</p>
-<h1 id="u4F7F_u7528_u7EBF_u7A0B_u7279_u5B9A_u6570_u636E_u7684readline_u51FD_u6570"><a href="#u4F7F_u7528_u7EBF_u7A0B_u7279_u5B9A_u6570_u636E_u7684readline_u51FD_u6570" class="headerlink" title="使用线程特定数据的readline函数"></a>使用线程特定数据的readline函数</h1><p>这里给出一个具体的例子，该例子是修改过的readline函数，它是利用了线程的特定数据以做到线程安全。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"unpthread.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_key_t</span> rl_key;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_once_t</span> rl_once = PTHREAD_ONCE_INIT;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_destructor</span><span class="params">(<span class="keyword">void</span> *ptr)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">free</span>(ptr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_once</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    Pthread_key_create(&amp;rl_key, readline_destructor);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="keyword">int</span> rl_cnt;</span><br><span class="line">    <span class="keyword">char</span> *rl_bufptr;</span><br><span class="line">    <span class="keyword">char</span> rl_buf[MAXLINE];</span><br><span class="line">&#125;Rline;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> ssize_t <span class="title">my_read</span><span class="params">(Rline *tsd, <span class="keyword">int</span> fd, <span class="keyword">char</span> *ptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (tsd -&gt; rl_cnt &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="comment">/* no data in buffer */</span></span><br><span class="line">    again:</span><br><span class="line">	<span class="keyword">if</span> ((tsd -&gt; rl_cnt = read(fd, tsd -&gt; rl_buf, MAXLINE)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	    <span class="keyword">if</span> (errno == EINTR)</span><br><span class="line">		<span class="keyword">goto</span> again;</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (tsd -&gt; rl_cnt == <span class="number">0</span>) &#123;</span><br><span class="line">	    <span class="comment">/* EOF */</span></span><br><span class="line">	    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    tsd -&gt; rl_bufptr = tsd -&gt; rl_buf;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    tsd -&gt; rl_cnt--;</span><br><span class="line">    *ptr = *tsd -&gt; rl_bufptr++;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ssize_t</span> thread_readline(<span class="keyword">int</span> fd, <span class="keyword">void</span> *vptr, <span class="keyword">size_t</span> maxlen) &#123;</span><br><span class="line">    Rline *tsd;</span><br><span class="line">    <span class="keyword">size_t</span> n, rc;</span><br><span class="line">    <span class="keyword">char</span> c, *ptr;</span><br><span class="line"></span><br><span class="line">    Pthread_once(&amp;rl_once, readline_once);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((tsd = pthread_getspecific(rl_key)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	<span class="comment">/* alloc thread specific data */</span></span><br><span class="line">	tsd = Calloc(<span class="number">1</span>, <span class="keyword">sizeof</span>(Rline));</span><br><span class="line">	pthread_setspecific(rl_key, tsd);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ptr = vptr;</span><br><span class="line">    <span class="keyword">for</span> (n = <span class="number">1</span>; n&lt;maxlen; n++) &#123;</span><br><span class="line">	<span class="keyword">if</span> ((rc = my_read(tsd, fd, &amp;c)) == <span class="number">1</span>) &#123;</span><br><span class="line">	    *ptr++ = c;</span><br><span class="line">	    <span class="keyword">if</span> (c == <span class="string">'\n'</span>)</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (rc == <span class="number">0</span>) &#123;</span><br><span class="line">	    <span class="comment">/* end of file */</span></span><br><span class="line">	    *ptr = <span class="number">0</span>;</span><br><span class="line">	    <span class="keyword">return</span> n-<span class="number">1</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    <span class="comment">/* error */</span></span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    *ptr = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>既然守护进程在没有控制终端的环境下运行，那么它绝对不会收到来自内核的SIGHUP信号，许多守护进程因此把这个信号作为来自系统管理员的一个通知，表示其配置文件已经发生变化，守护进程应该重新读入配置文件。</p>
+<h1 id="Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F"><a href="#Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F" class="headerlink" title="Linux下daemon的启动脚本和启动方式"></a>Linux下daemon的启动脚本和启动方式</h1><h3 id="u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E"><a href="#u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E" class="headerlink" title="配置文件位置"></a>配置文件位置</h3><p>通常daemon的启动脚本放在/etc/init.d/目录下，启动脚本可以进程环境检测、配置文件分析、PID文件放置以及相关重要交换文件的锁操作。</p>
+<p>super daemon的配置文件放置在/etc/xinetd.d/目录和/etc/xinetd.conf中。</p>
+<p>在/etc/目录下还有各自服务的配置文件</p>
+<p>/var/lib/目录下是一些会产生数据的服务放置产生的数据库的位置，数据库管理系统MySQL的数据库默认写入/var/lib/mysql。</p>
+<p>/var/run/目录下存放各服务程序的PID记录。</p>
+<p>对于stand alone的daemon，我们即可执行/etc/init.d/目录下的脚本来启动它，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ /etc/init.d/mysql start</span><br></pre></td></tr></table></figure>
+<p>也可以利用service命令（实际上它也是一个stand alone的服务）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service mysql start</span><br></pre></td></tr></table></figure>
+<h3 id="super_daemon_u914D_u7F6E_u6587_u4EF6"><a href="#super_daemon_u914D_u7F6E_u6587_u4EF6" class="headerlink" title="super daemon配置文件"></a>super daemon配置文件</h3><p>Linux下super daemon由xinetd这个进程实现，它不仅可以启动其他daemon，还可以进行安全性或者其他管理机制的控制。xinetd的默认配置存放在/etc/xinetd.conf中，由xinetd启动的服务程序的配置放置在/etc/xinetd.d目录下。<br>如果一个服务的配置文件没有xinetd.conf中指定的参数，那么该服务对应的参数就以xinetd.conf中的为准。具体的参数说明可以参加《鸟哥——基础篇》P559。一个简单的daytime服务配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service mydaytime&#10;&#123;&#10;        disable         = no&#10;        socket_type     = stream&#10;        wait            = no&#10;        user            = root&#10;        server          = /home/zach41/Desktop/unp/unpv13e/inetd/daytimetcpsrv3&#10;        log_on_failure  = USERID&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>这之后我们还需要修改/etc/services文件，分配一个端口来提供daytime服务。具体就是添加如下一行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mydaytime    9999/tcp</span><br></pre></td></tr></table></figure>
+<p>这样配置之后，我们重启xinetd服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service xinetd restart&#10;&#10140;  ~ sudo netstat -tnlp | grep 9999&#10;[sudo] password for zach41: &#10;tcp        0      0 0.0.0.0:9999            0.0.0.0:*               LISTEN      15914/xinetd</span><br></pre></td></tr></table></figure>
+<p>可以看到xinetd进程在监听9999端口。</p>
+<p>我们运行一个daytime客户端程序</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  names git:(master) &#10007; ./daytimetcpcli2 0.0.0.0 9999&#10;trying 0.0.0.0:9999&#10;Mon Sep 19 18:43:04 2016</span><br></pre></td></tr></table></figure>
+<h3 id="daytime_daemon_u7A0B_u5E8F"><a href="#daytime_daemon_u7A0B_u5E8F" class="headerlink" title="daytime daemon程序"></a>daytime daemon程序</h3><p>最后这里给出daytimeserver的代码，这是由xinetd作为守护进程启动的时间获取服务器程序。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span></span><br><span class="line"><span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">socklen_t</span>		len;</span><br><span class="line">	<span class="keyword">struct</span> sockaddr	*cliaddr;</span><br><span class="line">	<span class="keyword">char</span>			buff[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span>			ticks;</span><br><span class="line"></span><br><span class="line">	daemon_inetd(argv[<span class="number">0</span>], <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	cliaddr = Malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage));</span><br><span class="line">	len = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage);</span><br><span class="line">	Getpeername(<span class="number">0</span>, cliaddr, &amp;len);</span><br><span class="line">	err_msg(<span class="string">"connection from %s"</span>, Sock_ntop(cliaddr, len));</span><br><span class="line"></span><br><span class="line">    ticks = time(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">snprintf</span>(buff, <span class="keyword">sizeof</span>(buff), <span class="string">"%.24s\r\n"</span>, ctime(&amp;ticks));</span><br><span class="line">    Write(<span class="number">0</span>, buff, <span class="built_in">strlen</span>(buff));</span><br><span class="line"></span><br><span class="line">	Close(<span class="number">0</span>);	<span class="comment">/* close TCP connection */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到所有套接字的创建代码(tcp_listen和accept的调用)都不见了，这些步骤都有xinetd执行，我们使用描述符0指代已由xinetd接受的TCP连接（套接字描述符被复制到描述符0, 1, 2）。daemon_init只是负责设置daemon_proc<br>标志以及调用openlog，从而发送日志信息给syslogd守护进程。</p>
 
           
         
@@ -529,172 +502,6 @@
 <li>服务器响应一个IPv4 SYN/ACK分节，连接于是用IPv4数据报建立。</li>
 </ol>
 <p>以后在以太网上传递的是IPv4数据报。</p>
-
-          
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/19/系统服务——daemon/" itemprop="url">
-                  系统服务——daemon
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-19T00:00:00+08:00" content="2016-09-19">
-              2016-09-19
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/19/系统服务——daemon/" class="leancloud_visitors" data-flag-title="系统服务——daemon">
-               &nbsp; | &nbsp;
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="daemon"><a href="#daemon" class="headerlink" title="daemon"></a>daemon</h1><h3 id="u4EC0_u4E48_u662Fdaemon"><a href="#u4EC0_u4E48_u662Fdaemon" class="headerlink" title="什么是daemon"></a>什么是daemon</h3><p>简单来说，系统为了某些功能必须提供一些服务，这个服务我们称之为<code>service</code>，但是service的提供需要进程的运行，所以实现这个service的程序我们称之为<code>daemon</code>。我们不必<br>区分daemon与service，或者说可以将他们视为等同的。因为没有daemon在后台运行就不会有这个serivce。daemon没有控制终端，所以当有事发生时，它们需要有消息输出的方法可用。<br><code>syslog</code>函数是输出这些消息的标准方法，它把这些消息发送给<code>syslogd</code>守护进程。</p>
-<p>syslogd的函数原型为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">syslog</span><span class="params">(<span class="keyword">int</span> priority, <span class="keyword">const</span> <span class="keyword">char</span> *message, ...)</span></span>;</span><br></pre></td></tr></table></figure>
-<p><code>priority</code>由level和facility组成，具体可以查看UNP P288。</p>
-<h3 id="daemon_u7684_u4E3B_u8981_u5206_u7C7B"><a href="#daemon_u7684_u4E3B_u8981_u5206_u7C7B" class="headerlink" title="daemon的主要分类"></a>daemon的主要分类</h3><p>如果按照启动与管理方式分类：</p>
-<ul>
-<li>stand alone：这种类型的daemon不必通过其他机制来管理，可以自行启动，一旦启动就常驻内存。其最大的优点是由于一直在内存内持续的提供服务，因此对于客户的请求响应较快。常见的<br>stand alone的daemon有ftp、httpd等。</li>
-<li>super daemon：一个特殊的daemon来统一管理其他的daemon。这一种服务的启动方式通过同一个daemon来负责唤起服务。这个特殊的daemon被称为super daemon。早期的super daemon是inetd，现在<br>Linux下是xinetd。当客户没有请求时，对应的服务未启动，只有当客户有对应的请求来到时，super daemon才会唤醒相应的服务，当请求完成之后，被唤醒的这个服务也会关闭并释放资源。该机制的优点在于：１）super daemon<br>可以具有安全管控机制；２）服务在请求结束后就关闭，不会一直占用资源。缺点在于对于请求的响应较慢。</li>
-</ul>
-<p>如果按照工作形态分类：</p>
-<ul>
-<li>signal-control：这种daemon通过信号来管理，只要有任何客户端的请求进来，它就会立即启动取处理。</li>
-<li>interval-control：这种daemon每隔一段时间就主动取执行某项工作。</li>
-</ul>
-<h3 id="u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C"><a href="#u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C" class="headerlink" title="将一个程序作为daemon运行"></a>将一个程序作为daemon运行</h3><p>Linux提供了<code>daemon</code>函数将一个普通进程转变为守护进程运行。它的原理和这里给出的<code>daemon_init</code>函数大同小异。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">daemon_init</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *pname, <span class="keyword">int</span> facility)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* child continues */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* become session leader */</span></span><br><span class="line">    <span class="keyword">if</span> (setsid() &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 必须忽略SIGHUP，否则当会话头进程终止时，会话中的所有进程都收到SIGHUP信号 */</span></span><br><span class="line">    Signal(SIGHUP, SIG_IGN);</span><br><span class="line">    <span class="comment">/* 再次Fork，使得进程不再是会话头 */</span></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    daemon_proc = <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    chdir(<span class="string">"/"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXFD; i++)</span><br><span class="line">	close(i);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* redirec stdin, stdout and stderr to '/dev/null' */</span></span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDONLY);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line"></span><br><span class="line">    openlog(pname, LOG_PID, facility);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>首先是fork，在fork结束之后，父进程终止，子进程自动在后台运行。另外，由于子进程继承了父进程的进程组ID，这保证了子进程不是一个进程组的头进程，这为下面的setsid做了准备。</li>
-<li>setsid，其用于创建一个新的会话，当前进程变为新的会话的会话头进程以及新进程组的进程组头进程，从而不再有控制终端。</li>
-<li>忽略SIGHUP信号并再次fork，再次fork保证本守护进程不会是会话头进程，那么即使将来打开了一个终端设备，也不会自动获得控制终端。因为当没有控制终端的会话头进程打开一个终端设备时，该终端会自动成为<br>这个会话头进程的控制终端。忽略SIGHUP信号是因为当会话头进程终止时，其会话中的所有进程（再次fork产生的子进程）都收到SIGHUP信号。</li>
-<li>将stdin、stdout以及stderr重定向到/dev/null，打开这些描述符的理由在于，守护进程调用的那些假设能从这三个描述符读写的库函数不会因为这些描述符未打开而失败。</li>
-<li>调用syslog处理函数。</li>
-</ol>
-<p>既然守护进程在没有控制终端的环境下运行，那么它绝对不会收到来自内核的SIGHUP信号，许多守护进程因此把这个信号作为来自系统管理员的一个通知，表示其配置文件已经发生变化，守护进程应该重新读入配置文件。</p>
-<h1 id="Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F"><a href="#Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F" class="headerlink" title="Linux下daemon的启动脚本和启动方式"></a>Linux下daemon的启动脚本和启动方式</h1><h3 id="u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E"><a href="#u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E" class="headerlink" title="配置文件位置"></a>配置文件位置</h3><p>通常daemon的启动脚本放在/etc/init.d/目录下，启动脚本可以进程环境检测、配置文件分析、PID文件放置以及相关重要交换文件的锁操作。</p>
-<p>super daemon的配置文件放置在/etc/xinetd.d/目录和/etc/xinetd.conf中。</p>
-<p>在/etc/目录下还有各自服务的配置文件</p>
-<p>/var/lib/目录下是一些会产生数据的服务放置产生的数据库的位置，数据库管理系统MySQL的数据库默认写入/var/lib/mysql。</p>
-<p>/var/run/目录下存放各服务程序的PID记录。</p>
-<p>对于stand alone的daemon，我们即可执行/etc/init.d/目录下的脚本来启动它，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ /etc/init.d/mysql start</span><br></pre></td></tr></table></figure>
-<p>也可以利用service命令（实际上它也是一个stand alone的服务）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service mysql start</span><br></pre></td></tr></table></figure>
-<h3 id="super_daemon_u914D_u7F6E_u6587_u4EF6"><a href="#super_daemon_u914D_u7F6E_u6587_u4EF6" class="headerlink" title="super daemon配置文件"></a>super daemon配置文件</h3><p>Linux下super daemon由xinetd这个进程实现，它不仅可以启动其他daemon，还可以进行安全性或者其他管理机制的控制。xinetd的默认配置存放在/etc/xinetd.conf中，由xinetd启动的服务程序的配置放置在/etc/xinetd.d目录下。<br>如果一个服务的配置文件没有xinetd.conf中指定的参数，那么该服务对应的参数就以xinetd.conf中的为准。具体的参数说明可以参加《鸟哥——基础篇》P559。一个简单的daytime服务配置如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service mydaytime&#10;&#123;&#10;        disable         = no&#10;        socket_type     = stream&#10;        wait            = no&#10;        user            = root&#10;        server          = /home/zach41/Desktop/unp/unpv13e/inetd/daytimetcpsrv3&#10;        log_on_failure  = USERID&#10;&#125;</span><br></pre></td></tr></table></figure>
-<p>这之后我们还需要修改/etc/services文件，分配一个端口来提供daytime服务。具体就是添加如下一行：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mydaytime    9999/tcp</span><br></pre></td></tr></table></figure>
-<p>这样配置之后，我们重启xinetd服务</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service xinetd restart&#10;&#10140;  ~ sudo netstat -tnlp | grep 9999&#10;[sudo] password for zach41: &#10;tcp        0      0 0.0.0.0:9999            0.0.0.0:*               LISTEN      15914/xinetd</span><br></pre></td></tr></table></figure>
-<p>可以看到xinetd进程在监听9999端口。</p>
-<p>我们运行一个daytime客户端程序</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  names git:(master) &#10007; ./daytimetcpcli2 0.0.0.0 9999&#10;trying 0.0.0.0:9999&#10;Mon Sep 19 18:43:04 2016</span><br></pre></td></tr></table></figure>
-<h3 id="daytime_daemon_u7A0B_u5E8F"><a href="#daytime_daemon_u7A0B_u5E8F" class="headerlink" title="daytime daemon程序"></a>daytime daemon程序</h3><p>最后这里给出daytimeserver的代码，这是由xinetd作为守护进程启动的时间获取服务器程序。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span></span><br><span class="line"><span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">socklen_t</span>		len;</span><br><span class="line">	<span class="keyword">struct</span> sockaddr	*cliaddr;</span><br><span class="line">	<span class="keyword">char</span>			buff[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span>			ticks;</span><br><span class="line"></span><br><span class="line">	daemon_inetd(argv[<span class="number">0</span>], <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	cliaddr = Malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage));</span><br><span class="line">	len = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage);</span><br><span class="line">	Getpeername(<span class="number">0</span>, cliaddr, &amp;len);</span><br><span class="line">	err_msg(<span class="string">"connection from %s"</span>, Sock_ntop(cliaddr, len));</span><br><span class="line"></span><br><span class="line">    ticks = time(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">snprintf</span>(buff, <span class="keyword">sizeof</span>(buff), <span class="string">"%.24s\r\n"</span>, ctime(&amp;ticks));</span><br><span class="line">    Write(<span class="number">0</span>, buff, <span class="built_in">strlen</span>(buff));</span><br><span class="line"></span><br><span class="line">	Close(<span class="number">0</span>);	<span class="comment">/* close TCP connection */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到所有套接字的创建代码(tcp_listen和accept的调用)都不见了，这些步骤都有xinetd执行，我们使用描述符0指代已由xinetd接受的TCP连接（套接字描述符被复制到描述符0, 1, 2）。daemon_init只是负责设置daemon_proc<br>标志以及调用openlog，从而发送日志信息给syslogd守护进程。</p>
 
           
         
@@ -1793,6 +1600,196 @@
 
 
     
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/09/02/Signal/" itemprop="url">
+                  Signal
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-02T00:00:00+08:00" content="2016-09-02">
+              2016-09-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/02/Signal/" class="leancloud_visitors" data-flag-title="Signal">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1"><a href="#Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1" class="headerlink" title="Signal, Linux进程间通信"></a>Signal, Linux进程间通信</h1><p>信号（Signal）是Linux的一种进程间通信机制，信号由内核或者其他进程发送给接收进程，接收到信号的进程相应地采取行动来处理信号。信号是一种软中断，即当一个进程收到一个信号时，它停止自己的执行流程，转而去处理信号。<br>值得注意的是信号是可重入的，即信号处理程序可以被其他信号中断。</p>
+<h3 id="u4FE1_u53F7_u7684_u79CD_u7C7B"><a href="#u4FE1_u53F7_u7684_u79CD_u7C7B" class="headerlink" title="信号的种类"></a>信号的种类</h3><p>常用的信号并不是很多，信号的名称在<code>&lt;signal.h&gt;</code>中定义，常用的信号及解释如下：</p>
+<ul>
+<li>SIGALRM：由<code>alarm()</code>系统调用发送给接收进程，<code>alarm()</code>系统调用可以定时发送一个SIGALRM信号给进程，以触发某个定时操作。</li>
+<li>SIGHUP：该信号表示某一个操作关闭了终端，运行在该终端下的程序会收到SIGHUP信号，默认的信号处理程序会结束收到的信号的程序。</li>
+<li>SIGINT：用户输入了Ctrl-C就会发送一个SIGINT给前台应用。</li>
+<li>SIGILL：这是一个异常信号，表示系统执行时遇到了一个非法程序，当加载动态链接一个被破坏的函数库时可能会产生该信号。注意，这个信号不能被捕获或者忽略，一般在shell中用于强制终止异常程序。</li>
+<li>SIGABRT：程序中调用<code>abort()</code>系统调用会产生一个SIGABRT信号</li>
+<li>SIGSEGV：这也是一个异常信号，当程序访问了一个不属于它的内存空间是内核会发送一个SIGSEGV信号给程序。</li>
+<li>SIGPIPE：Broken Pipe，如果程序尝试往管道写入数据，而管道并没有与之对应的读数据的进程，就会产生SIGPIPE信号。</li>
+<li>SIGTREM：这个信号告诉进程结束自身的运行，<code>kill</code>命令默认发送SIGTERM信号</li>
+<li>SIGHLD：当一个子进程结束运行时，父进程就会收到一个SIGHLD信号。</li>
+<li>SIGUSR1 &amp; SIGUSR2：用户可自定义的信号。</li>
+</ul>
+<p>注意<code>SIGILL</code>和<code>SIGSTOP</code>（用于调试）的处理行为不能被更改。</p>
+<h3 id="POSIX_u4FE1_u53F7_u7684_u8BED_u4E49"><a href="#POSIX_u4FE1_u53F7_u7684_u8BED_u4E49" class="headerlink" title="POSIX信号的语义"></a>POSIX信号的语义</h3><p>符合POSIX的系统上信号的处理总结为：</p>
+<ul>
+<li>一旦安装了信号处理函数，它就一直安装着</li>
+<li>在一个信号处理函数运行期间，正被递交的信号是阻塞的。而且安装处理函数时，POSIX保证传递给<code>sigaction</code>的<code>sa_mask</code>信号集中指定的任何信号都是被阻塞的。</li>
+<li>如果一个信号在被阻塞期间产生了一次或多次，那么该信号在被解阻塞之后通常只递交一次，也就是说，Unix信号默认是不排队的。</li>
+<li>利用sigprocmask函数选择性地阻塞或解阻塞一组信号是可能的，我们可以在一段临界代码执行期间，防止捕获某些信号，以此保护这段代码。</li>
+</ul>
+<h3 id="u4FE1_u53F7_u7684_u5904_u7406"><a href="#u4FE1_u53F7_u7684_u5904_u7406" class="headerlink" title="信号的处理"></a>信号的处理</h3><h4 id="signal_u51FD_u6570"><a href="#signal_u51FD_u6570" class="headerlink" title="signal函数"></a>signal函数</h4><p><code>signal</code>函数是一个年代久远的信号处理函数，其函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*handler)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br></pre></td></tr></table></figure>
+<p>可以看到，signal是一个函数，其返回值是一个函数指针，signal函数注册一个新的信号处理函数，并返回原先注册的信号处理函数。</p>
+<p>一个<code>signal</code>函数的例子如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sig_handler</span><span class="params">(<span class="keyword">int</span> signum)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Receive Signal : %d\n"</span>, signum);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    signal(SIGINT, sig_handler);</span><br><span class="line">    sleep(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果截图：<br><img src="/2016/09/02/Signal/signal_test.png" alt="signal_test.png" title=""></p>
+<p>可以看到当我们按下<code>Ctrl-C</code>时触发了自定义的信号处理函数。</p>
+<h4 id="sigaction_u51FD_u6570"><a href="#sigaction_u51FD_u6570" class="headerlink" title="sigaction函数"></a>sigaction函数</h4><p><code>signal</code>函数的行为根据UNIX版本的不同而不同，在不同的Linux版本中亦是如此。所以我们应该使用一个更加健壮的接口－－sigaction函数。sigaction的原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaction</span><span class="params">(<span class="keyword">int</span> signum, <span class="keyword">const</span> <span class="keyword">struct</span> sigaction *act, <span class="keyword">struct</span> sigaction *oldact)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>sigaction</code>的结构定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> sigaction &#123;</span><br><span class="line">	<span class="keyword">void</span>     (*sa_handler)(<span class="keyword">int</span>);</span><br><span class="line">	<span class="keyword">void</span>     (*sa_sigaction)(<span class="keyword">int</span>, <span class="keyword">siginfo_t</span> *, <span class="keyword">void</span> *);</span><br><span class="line">	<span class="keyword">sigset_t</span>   sa_mask;</span><br><span class="line">	<span class="keyword">int</span>        sa_flags;</span><br><span class="line">	<span class="keyword">void</span>     (*sa_restorer)(<span class="keyword">void</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>sa_flags</code>被设置成<code>SA_SIGINFO</code>时，信号处理函数是<code>sa_sigaction</code>函数，否则是<code>sa_handler</code>函数。<code>sa_flags</code>的其他值的解释如下：</p>
+<ul>
+<li>SA_NOCLDSTOP：子进程停止时不产生SIGHLD信号</li>
+<li>SA_RESETHAND：将对此信号的处理方式在信号处理函数入口处重置为SIG_DFL</li>
+<li>SA_RESTART：重启可中断的函数而不是给出EINTER错误</li>
+<li>SA_NODEFER：捕获到信号时不将它添加到屏蔽字中。</li>
+</ul>
+<p>当我们使用<code>sa_sigaction</code>函数作为信号处理函数时，我们可以得到发送信号的进程的更多信息，信息存储在<code>siginfo_t</code>中，其结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">siginfo_t</span> &#123;</span><br><span class="line">	<span class="keyword">int</span>      si_signo;    <span class="comment">/* Signal number */</span></span><br><span class="line">    <span class="keyword">int</span>      si_errno;    <span class="comment">/* An errno value */</span></span><br><span class="line">    <span class="keyword">int</span>      si_code;     <span class="comment">/* Signal code */</span></span><br><span class="line">    <span class="keyword">int</span>      si_trapno;   <span class="comment">/* Trap number that caused</span><br><span class="line">                                      hardware-generated signal</span><br><span class="line">                                      (unused on most architectures) */</span></span><br><span class="line">	<span class="keyword">pid_t</span>    si_pid;      <span class="comment">/* Sending process ID */</span></span><br><span class="line">    <span class="keyword">uid_t</span>    si_uid;      <span class="comment">/* Real user ID of sending process */</span></span><br><span class="line">    <span class="keyword">int</span>      si_status;   <span class="comment">/* Exit value or signal */</span></span><br><span class="line">    <span class="keyword">clock_t</span>  si_utime;    <span class="comment">/* User time consumed */</span></span><br><span class="line">    <span class="keyword">clock_t</span>  si_stime;    <span class="comment">/* System time </span><br><span class="line">	sigval_t si_value;    <span class="comment">/* Signal value */</span></span><br><span class="line">    int      si_int;      <span class="comment">/* POSIX.1b signal */</span></span><br><span class="line">    void    *si_ptr;      <span class="comment">/* POSIX.1b signal */</span></span><br><span class="line">    int      si_overrun;  <span class="comment">/* Timer overrun count; POSIX.1b timers */</span></span><br><span class="line">    int      si_timerid;  <span class="comment">/* Timer ID; POSIX.1b timers */</span></span><br><span class="line">    void    *si_addr;     <span class="comment">/* Memory location which caused fault */</span></span><br><span class="line">    long     si_band;     <span class="comment">/* Band event (was int in</span><br><span class="line">                                      glibc 2.3.2 and earlier) */</span></span><br><span class="line">	int      si_fd;       <span class="comment">/* File descriptor */</span></span><br><span class="line">    short    si_addr_lsb; <span class="comment">/* Least significant bit of address</span><br><span class="line">                                        (since Linux 2.6.32) */</span></span><br><span class="line">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><code>sa_mask</code>中设置被进程屏蔽的信号。</p>
+<p>一个使用<code>sigaction</code>的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sig_handler</span><span class="params">(<span class="keyword">int</span> signum)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Receive signal : %d\n"</span>, signum);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> sigaction act;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;act, <span class="number">0</span>, <span class="keyword">sizeof</span>(act));</span><br><span class="line"></span><br><span class="line">    act.sa_handler = sig_handler;</span><br><span class="line">    act.sa_flags   = SA_RESETHAND;</span><br><span class="line">    <span class="comment">/* 清除屏蔽字 */</span></span><br><span class="line">    sigemptyset(&amp;act.sa_mask);</span><br><span class="line"></span><br><span class="line">    sigaction(SIGINT, &amp;act, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Test\n"</span>);</span><br><span class="line">	sleep(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果如下：</p>
+<img src="/2016/09/02/Signal/sigaction_test.png" alt="sigaction_test.png" title="">
+<p>可以看到，程序第一次收到SIGINT信号时执行的是自定义的信号处理函数，第二次就被重置为默认的信号处理函数了。</p>
+<h4 id="kill_u51FD_u6570"><a href="#kill_u51FD_u6570" class="headerlink" title="kill函数"></a>kill函数</h4><p><code>kill</code>系统调用函数的原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">kill</span><span class="params">(pid_t pid, <span class="keyword">int</span> sig)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>它的作用是发送一个信号（由sig参数指定）给一个特定进程。默认发送<code>SIGTERM</code>信号。</p>
+<h4 id="u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570"><a href="#u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570" class="headerlink" title="信号集处理函数"></a>信号集处理函数</h4><p>信号集处理函数主要用于处理<code>sigset_t</code>，从而让进程屏蔽某些信号。函数的原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigemptyset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigfillset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaddset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigdelset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigismember</span><span class="params">(sigset_t *sigset, <span class="keyword">int</span> signal)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigpromask</span><span class="params">(<span class="keyword">int</span> how, <span class="keyword">const</span> sigset_t *<span class="built_in">set</span>, sigset_t *osigset)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigpending</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigsuspend</span><span class="params">(<span class="keyword">const</span> sigset_t *)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>sigpromask</code>可以根据<code>how</code>指定的值来修改进程的信号屏蔽字。如果<code>set</code>参数为空，则<code>how</code>没有意义，但是如果此时<code>osigset</code>不为空，那么当前信号屏蔽字保存在<code>osigset</code>指向的地址中。</p>
+<p><code>how</code>的不同取值和对应的操作：</p>
+<ul>
+<li>SIG_BLOCK：把参数set中的信号加入到进程的信号屏蔽字中</li>
+<li>SIG_SETMASK：把进程的信号屏蔽字设置为set中的信号</li>
+<li>SIG_UNBLOCK：从进程的信号屏蔽字中删除set中指定的信号</li>
+</ul>
+<p>注意，调用这个函数才能修改进程的信号屏蔽字，它之前的函数都只是改变一个变量，对进程的信号屏蔽字并没有直接影响。</p>
+<p><code>sigpending</code>函数将被阻塞的信号中停留在待处理状态的信号写入参数指定的地址中。</p>
+<p><code>sigsuspend</code>函数首先将进程的屏蔽字换成参数指定的信号，然后挂起进程。</p>
+<p>一个例子实验一下以上的函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span>  </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">handler</span><span class="params">(<span class="keyword">int</span> sig)</span>  </span><br><span class="line"></span>&#123;  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Handle the signal %d\n"</span>, sig);  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span>  </span><br><span class="line"></span>&#123;  </span><br><span class="line">    <span class="keyword">sigset_t</span> sigset;<span class="comment">//用于记录屏蔽字  </span></span><br><span class="line">    <span class="keyword">sigset_t</span> ign;<span class="comment">//用于记录被阻塞的信号集  </span></span><br><span class="line">    <span class="keyword">struct</span> sigaction act;  </span><br><span class="line">    <span class="comment">//清空信号集  </span></span><br><span class="line">    sigemptyset(&amp;sigset);  </span><br><span class="line">    sigemptyset(&amp;ign);  </span><br><span class="line">    <span class="comment">//向信号集中添加信号SIGINT  </span></span><br><span class="line">    sigaddset(&amp;sigset, SIGINT);  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">//设置处理函数和信号集      </span></span><br><span class="line">    act.sa_handler = handler;  </span><br><span class="line">    sigemptyset(&amp;act.sa_mask);  </span><br><span class="line">    act.sa_flags = <span class="number">0</span>;  </span><br><span class="line">    sigaction(SIGINT, &amp;act, <span class="number">0</span>);  </span><br><span class="line">  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Wait the signal SIGINT...\n"</span>);  </span><br><span class="line">    pause();<span class="comment">//挂起进程，等待信号  </span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">//设置进程屏蔽字，在本例中为屏蔽SIGINT   </span></span><br><span class="line">    sigprocmask(SIG_SETMASK, &amp;sigset, <span class="number">0</span>);     </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Please press Ctrl+c in 10 seconds...\n"</span>);  </span><br><span class="line">    sleep(<span class="number">10</span>);  </span><br><span class="line">    <span class="comment">//测试SIGINT是否被屏蔽  </span></span><br><span class="line">    sigpending(&amp;ign);  </span><br><span class="line">    <span class="keyword">if</span>(sigismember(&amp;ign, SIGINT))  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"The SIGINT signal has ignored\n"</span>);  </span><br><span class="line">    <span class="comment">//在信号集中删除信号SIGINT  </span></span><br><span class="line">    sigdelset(&amp;sigset, SIGINT);  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Wait the signal SIGINT...\n"</span>);  </span><br><span class="line">    <span class="comment">//将进程的屏蔽字重新设置，即取消对SIGINT的屏蔽  </span></span><br><span class="line">    <span class="comment">//并挂起进程  </span></span><br><span class="line">    sigsuspend(&amp;sigset);  </span><br><span class="line">  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"The app will exit in 5 seconds!\n"</span>);  </span><br><span class="line">    sleep(<span class="number">5</span>);  </span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<img src="/2016/09/02/Signal/sigset_test.png" alt="sigset_test.png" title="">
+<p>可以看到当我们屏蔽了SIGINT信号后，如果SIGINT发送给进程，那么信号就被阻塞编程待处理状态，当我们取消对信号的阻塞后该信号马上就被处理，于是程序就马上打印</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The app will exit in 5 seconds!</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
   </section>
 
   
@@ -1838,7 +1835,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">26</span>
+              <span class="site-state-item-count">25</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1846,7 +1843,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1855,7 +1852,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
