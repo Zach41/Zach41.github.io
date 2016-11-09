@@ -249,6 +249,508 @@
             
               
                 
+                <a class="post-title-link" href="/2016/09/02/Signal/" itemprop="url">
+                  Signal
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-09-02T00:00:00+08:00" content="2016-09-02">
+              2016-09-02
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/02/Signal/" class="leancloud_visitors" data-flag-title="Signal">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1"><a href="#Signal_2C_Linux_u8FDB_u7A0B_u95F4_u901A_u4FE1" class="headerlink" title="Signal, Linux进程间通信"></a>Signal, Linux进程间通信</h1><p>信号（Signal）是Linux的一种进程间通信机制，信号由内核或者其他进程发送给接收进程，接收到信号的进程相应地采取行动来处理信号。信号是一种软中断，即当一个进程收到一个信号时，它停止自己的执行流程，转而去处理信号。<br>值得注意的是信号是可重入的，即信号处理程序可以被其他信号中断。</p>
+<h3 id="u4FE1_u53F7_u7684_u79CD_u7C7B"><a href="#u4FE1_u53F7_u7684_u79CD_u7C7B" class="headerlink" title="信号的种类"></a>信号的种类</h3><p>常用的信号并不是很多，信号的名称在<code>&lt;signal.h&gt;</code>中定义，常用的信号及解释如下：</p>
+<ul>
+<li>SIGALRM：由<code>alarm()</code>系统调用发送给接收进程，<code>alarm()</code>系统调用可以定时发送一个SIGALRM信号给进程，以触发某个定时操作。</li>
+<li>SIGHUP：该信号表示某一个操作关闭了终端，运行在该终端下的程序会收到SIGHUP信号，默认的信号处理程序会结束收到的信号的程序。</li>
+<li>SIGINT：用户输入了Ctrl-C就会发送一个SIGINT给前台应用。</li>
+<li>SIGILL：这是一个异常信号，表示系统执行时遇到了一个非法程序，当加载动态链接一个被破坏的函数库时可能会产生该信号。注意，这个信号不能被捕获或者忽略，一般在shell中用于强制终止异常程序。</li>
+<li>SIGABRT：程序中调用<code>abort()</code>系统调用会产生一个SIGABRT信号</li>
+<li>SIGSEGV：这也是一个异常信号，当程序访问了一个不属于它的内存空间是内核会发送一个SIGSEGV信号给程序。</li>
+<li>SIGPIPE：Broken Pipe，如果程序尝试往管道写入数据，而管道并没有与之对应的读数据的进程，就会产生SIGPIPE信号。</li>
+<li>SIGTREM：这个信号告诉进程结束自身的运行，<code>kill</code>命令默认发送SIGTERM信号</li>
+<li>SIGHLD：当一个子进程结束运行时，父进程就会收到一个SIGHLD信号。</li>
+<li>SIGUSR1 &amp; SIGUSR2：用户可自定义的信号。</li>
+</ul>
+<p>注意<code>SIGILL</code>和<code>SIGSTOP</code>（用于调试）的处理行为不能被更改。</p>
+<h3 id="POSIX_u4FE1_u53F7_u7684_u8BED_u4E49"><a href="#POSIX_u4FE1_u53F7_u7684_u8BED_u4E49" class="headerlink" title="POSIX信号的语义"></a>POSIX信号的语义</h3><p>符合POSIX的系统上信号的处理总结为：</p>
+<ul>
+<li>一旦安装了信号处理函数，它就一直安装着</li>
+<li>在一个信号处理函数运行期间，正被递交的信号是阻塞的。而且安装处理函数时，POSIX保证传递给<code>sigaction</code>的<code>sa_mask</code>信号集中指定的任何信号都是被阻塞的。</li>
+<li>如果一个信号在被阻塞期间产生了一次或多次，那么该信号在被解阻塞之后通常只递交一次，也就是说，Unix信号默认是不排队的。</li>
+<li>利用sigprocmask函数选择性地阻塞或解阻塞一组信号是可能的，我们可以在一段临界代码执行期间，防止捕获某些信号，以此保护这段代码。</li>
+</ul>
+<h3 id="u4FE1_u53F7_u7684_u5904_u7406"><a href="#u4FE1_u53F7_u7684_u5904_u7406" class="headerlink" title="信号的处理"></a>信号的处理</h3><h4 id="signal_u51FD_u6570"><a href="#signal_u51FD_u6570" class="headerlink" title="signal函数"></a>signal函数</h4><p><code>signal</code>函数是一个年代久远的信号处理函数，其函数原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> (*signal(<span class="keyword">int</span>, <span class="keyword">void</span> (*handler)(<span class="keyword">int</span>)))(<span class="keyword">int</span>);</span><br></pre></td></tr></table></figure>
+<p>可以看到，signal是一个函数，其返回值是一个函数指针，signal函数注册一个新的信号处理函数，并返回原先注册的信号处理函数。</p>
+<p>一个<code>signal</code>函数的例子如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sig_handler</span><span class="params">(<span class="keyword">int</span> signum)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Receive Signal : %d\n"</span>, signum);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    signal(SIGINT, sig_handler);</span><br><span class="line">    sleep(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果截图：<br><img src="/2016/09/02/Signal/signal_test.png" alt="signal_test.png" title=""></p>
+<p>可以看到当我们按下<code>Ctrl-C</code>时触发了自定义的信号处理函数。</p>
+<h4 id="sigaction_u51FD_u6570"><a href="#sigaction_u51FD_u6570" class="headerlink" title="sigaction函数"></a>sigaction函数</h4><p><code>signal</code>函数的行为根据UNIX版本的不同而不同，在不同的Linux版本中亦是如此。所以我们应该使用一个更加健壮的接口－－sigaction函数。sigaction的原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaction</span><span class="params">(<span class="keyword">int</span> signum, <span class="keyword">const</span> <span class="keyword">struct</span> sigaction *act, <span class="keyword">struct</span> sigaction *oldact)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>sigaction</code>的结构定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> sigaction &#123;</span><br><span class="line">	<span class="keyword">void</span>     (*sa_handler)(<span class="keyword">int</span>);</span><br><span class="line">	<span class="keyword">void</span>     (*sa_sigaction)(<span class="keyword">int</span>, <span class="keyword">siginfo_t</span> *, <span class="keyword">void</span> *);</span><br><span class="line">	<span class="keyword">sigset_t</span>   sa_mask;</span><br><span class="line">	<span class="keyword">int</span>        sa_flags;</span><br><span class="line">	<span class="keyword">void</span>     (*sa_restorer)(<span class="keyword">void</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>sa_flags</code>被设置成<code>SA_SIGINFO</code>时，信号处理函数是<code>sa_sigaction</code>函数，否则是<code>sa_handler</code>函数。<code>sa_flags</code>的其他值的解释如下：</p>
+<ul>
+<li>SA_NOCLDSTOP：子进程停止时不产生SIGHLD信号</li>
+<li>SA_RESETHAND：将对此信号的处理方式在信号处理函数入口处重置为SIG_DFL</li>
+<li>SA_RESTART：重启可中断的函数而不是给出EINTER错误</li>
+<li>SA_NODEFER：捕获到信号时不将它添加到屏蔽字中。</li>
+</ul>
+<p>当我们使用<code>sa_sigaction</code>函数作为信号处理函数时，我们可以得到发送信号的进程的更多信息，信息存储在<code>siginfo_t</code>中，其结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">siginfo_t</span> &#123;</span><br><span class="line">	<span class="keyword">int</span>      si_signo;    <span class="comment">/* Signal number */</span></span><br><span class="line">    <span class="keyword">int</span>      si_errno;    <span class="comment">/* An errno value */</span></span><br><span class="line">    <span class="keyword">int</span>      si_code;     <span class="comment">/* Signal code */</span></span><br><span class="line">    <span class="keyword">int</span>      si_trapno;   <span class="comment">/* Trap number that caused</span><br><span class="line">                                      hardware-generated signal</span><br><span class="line">                                      (unused on most architectures) */</span></span><br><span class="line">	<span class="keyword">pid_t</span>    si_pid;      <span class="comment">/* Sending process ID */</span></span><br><span class="line">    <span class="keyword">uid_t</span>    si_uid;      <span class="comment">/* Real user ID of sending process */</span></span><br><span class="line">    <span class="keyword">int</span>      si_status;   <span class="comment">/* Exit value or signal */</span></span><br><span class="line">    <span class="keyword">clock_t</span>  si_utime;    <span class="comment">/* User time consumed */</span></span><br><span class="line">    <span class="keyword">clock_t</span>  si_stime;    <span class="comment">/* System time </span><br><span class="line">	sigval_t si_value;    <span class="comment">/* Signal value */</span></span><br><span class="line">    int      si_int;      <span class="comment">/* POSIX.1b signal */</span></span><br><span class="line">    void    *si_ptr;      <span class="comment">/* POSIX.1b signal */</span></span><br><span class="line">    int      si_overrun;  <span class="comment">/* Timer overrun count; POSIX.1b timers */</span></span><br><span class="line">    int      si_timerid;  <span class="comment">/* Timer ID; POSIX.1b timers */</span></span><br><span class="line">    void    *si_addr;     <span class="comment">/* Memory location which caused fault */</span></span><br><span class="line">    long     si_band;     <span class="comment">/* Band event (was int in</span><br><span class="line">                                      glibc 2.3.2 and earlier) */</span></span><br><span class="line">	int      si_fd;       <span class="comment">/* File descriptor */</span></span><br><span class="line">    short    si_addr_lsb; <span class="comment">/* Least significant bit of address</span><br><span class="line">                                        (since Linux 2.6.32) */</span></span><br><span class="line">&#125;</span></span><br></pre></td></tr></table></figure>
+<p><code>sa_mask</code>中设置被进程屏蔽的信号。</p>
+<p>一个使用<code>sigaction</code>的例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sig_handler</span><span class="params">(<span class="keyword">int</span> signum)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Receive signal : %d\n"</span>, signum);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> sigaction act;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;act, <span class="number">0</span>, <span class="keyword">sizeof</span>(act));</span><br><span class="line"></span><br><span class="line">    act.sa_handler = sig_handler;</span><br><span class="line">    act.sa_flags   = SA_RESETHAND;</span><br><span class="line">    <span class="comment">/* 清除屏蔽字 */</span></span><br><span class="line">    sigemptyset(&amp;act.sa_mask);</span><br><span class="line"></span><br><span class="line">    sigaction(SIGINT, &amp;act, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Test\n"</span>);</span><br><span class="line">	sleep(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结果如下：</p>
+<img src="/2016/09/02/Signal/sigaction_test.png" alt="sigaction_test.png" title="">
+<p>可以看到，程序第一次收到SIGINT信号时执行的是自定义的信号处理函数，第二次就被重置为默认的信号处理函数了。</p>
+<h4 id="kill_u51FD_u6570"><a href="#kill_u51FD_u6570" class="headerlink" title="kill函数"></a>kill函数</h4><p><code>kill</code>系统调用函数的原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">kill</span><span class="params">(pid_t pid, <span class="keyword">int</span> sig)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>它的作用是发送一个信号（由sig参数指定）给一个特定进程。默认发送<code>SIGTERM</code>信号。</p>
+<h4 id="u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570"><a href="#u4FE1_u53F7_u96C6_u5904_u7406_u51FD_u6570" class="headerlink" title="信号集处理函数"></a>信号集处理函数</h4><p>信号集处理函数主要用于处理<code>sigset_t</code>，从而让进程屏蔽某些信号。函数的原型如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigemptyset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigfillset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaddset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigdelset</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigismember</span><span class="params">(sigset_t *sigset, <span class="keyword">int</span> signal)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigpromask</span><span class="params">(<span class="keyword">int</span> how, <span class="keyword">const</span> sigset_t *<span class="built_in">set</span>, sigset_t *osigset)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigpending</span><span class="params">(sigset_t *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigsuspend</span><span class="params">(<span class="keyword">const</span> sigset_t *)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>sigpromask</code>可以根据<code>how</code>指定的值来修改进程的信号屏蔽字。如果<code>set</code>参数为空，则<code>how</code>没有意义，但是如果此时<code>osigset</code>不为空，那么当前信号屏蔽字保存在<code>osigset</code>指向的地址中。</p>
+<p><code>how</code>的不同取值和对应的操作：</p>
+<ul>
+<li>SIG_BLOCK：把参数set中的信号加入到进程的信号屏蔽字中</li>
+<li>SIG_SETMASK：把进程的信号屏蔽字设置为set中的信号</li>
+<li>SIG_UNBLOCK：从进程的信号屏蔽字中删除set中指定的信号</li>
+</ul>
+<p>注意，调用这个函数才能修改进程的信号屏蔽字，它之前的函数都只是改变一个变量，对进程的信号屏蔽字并没有直接影响。</p>
+<p><code>sigpending</code>函数将被阻塞的信号中停留在待处理状态的信号写入参数指定的地址中。</p>
+<p><code>sigsuspend</code>函数首先将进程的屏蔽字换成参数指定的信号，然后挂起进程。</p>
+<p>一个例子实验一下以上的函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span>  </span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span>  </span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">handler</span><span class="params">(<span class="keyword">int</span> sig)</span>  </span><br><span class="line"></span>&#123;  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Handle the signal %d\n"</span>, sig);  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span>  </span><br><span class="line"></span>&#123;  </span><br><span class="line">    <span class="keyword">sigset_t</span> sigset;<span class="comment">//用于记录屏蔽字  </span></span><br><span class="line">    <span class="keyword">sigset_t</span> ign;<span class="comment">//用于记录被阻塞的信号集  </span></span><br><span class="line">    <span class="keyword">struct</span> sigaction act;  </span><br><span class="line">    <span class="comment">//清空信号集  </span></span><br><span class="line">    sigemptyset(&amp;sigset);  </span><br><span class="line">    sigemptyset(&amp;ign);  </span><br><span class="line">    <span class="comment">//向信号集中添加信号SIGINT  </span></span><br><span class="line">    sigaddset(&amp;sigset, SIGINT);  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">//设置处理函数和信号集      </span></span><br><span class="line">    act.sa_handler = handler;  </span><br><span class="line">    sigemptyset(&amp;act.sa_mask);  </span><br><span class="line">    act.sa_flags = <span class="number">0</span>;  </span><br><span class="line">    sigaction(SIGINT, &amp;act, <span class="number">0</span>);  </span><br><span class="line">  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Wait the signal SIGINT...\n"</span>);  </span><br><span class="line">    pause();<span class="comment">//挂起进程，等待信号  </span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">//设置进程屏蔽字，在本例中为屏蔽SIGINT   </span></span><br><span class="line">    sigprocmask(SIG_SETMASK, &amp;sigset, <span class="number">0</span>);     </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Please press Ctrl+c in 10 seconds...\n"</span>);  </span><br><span class="line">    sleep(<span class="number">10</span>);  </span><br><span class="line">    <span class="comment">//测试SIGINT是否被屏蔽  </span></span><br><span class="line">    sigpending(&amp;ign);  </span><br><span class="line">    <span class="keyword">if</span>(sigismember(&amp;ign, SIGINT))  </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"The SIGINT signal has ignored\n"</span>);  </span><br><span class="line">    <span class="comment">//在信号集中删除信号SIGINT  </span></span><br><span class="line">    sigdelset(&amp;sigset, SIGINT);  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Wait the signal SIGINT...\n"</span>);  </span><br><span class="line">    <span class="comment">//将进程的屏蔽字重新设置，即取消对SIGINT的屏蔽  </span></span><br><span class="line">    <span class="comment">//并挂起进程  </span></span><br><span class="line">    sigsuspend(&amp;sigset);  </span><br><span class="line">  </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"The app will exit in 5 seconds!\n"</span>);  </span><br><span class="line">    sleep(<span class="number">5</span>);  </span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<img src="/2016/09/02/Signal/sigset_test.png" alt="sigset_test.png" title="">
+<p>可以看到当我们屏蔽了SIGINT信号后，如果SIGINT发送给进程，那么信号就被阻塞编程待处理状态，当我们取消对信号的阻塞后该信号马上就被处理，于是程序就马上打印</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The app will exit in 5 seconds!</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/08/30/Unix套接字编程基础/" itemprop="url">
+                  Unix套接字编程基础
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-08-30T00:00:00+08:00" content="2016-08-30">
+              2016-08-30
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unix/" itemprop="url" rel="index">
+                    <span itemprop="name">Unix</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/08/30/Unix套接字编程基础/" class="leancloud_visitors" data-flag-title="Unix套接字编程基础">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="u6570_u636E_u7ED3_u6784"><a href="#u6570_u636E_u7ED3_u6784" class="headerlink" title="数据结构"></a>数据结构</h1><p>这里仅讨论IPv4相关的数据，IPv6与之类似，可以查阅相关的资料。</p>
+<p>网络套接字的地址结构：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> in_addr &#123;</span><br><span class="line">	<span class="keyword">in_addr_t</span> s_addr;        <span class="comment">// 32位IPv4地址</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> sockaddr_in &#123;</span><br><span class="line">	<span class="keyword">uint8_t</span>     sin_len;        <span class="comment">// 结构的长度</span></span><br><span class="line">	<span class="keyword">sa_family_t</span> sin_family;     <span class="comment">// AF_INET，地址族</span></span><br><span class="line">	<span class="keyword">in_port_t</span>   sin_port;       <span class="comment">// 端口号</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">char</span>        sin_zero[<span class="number">8</span>];    <span class="comment">// unused</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>网络协议规定必须指定一个网络字节序（大端还是小端），作为网络编程人员必须清楚不同字节之间的差异。比如，在每一个TCP分节中都有16位的端口号和32位的IPv4地址，发送协议栈和接收协议栈必须就这些多字节字段各个字节的传送顺序达成一致。网络协议使用大端字节序来传送这些多字节数据。</p>
+<p>举例来说，如果有一个32位的IPv4地址，首先要转换字节序再使用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">uint32_t</span> ip_addr = htonl(ori_ip_addr);</span><br></pre></td></tr></table></figure>
+<p>共有4个转换函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">uint16_t</span> htons(<span class="keyword">uint16_t</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> htonl(<span class="keyword">uint32_t</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint16_t</span> ntohs(<span class="keyword">uint16_t</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> ntohl(<span class="keyword">uint32_t</span>);</span><br></pre></td></tr></table></figure>
+<p><code>h</code>表示host，<code>n</code>表示network，<code>s</code>表示short，<code>l</code>表示long</p>
+<p>通常来说我们习惯用点分十进制来表示IP地址，如<code>192.168.1.1</code>，因为这样易读易懂，但是在网络上传输时应该使用的32位的二进制来表示IP地址，于是就要进行转换，以下两个函数提供转换功能：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">inet_pton</span><span class="params">(<span class="keyword">int</span> family, <span class="keyword">const</span> <span class="keyword">char</span> *strptr, <span class="keyword">void</span> *addrptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span> *<span class="title">inet_ntop</span><span class="params">(<span class="keyword">int</span> family, <span class="keyword">const</span> <span class="keyword">char</span> *addrptr, <span class="keyword">char</span> *strptr, size_t len)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>family</code>即可以是<code>AF_INET</code>，也可以是<code>AF_INET6</code>。如果是不被支持的地址族作为family参数，返回一个错误，<code>errno</code>被设置为<code>EAFNOSUPPORT</code>。</p>
+<p>这里<code>n</code>表示numeric，<code>p</code>表示presentation。</p>
+<h1 id="u57FA_u672CTCP_u5957_u63A5_u5B57_u7F16_u7A0B"><a href="#u57FA_u672CTCP_u5957_u63A5_u5B57_u7F16_u7A0B" class="headerlink" title="基本TCP套接字编程"></a>基本TCP套接字编程</h1><h3 id="sock_u51FD_u6570"><a href="#sock_u51FD_u6570" class="headerlink" title="sock函数"></a>sock函数</h3><p>首先需要创建一个套接字，创建套接字的函数如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">socket</span><span class="params">(<span class="keyword">int</span> family, <span class="keyword">int</span> type, <span class="keyword">int</span> protocol)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>family</code>指定协议族，<code>type</code>指定套接字类型，<code>protocol</code>指定某个协议类型常值，当设置为0时，程序会选择和给定的family和type组合的系统默认值。</p>
+<h3 id="connect_u51FD_u6570"><a href="#connect_u51FD_u6570" class="headerlink" title="connect函数"></a>connect函数</h3><p>TCP客户端用connect函数来与TCP服务器建立连接。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">const</span> <span class="keyword">struct</span> sockaddr *servaddr, socklen_t addrlen)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>客户不必在使用connect前调用bind函数，因为需要的话内核会分配一个临时的端口给客户进程。</p>
+<p>出错返回的错误情况：</p>
+<ol>
+<li>TCP客户等待一段时间后没有收到服务器返回的TCP分节，返回ETIMEDOUT错误。</li>
+<li>对客户的SYN响应是RST（复位），表明服务器上并没有进程在等待与之连接，这是一种硬错误，客户收到后马上返回ECONNREFUSED。</li>
+<li>客户发出的SYN在某个路由上引发了一个”destination unreachable”的ICMP错误，则认为是一种软错误。客户机内核保存该消息，并持续发送SYN包，如果等待一段时间后未收到响应，就把保存的信息（ICMP错误）作为EHOSTUNREACH或ENETUNREACH错误返回给进程。</li>
+</ol>
+<h3 id="bind_u51FD_u6570"><a href="#bind_u51FD_u6570" class="headerlink" title="bind函数"></a>bind函数</h3><p>绑定一个本地协议地址给一个套接字，对于网际协议，协议地址是32位的IPv4地址或128位的IPv6地址与16位的TCP或者UDP端口号的组合。</p>
+<p>函数原型：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bind</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">const</span> <span class="keyword">struct</span> sockaddr *myaddr, socklen_t addrlen)</span></span>;</span><br></pre></td></tr></table></figure>
+<h3 id="listen_u51FD_u6570"><a href="#listen_u51FD_u6570" class="headerlink" title="listen函数"></a>listen函数</h3><p><code>listen</code>仅由TCP服务器调用，它把一个未连接的套接字转换成一个被动套接字，以接收客户的请求。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">listen</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> backlog)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>内核为任何一个给定的监听套接字维护两个队列：</p>
+<ol>
+<li>未完成连接队列：客户已经发送一个SYN分节给服务器，而服务器正在等待完成对应的三次握手过程。</li>
+<li>已完成连接队列：每个已完成TCP三次握手的客户对应启动一项。</li>
+</ol>
+<p><code>backlog</code>指定两个队列总和的最大值。</p>
+<p>要注意的是，在三次握手完成之后，但在服务器调用accept之前到达的数据应由服务器TCP排队。</p>
+<h3 id="accept_u51FD_u6570"><a href="#accept_u51FD_u6570" class="headerlink" title="accept函数"></a>accept函数</h3><p><code>accept</code>函数用于TCP服务器调用，将从已完成队列返回队头的连接。如果已完成连接队列为空，那么服务器进程将被睡眠，直到下一个连接完成。</p>
+<p>函数原型：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">accept</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">struct</span> sockaddr *cliaddr, socklen_t, *addrlen)</span></span>;</span><br></pre></td></tr></table></figure>
+<h1 id="u4E00_u4E2A_u5E76_u53D1_u7684_u670D_u52A1_u5668_u7684_u4F8B_u5B50"><a href="#u4E00_u4E2A_u5E76_u53D1_u7684_u670D_u52A1_u5668_u7684_u4F8B_u5B50" class="headerlink" title="一个并发的服务器的例子"></a>一个并发的服务器的例子</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> listenfd, connfd;</span><br><span class="line">	<span class="keyword">socklen_t</span> len;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">struct</span> sockaddr_in servaddr, cliaddr;</span><br><span class="line">	<span class="keyword">char</span> buf[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span> ticks;</span><br><span class="line">	<span class="keyword">pid_t</span> pid;</span><br><span class="line">	</span><br><span class="line">	listenfd = Socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">	<span class="built_in">memset</span>(servaddr, <span class="number">0</span>, <span class="keyword">sizeof</span>(servaddr));</span><br><span class="line">	servaddr.sin_family = AF_INET;</span><br><span class="line">	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line">	servaddr.sin_port = htons(<span class="number">13</span>);</span><br><span class="line">	</span><br><span class="line">	Bind(listenfd, (SA* )&amp;servaddr, <span class="keyword">sizeof</span>(servaddr));</span><br><span class="line">	</span><br><span class="line">	Listen(listenfd, LISTENQ);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		len = <span class="keyword">sizeof</span>(connfd);</span><br><span class="line">		connfd = Accept(listenfd, (SA *)&amp;cliaddr, &amp;len);</span><br><span class="line">		<span class="keyword">if</span> ((pid = fork()) == <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="comment">// 子进程</span></span><br><span class="line">			Close(listenfd);</span><br><span class="line">			do_process(connfd);</span><br><span class="line">			Close(connfd);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		Close(connfd);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/26/自定Modal-Transition/" itemprop="url">
+                  自定Modal Transition
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-26T00:00:00+08:00" content="2016-05-26">
+              2016-05-26
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Swift/" itemprop="url" rel="index">
+                    <span itemprop="name">Swift</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/05/26/自定Modal-Transition/" class="leancloud_visitors" data-flag-title="自定Modal Transition">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="u81EA_u5B9A_u4E49Modal_Transition"><a href="#u81EA_u5B9A_u4E49Modal_Transition" class="headerlink" title="自定义Modal Transition"></a>自定义Modal Transition</h1><h2 id="u5E8F"><a href="#u5E8F" class="headerlink" title="序"></a>序</h2><p>iOS 7提供了一套新的自定义转场动画的API，这套API可以大大降低了我们自定过渡动画的难度。下面用Ray Wenderlich的一张流程图说明API各个部分的作用。</p>
+<img src="/2016/05/26/自定Modal-Transition/process.jpg" alt="process.jpg" title="">
+<p>可以看到一个ViewController被呈现或者消除的时候，UIKit会想Transition Delegate请求一个Animator，Animator负责转场动画的实现。可见我们需要自定义个Animator。</p>
+<p>一个Animator应该遵循<code>UIViewControllerAnimatedTransitioning</code>协议，这个包含三个方法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">transitionDuration</span><span class="params">(<span class="number">_</span> transitionContext: UIViewControllerContextTransitioning?)</span></span> -&gt; <span class="type">NSTimeInterval</span></span><br><span class="line"></span><br><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">animateTransition</span><span class="params">(<span class="number">_</span> transitionContext: UIViewControllerContextTransitioning)</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">optional</span> <span class="func"><span class="keyword">func</span> <span class="title">animationEnded</span><span class="params">(<span class="number">_</span> transitionCompleted: Bool)</span></span></span><br></pre></td></tr></table></figure>
+<p>这里出现了一个UIViewControllerContextTransitioning，它是转场动画的上下文对象，通过它可以获得将要被显示的view、将要被消除的view、将要显示的viewController等等相关对象。需要注意一定是，可能你自己持有了destinationController，但是，但是，但是，一定要通过transitionContext对象来获得desctinationController，以避免出现一些棘手的错误。</p>
+<h2 id="u5F00_u59CB"><a href="#u5F00_u59CB" class="headerlink" title="开始"></a>开始</h2><p>下面我们就来着手写一个Modal Transition。这个转场动画参考了<a href="https://github.com/andreamazz/BubbleTransition" target="_blank" rel="external">Bubble Transition</a></p>
+<p>先看一下效果：</p>
+<img src="/2016/05/26/自定Modal-Transition/preview.gif" alt="preview.gif" title="">
+<p>首先创建一个BubbleTransition类。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BubbleTransition</span>: <span class="title">NSObject</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> bubbleColor: <span class="type">UIColor</span> = <span class="type">UIColor</span>.whiteColor()</span><br><span class="line">    <span class="keyword">var</span> startPoint: <span class="type">CGPoint</span> = <span class="type">CGPointZero</span> &#123;</span><br><span class="line">        <span class="keyword">didSet</span> &#123;</span><br><span class="line">            bubble.center = startPoint</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span>(<span class="keyword">set</span>) <span class="keyword">var</span> bubble: <span class="type">UIView</span> = <span class="type">UIView</span>()</span><br><span class="line">    <span class="keyword">var</span> duration: <span class="type">Double</span> = <span class="number">0.5</span></span><br><span class="line">    </span><br><span class="line">    <span class="class"><span class="keyword">enum</span> <span class="title">BubbleTransitionType</span> </span>&#123;</span><br><span class="line">        <span class="keyword">case</span> dismiss, present</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> mode: <span class="type">BubbleTransitionType</span> = .present</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>BubbleTransition现在只是定义了一个变量，其中最主要的是BubbleTransitionType，<code>present</code>表示显示viewController，<code>dismiss</code>表示消除viewController。<code>startPoint</code>是将要呈现的viewController.view的起始位置，后面我们将看到它的作用。</p>
+<p>现在我们利用扩展来BubbleTransition实现UIViewControllerAnimatedTransitioning协议。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">BubbleTransition</span>: <span class="title">UIViewControllerAnimatedTransitioning</span> </span>&#123;</span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">transitionDuration</span><span class="params">(transitionContext: UIViewControllerContextTransitioning?)</span></span> -&gt; <span class="type">NSTimeInterval</span> &#123;</span><br><span class="line">		<span class="comment">// 1</span></span><br><span class="line">        <span class="keyword">return</span> duration</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">animateTransition</span><span class="params">(transitionContext: UIViewControllerContextTransitioning)</span></span> &#123;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> containerView = transitionContext.containerView() <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> mode == .present &#123;</span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> presentedView = transitionContext.viewForKey(<span class="type">UITransitionContextToViewKey</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">let</span> originalSize = presentedView.frame.size</span><br><span class="line">            <span class="keyword">let</span> originalCenter = presentedView.center</span><br><span class="line">            </span><br><span class="line">			<span class="comment">// 2</span></span><br><span class="line">            <span class="keyword">let</span> bubbleFrame = bubbleFrameFrom(originalSize: originalSize, startPoint: startPoint)</span><br><span class="line">            bubble.backgroundColor = bubbleColor</span><br><span class="line">            bubble.frame = bubbleFrame</span><br><span class="line">            bubble.center = startPoint</span><br><span class="line">            bubble.layer.cornerRadius = bubble.frame.size.height / <span class="number">2.0</span></span><br><span class="line">            bubble.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>)</span><br><span class="line">            containerView.addSubview(bubble)</span><br><span class="line">            </span><br><span class="line">			<span class="comment">// 3</span></span><br><span class="line">            presentedView.center = bubble.center</span><br><span class="line">            presentedView.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>);</span><br><span class="line">            presentedView.alpha = <span class="number">0</span></span><br><span class="line">            containerView.addSubview(presentedView)</span><br><span class="line">            </span><br><span class="line">            <span class="type">UIView</span>.animateWithDuration(duration, animations: &#123;() <span class="keyword">in</span></span><br><span class="line">                presentedView.center = originalCenter</span><br><span class="line">                presentedView.alpha = <span class="number">1</span></span><br><span class="line">                presentedView.transform = <span class="type">CGAffineTransformIdentity</span></span><br><span class="line">                </span><br><span class="line">                <span class="keyword">self</span>.bubble.transform = <span class="type">CGAffineTransformIdentity</span></span><br><span class="line">            &#125;) &#123;(<span class="number">_</span>) <span class="keyword">in</span></span><br><span class="line">				<span class="comment">// 4</span></span><br><span class="line">                transitionContext.completeTransition(<span class="literal">true</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> returningView = transitionContext.viewForKey(<span class="type">UITransitionContextFromViewKey</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">let</span> originalSize = returningView.frame.size</span><br><span class="line">            <span class="keyword">let</span> originalCenter = returningView.center</span><br><span class="line">            <span class="keyword">let</span> bubbleFrame = bubbleFrameFrom(originalSize: originalSize, startPoint: startPoint)</span><br><span class="line">            bubble.frame = bubbleFrame</span><br><span class="line">            bubble.layer.cornerRadius = bubble.frame.size.height / <span class="number">2.0</span></span><br><span class="line">            bubble.backgroundColor = bubbleColor</span><br><span class="line">            bubble.center = startPoint</span><br><span class="line">            </span><br><span class="line">            <span class="type">UIView</span>.animateWithDuration(duration, animations: &#123;</span><br><span class="line">                <span class="keyword">self</span>.bubble.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>)</span><br><span class="line">                returningView.center = <span class="keyword">self</span>.startPoint</span><br><span class="line">                returningView.alpha = <span class="number">0.0</span></span><br><span class="line">                returningView.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>)</span><br><span class="line">            &#125;) &#123;(<span class="number">_</span>) <span class="keyword">in</span></span><br><span class="line">				<span class="comment">// 5</span></span><br><span class="line">                returningView.center = originalCenter</span><br><span class="line">                <span class="keyword">self</span>.bubble.transform = <span class="type">CGAffineTransformIdentity</span></span><br><span class="line">                <span class="keyword">self</span>.bubble.removeFromSuperview()</span><br><span class="line">                returningView.removeFromSuperview()</span><br><span class="line">                transitionContext.completeTransition(<span class="literal">true</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 6</span></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">BubbleTransition</span> </span>&#123;</span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">bubbleFrameFrom</span><span class="params">(originalSize size: CGSize, startPoint start: CGPoint)</span></span> -&gt; <span class="type">CGRect</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> lengthX = fmax(start.x, size.width-start.x)</span><br><span class="line">        <span class="keyword">let</span> lengthY = fmax(start.y, size.height-start.y)</span><br><span class="line">        <span class="keyword">let</span> radius  = sqrt(lengthX*lengthX + lengthY*lengthY)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="type">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, radius*<span class="number">2</span>, radius*<span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先解释一下整体的思路：</p>
+<img src="/2016/05/26/自定Modal-Transition/cordinator2.png" alt="cordinator2.png" title="">
+<p>小圆圈表示button的位置，点击button会呈现我们要显示的view，就称它是modalView吧。在动画发生之前，我们在containerView中加入一个bubbleView，然后加入modalView（顺序很重要），bubbleView就作为modalView的背景，它们一起从0.001的比例缩放到1比例，这样看起来就像是一个气泡的效果。因为气泡要充满整个屏幕，所以我们就要像上述图示所示的那样得到最大的半径，然后将bubbleView的长宽设置为半径的两倍。</p>
+<p>对应标签位置的解释：</p>
+<ol>
+<li>转场动画的时间长度</li>
+<li>得到bubbl视图的frame，将它的缩放比列设为0.001，然后添加到containerView中</li>
+<li>添加将要呈现的视图，将它的比例也设置为0.001，以便和bubble视图一起放到</li>
+<li>在动画结束之后一定要调用transitionContext.completeTransition(true)以表示这次转场动画结束。</li>
+<li>dismiss基本上是present的逆过程，需要注意的是在动画完成后要把bubble视图和modalView从containerView中移除。</li>
+<li>计算最大半径，并返回bubbleView的Frame。</li>
+</ol>
+<p>最后，为了让我们的BubbleTransition成为转场动画的Animator，我们要在prepareForSegue中设置destinationController的transitioningDelegate，并实现协议对应的方法。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">prepareForSegue</span><span class="params">(segue: UIStoryboardSegue, sender: AnyObject?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> destinationController = segue.destinationViewController</span><br><span class="line">        </span><br><span class="line">        destinationController.modalPresentationStyle = .<span class="type">Custom</span>    <span class="comment">// 自定义modalPresentationStyle</span></span><br><span class="line">        destinationController.transitioningDelegate = <span class="keyword">self</span>;       <span class="comment">// 设置delegate</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// UIViewControllerTransitioningDelegate</span></span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">animationControllerForPresentedController</span><span class="params">(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController)</span></span> -&gt; <span class="type">UIViewControllerAnimatedTransitioning</span>? &#123;</span><br><span class="line">        transition.bubbleColor = bubbleBtn.backgroundColor!</span><br><span class="line">        transition.startPoint = bubbleBtn.center</span><br><span class="line">        transition.mode = .present</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> transition</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">animationControllerForDismissedController</span><span class="params">(dismissed: UIViewController)</span></span> -&gt; <span class="type">UIViewControllerAnimatedTransitioning</span>? &#123;</span><br><span class="line">        transition.bubbleColor = bubbleBtn.backgroundColor!</span><br><span class="line">        transition.startPoint = bubbleBtn.center</span><br><span class="line">        transition.mode = .dismiss</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> transition</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/23/Swift Collections/" itemprop="url">
                   Swift Collections
                 </a>
@@ -716,7 +1218,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">23</span>
+              <span class="site-state-item-count">26</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -724,7 +1226,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -733,7 +1235,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">32</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

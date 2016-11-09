@@ -1,0 +1,783 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Emacs,Rust," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="RustRust是一种注重高效、安全、并行的系统程序语言。它有以下特定：
+
+零开销抽象
+转移语义
+保证内存安全
+没有数据竞争的线程
+trait泛型
+模式匹配
+类型推断
+极小的运行时
+高效的C绑定
+
+Rust是一门有希望代替C++的语言，所以确实值得学习。于是这也就鼓捣了以下emacs下的环境配置。
+环境配置下载Rust安装官方教程下载即可：
+1curl https://sh.rustup.rs -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Emacs Rust环境配置">
+<meta property="og:url" content="http://yoursite.com/2016/11/09/Emacs Rust环境配置/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="RustRust是一种注重高效、安全、并行的系统程序语言。它有以下特定：
+
+零开销抽象
+转移语义
+保证内存安全
+没有数据竞争的线程
+trait泛型
+模式匹配
+类型推断
+极小的运行时
+高效的C绑定
+
+Rust是一门有希望代替C++的语言，所以确实值得学习。于是这也就鼓捣了以下emacs下的环境配置。
+环境配置下载Rust安装官方教程下载即可：
+1curl https://sh.rustup.rs -">
+<meta property="og:updated_time" content="2016-11-09T04:51:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Emacs Rust环境配置">
+<meta name="twitter:description" content="RustRust是一种注重高效、安全、并行的系统程序语言。它有以下特定：
+
+零开销抽象
+转移语义
+保证内存安全
+没有数据竞争的线程
+trait泛型
+模式匹配
+类型推断
+极小的运行时
+高效的C绑定
+
+Rust是一门有希望代替C++的语言，所以确实值得学习。于是这也就鼓捣了以下emacs下的环境配置。
+环境配置下载Rust安装官方教程下载即可：
+1curl https://sh.rustup.rs -">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> Emacs Rust环境配置 | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Emacs Rust环境配置
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-09T00:00:00+08:00" content="2016-11-09">
+              2016-11-09
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/杂记/" itemprop="url" rel="index">
+                    <span itemprop="name">杂记</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/11/09/Emacs Rust环境配置/" class="leancloud_visitors" data-flag-title="Emacs Rust环境配置">
+               &nbsp; | &nbsp;
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Rust"><a href="#Rust" class="headerlink" title="Rust"></a>Rust</h1><p><strong>Rust</strong>是一种注重高效、安全、并行的系统程序语言。它有以下特定：</p>
+<ul>
+<li>零开销抽象</li>
+<li>转移语义</li>
+<li>保证内存安全</li>
+<li>没有数据竞争的线程</li>
+<li>trait泛型</li>
+<li>模式匹配</li>
+<li>类型推断</li>
+<li>极小的运行时</li>
+<li>高效的C绑定</li>
+</ul>
+<p><strong>Rust</strong>是一门有希望代替<strong>C++</strong>的语言，所以确实值得学习。于是这也就鼓捣了以下<code>emacs</code>下的环境配置。</p>
+<h1 id="u73AF_u5883_u914D_u7F6E"><a href="#u73AF_u5883_u914D_u7F6E" class="headerlink" title="环境配置"></a>环境配置</h1><h3 id="u4E0B_u8F7DRust"><a href="#u4E0B_u8F7DRust" class="headerlink" title="下载Rust"></a>下载Rust</h3><p>安装官方教程下载即可：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://sh.rustup.rs -sSf | sh</span><br></pre></td></tr></table></figure>
+<p><strong>Rust</strong>的包管理工具<strong>Cargo</strong>下载的包路径为<code>~/.cargo</code>，所以能直接调用相关命令，我们把它加到环境变量里：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PATH=&#34;$HOME/.cargo/bin:$PATH&#34;</span><br></pre></td></tr></table></figure>
+<p>还需要注意一点，<code>cargo.io</code>站点设置在国外，国内下载会很慢，所以还是要改一下源。我们就中科大的源就好。<br>修改<code>$HOME/.cargo/config</code>为：</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">[source.crates-io]</span></span><br><span class="line"><span class="setting">registry = <span class="value"><span class="string">"https://github.com/rust-lang/crates.io-index"</span></span></span></span><br><span class="line"><span class="setting">replace-with = <span class="value"><span class="string">'ustc'</span></span></span></span><br><span class="line"><span class="title">[source.ustc]</span></span><br><span class="line"><span class="setting">registry = <span class="value"><span class="string">"git://crates.mirrors.ustc.edu.cn/index"</span></span></span></span><br></pre></td></tr></table></figure>
+<p>同时在环境变量里添加：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static&#10;&#10;export RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup</span><br></pre></td></tr></table></figure>
+<h3 id="rust-mode"><a href="#rust-mode" class="headerlink" title="rust-mode"></a>rust-mode</h3><p><code>rust-mode</code>是<strong>Rust</strong>的<code>major mode</code>，直接<code>M-x package-install rust-mode</code>后将<code>rust-mode</code>加入<code>auto-mode-list</code>中：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(setq auto-mode-alist&#10;&#9;  (append&#10;&#9;   &#39;((&#34;\\.rs\\&#39;&#34; . rust-mode))&#10;&#9;   auto-mode-alist))</span><br></pre></td></tr></table></figure>
+<h3 id="cargo"><a href="#cargo" class="headerlink" title="cargo"></a>cargo</h3><p><code>cargo.el</code>是<code>emacs</code>内使用<code>cargo</code>命令的插件，<code>M-x package-install cargo</code>下载。</p>
+<p>配置:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;rust-mode-hook &#39;cargo-minor-mode)</span><br></pre></td></tr></table></figure>
+<p>快捷键：</p>
+<ul>
+<li>C-c C-c C-r：<code>cargo run</code></li>
+<li>C-c C-c C-b：<code>cargo build</code></li>
+<li>C-c C-c C-t：<code>cargo test</code></li>
+</ul>
+<h3 id="flycheck-rust"><a href="#flycheck-rust" class="headerlink" title="flycheck-rust"></a>flycheck-rust</h3><p><code>flycheck-rust</code>用于语法检查，<code>M-x package-install flycheck-rust</code>，</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;rust-mode-hook #&#39;flycheck-rust-setup)</span><br></pre></td></tr></table></figure>
+<h3 id="rust-fmt"><a href="#rust-fmt" class="headerlink" title="rust-fmt"></a>rust-fmt</h3><p>代码格式化工具，需要首先安装<code>rustfmt</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo install rustfmt</span><br></pre></td></tr></table></figure>
+<p>然后安装插件<code>M-x package-install rustfmt</code>，配置如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(define-key rust-mode-map (kbd &#34;C-c C-f&#34;) #&#39;rust-format-buffer)</span><br></pre></td></tr></table></figure>
+<p>可以设置每次保存后自动格式化，但是我觉得不好用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;rust-mode-hook #&#39;rustfmt-enable-on-save)</span><br></pre></td></tr></table></figure>
+<h3 id="rust_racer"><a href="#rust_racer" class="headerlink" title="rust racer"></a>rust racer</h3><p><code>racer</code>是<code>emacs</code>中<strong>Rust</strong>的代码提示插件，很好使，需要<code>company</code>插件支持，首先下载<code>company</code>，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">M-x package-install company</span><br></pre></td></tr></table></figure>
+<p>下载<code>racer</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo install racer</span><br></pre></td></tr></table></figure>
+<p>需要<strong>Rust</strong>的源码以便<code>eldoc</code>可以工作。配置如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">;; rust racer&#10;(setq racer-rust-src-path (expand-file-name &#34;~/rust-1.12.1/src&#34;))&#10;(add-hook &#39;rust-mode-hook #&#39;racer-mode)&#10;(add-hook &#39;racer-mode-hook #&#39;eldoc-mode)&#10;&#10;(add-hook &#39;racer-mode-hook #&#39;company-mode)&#10;(define-key rust-mode-map (kbd &#34;TAB&#34;) #&#39;company-indent-or-complete-common)&#10;(setq company-tooltip-align-annotations t)</span><br></pre></td></tr></table></figure>
+<h3 id="toml-mode"><a href="#toml-mode" class="headerlink" title="toml-mode"></a>toml-mode</h3><p><strong>Rust</strong>使用<code>TOML</code>文本来配置项目，<code>toml-mode</code>提供对应的语法高亮，直接下载即可：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">M-x package-install toml-mode</span><br></pre></td></tr></table></figure>
+<p>我们也可以在<code>toml-mode</code>中使用<code>company</code>以便有自动补全：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;toml-mode-hook &#39;company-mode)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Emacs/" rel="tag">#Emacs</a>
+          
+            <a href="/tags/Rust/" rel="tag">#Rust</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/02/gitignore/" rel="next" title="快速添加gitignore">
+                <i class="fa fa-chevron-left"></i> 快速添加gitignore
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">26</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Rust"><span class="nav-number">1.</span> <span class="nav-text">Rust</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u73AF_u5883_u914D_u7F6E"><span class="nav-number">2.</span> <span class="nav-text">环境配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u4E0B_u8F7DRust"><span class="nav-number">2.0.1.</span> <span class="nav-text">下载Rust</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rust-mode"><span class="nav-number">2.0.2.</span> <span class="nav-text">rust-mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cargo"><span class="nav-number">2.0.3.</span> <span class="nav-text">cargo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flycheck-rust"><span class="nav-number">2.0.4.</span> <span class="nav-text">flycheck-rust</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rust-fmt"><span class="nav-number">2.0.5.</span> <span class="nav-text">rust-fmt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rust_racer"><span class="nav-number">2.0.6.</span> <span class="nav-text">rust racer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#toml-mode"><span class="nav-number">2.0.7.</span> <span class="nav-text">toml-mode</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+</body>
+</html>
