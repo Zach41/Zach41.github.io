@@ -5,10 +5,10 @@
   
 
 
-<html class="theme-next muse use-motion">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
 
@@ -27,7 +27,9 @@
 
 
 
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -59,7 +61,9 @@
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
@@ -92,19 +96,33 @@
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
+    root: '/',
     scheme: 'Muse',
     sidebar: {"position":"left","display":"post"},
     fancybox: true,
     motion: true,
     duoshuo: {
-      userId: 0,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
     }
   };
 </script>
+
+
+
+
+
+
 
   <title> Zach的博客 </title>
 </head>
@@ -164,7 +182,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
           </a>
@@ -174,7 +192,7 @@
         <li class="menu-item menu-item-categories">
           <a href="/categories" rel="section">
             
-              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
             
             分类
           </a>
@@ -184,7 +202,7 @@
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
             
-              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
             关于
           </a>
@@ -194,7 +212,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
-              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
           </a>
@@ -204,7 +222,7 @@
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
             
-              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
             
             标签
           </a>
@@ -217,6 +235,8 @@
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -231,6 +251,152 @@
       
 
   
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/28/Rust FFI/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/11/28/Rust FFI/" itemprop="url">
+                  Rust FFI
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/11/28/Rust FFI/" class="leancloud_visitors" data-flag-title="Rust FFI">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="FFI"><a href="#FFI" class="headerlink" title="FFI"></a>FFI</h1><p><code>FFI</code>(Foreign Function Interface)，顾名思义，是Rust中用来调用其他语言的机制。值得注意的是，<code>FFI</code>在C和Rust之间实现了零抽象开销，也就是说在Rust调用C和C调用Rust时并没有运行时的花销。</p>
+<h3 id="u4E00_u4E2A_u4F8B_u5B50"><a href="#u4E00_u4E2A_u4F8B_u5B50" class="headerlink" title="一个例子"></a>一个例子</h3><p>比方说我们定义了一个函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">double_input</span><span class="params">(<span class="keyword">int</span> input)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> intput * <span class="number">2</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们需要在Rust中调用它，那么<code>main.rs</code>文件应该是这样的：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> libc;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[link(name = "extlib")]</span></span><br><span class="line"><span class="keyword">extern</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">double_input</span></span>(input: libc::c_int) -&gt; libc::c_int;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> input = <span class="number">4</span>;</span><br><span class="line">    <span class="keyword">let</span> output = <span class="keyword">unsafe</span> &#123; double_input(input) &#125;;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"&#123;&#125; * 2 = &#123;&#125;"</span>, input, output);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们来一步一步剖析这个程序：</p>
+<ul>
+<li><p><code>libc</code>这个库提供了许多类型定义，用以桥街Rust和C的类型。</p>
+</li>
+<li><p><code>#[link(name = &quot;extlib&quot;)]</code>这个<code>Attribute</code>告诉编译器这个函数可以连接<strong>libextlib</strong>这个库而得到，这里的链接是动态链接。注意<code>link</code>属性还有另外一种形式：<code>#[link(name = &quot;extlib&quot;, kind = &quot;static&quot;)]</code>，<code>kind</code>目前只有两个值：</p>
+<ul>
+<li>static</li>
+<li>framework（只在OSX中）</li>
+</ul>
+<p>如果不指定<code>kind</code>，那么默认为动态链接。</p>
+</li>
+<li><p><code>extern</code>代码块声明从C语言调用的函数接口。</p>
+</li>
+<li><p>因为编译器不知道C函数是如何实现，所以它假设内存安全问题会在你调用C函数时发生，所以我们必须用<code>unsafe</code>来包含调用C函数的语句。</p>
+</li>
+<li><p>需要注意的是，我们需要在项目中添加一个<code>build.rs</code>文件来告诉编译如何编译C文件并生成<strong>libextlib</strong>，具体可以参考这个例子<a href="https://github.com/alexcrichton/rust-ffi-examples/tree/master/rust-to-c" target="_blank" rel="external">rust-to-c</a></p>
+</li>
+</ul>
+<h3 id="u5B89_u5168_u62BD_u8C61"><a href="#u5B89_u5168_u62BD_u8C61" class="headerlink" title="安全抽象"></a>安全抽象</h3><p>如果我们把一个C函数绑定到Rust，不仅绑定的抽象开销为零，我们也可以让C函数变得更加安全。我们拿下面的例子来说明：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Gets the data for a file in the tarball at the given index, returning NULL if</span></span><br><span class="line"><span class="comment">// it does not exist. The `size` pointer is filled in with the size of the file</span></span><br><span class="line"><span class="comment">// if successful.</span></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span> *<span class="title">tarball_file_data</span><span class="params">(tarball_t *tarball, <span class="keyword">unsigned</span> index, size_t *size)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>假设我们调用这个函数，那么函数返回一个指针，而在之后某一个时刻，我们销毁了<code>tarball</code>所在内存，那么这时候这个指针就变成了野指针（dangling pointer），后续如果使用了这个指针，很可能程序就会崩溃。</p>
+<p>如果我们把这个函数绑定到Rust：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> Tarball &#123; raw: *<span class="keyword">mut</span> tarball_t &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Tarball &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">file</span></span>(&amp;<span class="keyword">self</span>, index: <span class="keyword">u32</span>) -&gt; <span class="built_in">Option</span>&lt;&amp;[<span class="keyword">u8</span>]&gt; &#123;</span><br><span class="line">        <span class="keyword">unsafe</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> <span class="keyword">mut</span> size = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">let</span> data = tarball_file_data(<span class="keyword">self</span>.raw, index <span class="keyword">as</span> libc::c_uint,</span><br><span class="line">                                         &amp;<span class="keyword">mut</span> size);</span><br><span class="line">            <span class="keyword">if</span> data.is_null() &#123;</span><br><span class="line">                <span class="built_in">None</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="built_in">Some</span>(slice::from_raw_parts(data <span class="keyword">as</span> *<span class="keyword">const</span> <span class="keyword">u8</span>, size <span class="keyword">as</span> usize))</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>data</code>的声明周期默认和一个<code>Tarball</code>对象绑定在一起，如果<code>Tarball</code>已经被销毁，那么<code>data</code>由于Rust的限制也不能被使用，程序编译都不会通过，从而保证了安全。</p>
+<h3 id="FFI_u548Cpanics"><a href="#FFI_u548Cpanics" class="headerlink" title="FFI和panics"></a>FFI和panics</h3><p>需要注意的一点是，如果其他语言函数和<code>panic!</code>在同一个线程中被调用，那么结果是未定义的。如果编写的程序可能<code>panic</code>，我们就得让<code>panic</code>在另一个线程中被调用：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::thread;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">extern</span> <span class="function"><span class="keyword">fn</span> <span class="title">oh_no</span></span>() -&gt; <span class="keyword">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> h = thread::spawn(|| &#123;</span><br><span class="line">        <span class="built_in">panic!</span>(<span class="string">"Oops!"</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">match</span> h.join() &#123;</span><br><span class="line">        <span class="built_in">Ok</span>(_) =&gt; <span class="number">1</span>,</span><br><span class="line">        <span class="built_in">Err</span>(_) =&gt; <span class="number">0</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
   
 
   
@@ -238,6 +404,187 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/09/Emacs Rust环境配置/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/11/09/Emacs Rust环境配置/" itemprop="url">
+                  Emacs Rust环境配置
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/11/09/Emacs Rust环境配置/" class="leancloud_visitors" data-flag-title="Emacs Rust环境配置">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Rust"><a href="#Rust" class="headerlink" title="Rust"></a>Rust</h1><p><strong>Rust</strong>是一种注重高效、安全、并行的系统程序语言。它有以下特定：</p>
+<ul>
+<li>零开销抽象</li>
+<li>转移语义</li>
+<li>保证内存安全</li>
+<li>没有数据竞争的线程</li>
+<li>trait泛型</li>
+<li>模式匹配</li>
+<li>类型推断</li>
+<li>极小的运行时</li>
+<li>高效的C绑定</li>
+</ul>
+<p><strong>Rust</strong>是一门有希望代替<strong>C++</strong>的语言，所以确实值得学习。于是这也就鼓捣了以下<code>emacs</code>下的环境配置。</p>
+<h1 id="u73AF_u5883_u914D_u7F6E"><a href="#u73AF_u5883_u914D_u7F6E" class="headerlink" title="环境配置"></a>环境配置</h1><h3 id="u4E0B_u8F7DRust"><a href="#u4E0B_u8F7DRust" class="headerlink" title="下载Rust"></a>下载Rust</h3><p>安装官方教程下载即可：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https://sh.rustup.rs -sSf | sh</span><br></pre></td></tr></table></figure>
+<p><strong>Rust</strong>的包管理工具<strong>Cargo</strong>下载的包路径为<code>~/.cargo</code>，所以能直接调用相关命令，我们把它加到环境变量里：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PATH=&#34;$HOME/.cargo/bin:$PATH&#34;</span><br></pre></td></tr></table></figure>
+<p>还需要注意一点，<code>cargo.io</code>站点设置在国外，国内下载会很慢，所以还是要改一下源。我们就中科大的源就好。<br>修改<code>$HOME/.cargo/config</code>为：</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">[source.crates-io]</span></span><br><span class="line"><span class="setting">registry = <span class="value"><span class="string">"https://github.com/rust-lang/crates.io-index"</span></span></span></span><br><span class="line"><span class="setting">replace-with = <span class="value"><span class="string">'ustc'</span></span></span></span><br><span class="line"><span class="title">[source.ustc]</span></span><br><span class="line"><span class="setting">registry = <span class="value"><span class="string">"git://crates.mirrors.ustc.edu.cn/index"</span></span></span></span><br></pre></td></tr></table></figure>
+<p>同时在环境变量里添加：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static&#10;&#10;export RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup</span><br></pre></td></tr></table></figure>
+<h3 id="rust-mode"><a href="#rust-mode" class="headerlink" title="rust-mode"></a>rust-mode</h3><p><code>rust-mode</code>是<strong>Rust</strong>的<code>major mode</code>，直接<code>M-x package-install rust-mode</code>后将<code>rust-mode</code>加入<code>auto-mode-list</code>中：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(setq auto-mode-alist&#10;&#9;  (append&#10;&#9;   &#39;((&#34;\\.rs\\&#39;&#34; . rust-mode))&#10;&#9;   auto-mode-alist))</span><br></pre></td></tr></table></figure>
+<h3 id="cargo"><a href="#cargo" class="headerlink" title="cargo"></a>cargo</h3><p><code>cargo.el</code>是<code>emacs</code>内使用<code>cargo</code>命令的插件，<code>M-x package-install cargo</code>下载。</p>
+<p>配置:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;rust-mode-hook &#39;cargo-minor-mode)</span><br></pre></td></tr></table></figure>
+<p>快捷键：</p>
+<ul>
+<li>C-c C-c C-r：<code>cargo run</code></li>
+<li>C-c C-c C-b：<code>cargo build</code></li>
+<li>C-c C-c C-t：<code>cargo test</code></li>
+</ul>
+<h3 id="flycheck-rust"><a href="#flycheck-rust" class="headerlink" title="flycheck-rust"></a>flycheck-rust</h3><p><code>flycheck-rust</code>用于语法检查，<code>M-x package-install flycheck-rust</code>，</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;rust-mode-hook #&#39;flycheck-rust-setup)</span><br></pre></td></tr></table></figure>
+<h3 id="rust-fmt"><a href="#rust-fmt" class="headerlink" title="rust-fmt"></a>rust-fmt</h3><p>代码格式化工具，需要首先安装<code>rustfmt</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo install rustfmt</span><br></pre></td></tr></table></figure>
+<p>然后安装插件<code>M-x package-install rustfmt</code>，配置如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(define-key rust-mode-map (kbd &#34;C-c C-f&#34;) #&#39;rust-format-buffer)</span><br></pre></td></tr></table></figure>
+<p>可以设置每次保存后自动格式化，但是我觉得不好用：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;rust-mode-hook #&#39;rustfmt-enable-on-save)</span><br></pre></td></tr></table></figure>
+<h3 id="rust_racer"><a href="#rust_racer" class="headerlink" title="rust racer"></a>rust racer</h3><p><code>racer</code>是<code>emacs</code>中<strong>Rust</strong>的代码提示插件，很好使，需要<code>company</code>插件支持，首先下载<code>company</code>，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">M-x package-install company</span><br></pre></td></tr></table></figure>
+<p>下载<code>racer</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo install racer</span><br></pre></td></tr></table></figure>
+<p>需要<strong>Rust</strong>的源码以便<code>eldoc</code>可以工作。配置如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">;; rust racer&#10;(setq racer-rust-src-path (expand-file-name &#34;~/rust-1.12.1/src&#34;))&#10;(add-hook &#39;rust-mode-hook #&#39;racer-mode)&#10;(add-hook &#39;racer-mode-hook #&#39;eldoc-mode)&#10;&#10;(add-hook &#39;racer-mode-hook #&#39;company-mode)&#10;(define-key rust-mode-map (kbd &#34;TAB&#34;) #&#39;company-indent-or-complete-common)&#10;(setq company-tooltip-align-annotations t)</span><br></pre></td></tr></table></figure>
+<h3 id="toml-mode"><a href="#toml-mode" class="headerlink" title="toml-mode"></a>toml-mode</h3><p><strong>Rust</strong>使用<code>TOML</code>文本来配置项目，<code>toml-mode</code>提供对应的语法高亮，直接下载即可：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">M-x package-install toml-mode</span><br></pre></td></tr></table></figure>
+<p>我们也可以在<code>toml-mode</code>中使用<code>company</code>以便有自动补全：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(add-hook &#39;toml-mode-hook &#39;company-mode)</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/02/gitignore/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -259,34 +606,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-11-02T00:00:00+08:00" content="2016-11-02">
-              2016-11-02
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/dev-tools/" itemprop="url" rel="index">
-                    <span itemprop="name">dev tools</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -298,7 +624,7 @@
           
           
              <span id="/2016/11/02/gitignore/" class="leancloud_visitors" data-flag-title="快速添加gitignore">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -308,6 +634,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -332,7 +661,7 @@
         
       
     </div>
-    
+
     <div>
       
     </div>
@@ -340,6 +669,7 @@
     <div>
       
     </div>
+
 
     <footer class="post-footer">
       
@@ -358,13 +688,26 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/28/线程基础/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -386,46 +729,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-28T00:00:00+08:00" content="2016-10-28">
-              2016-10-28
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -437,7 +747,7 @@
           
           
              <span id="/2016/10/28/线程基础/" class="leancloud_visitors" data-flag-title="线程基础">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -447,6 +757,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -630,7 +943,7 @@
         
       
     </div>
-    
+
     <div>
       
     </div>
@@ -638,6 +951,7 @@
     <div>
       
     </div>
+
 
     <footer class="post-footer">
       
@@ -656,13 +970,26 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/23/进程关系/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -684,46 +1011,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-23T00:00:00+08:00" content="2016-10-23">
-              2016-10-23
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/学习笔记/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -735,7 +1029,7 @@
           
           
              <span id="/2016/10/23/进程关系/" class="leancloud_visitors" data-flag-title="进程关系">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -745,6 +1039,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -815,7 +1112,7 @@
         
       
     </div>
-    
+
     <div>
       
     </div>
@@ -823,6 +1120,7 @@
     <div>
       
     </div>
+
 
     <footer class="post-footer">
       
@@ -841,13 +1139,26 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/23/守护进程/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -869,46 +1180,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-23T00:00:00+08:00" content="2016-10-23">
-              2016-10-23
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -920,7 +1198,7 @@
           
           
              <span id="/2016/10/23/守护进程/" class="leancloud_visitors" data-flag-title="守护进程">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -930,6 +1208,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -989,7 +1270,7 @@
         
       
     </div>
-    
+
     <div>
       
     </div>
@@ -997,6 +1278,7 @@
     <div>
       
     </div>
+
 
     <footer class="post-footer">
       
@@ -1015,13 +1297,26 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/20/进程控制/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -1043,46 +1338,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-20T00:00:00+08:00" content="2016-10-20">
-              2016-10-20
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -1094,7 +1356,7 @@
           
           
              <span id="/2016/10/20/进程控制/" class="leancloud_visitors" data-flag-title="进程控制">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -1104,6 +1366,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -1279,7 +1544,7 @@
         
       
     </div>
-    
+
     <div>
       
     </div>
@@ -1287,6 +1552,7 @@
     <div>
       
     </div>
+
 
     <footer class="post-footer">
       
@@ -1305,13 +1571,26 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/12/libev源码浅析/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -1333,46 +1612,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-12T00:00:00+08:00" content="2016-10-12">
-              2016-10-12
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -1384,7 +1630,7 @@
           
           
              <span id="/2016/10/12/libev源码浅析/" class="leancloud_visitors" data-flag-title="libev源码浅析">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -1394,6 +1640,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -1541,7 +1790,7 @@
         
       
     </div>
-    
+
     <div>
       
     </div>
@@ -1549,6 +1798,7 @@
     <div>
       
     </div>
+
 
     <footer class="post-footer">
       
@@ -1567,13 +1817,26 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/08/进程/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -1595,46 +1858,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-08T00:00:00+08:00" content="2016-10-08">
-              2016-10-08
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -1646,7 +1876,7 @@
           
           
              <span id="/2016/10/08/进程/" class="leancloud_visitors" data-flag-title="进程">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -1656,6 +1886,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -1713,7 +1946,7 @@
         
       
     </div>
-    
+
     <div>
       
     </div>
@@ -1721,6 +1954,7 @@
     <div>
       
     </div>
+
 
     <footer class="post-footer">
       
@@ -1739,13 +1973,26 @@
       
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/04/epoll入门/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -1767,46 +2014,13 @@
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-10-04T00:00:00+08:00" content="2016-10-04">
-              2016-10-04
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-                  ， 
-                
-
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/学习笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">学习笔记</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -1818,7 +2032,7 @@
           
           
              <span id="/2016/10/04/epoll入门/" class="leancloud_visitors" data-flag-title="epoll入门">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -1828,6 +2042,9 @@
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -1886,165 +2103,7 @@
         
       
     </div>
-    
-    <div>
-      
-    </div>
 
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/22/互斥锁和条件变量/" itemprop="url">
-                  互斥锁和条件变量
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-22T00:00:00+08:00" content="2016-09-22">
-              2016-09-22
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/22/互斥锁和条件变量/" class="leancloud_visitors" data-flag-title="互斥锁和条件变量">
-               &nbsp; | &nbsp;
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="u5E76_u53D1_u7F16_u7A0B_u7684_u95EE_u9898"><a href="#u5E76_u53D1_u7F16_u7A0B_u7684_u95EE_u9898" class="headerlink" title="并发编程的问题"></a>并发编程的问题</h1><p>考虑这样一个问题，有两个线程，A和B，他们对同一个全局变量执行递减操作。假设C编译器将递减运算转换成3条机器指令：从内存装载到寄存器、递减寄存器、从寄存器存储到内存。可能会出现以下情形：</p>
-<ol>
-<li>线程A运行，把变量的值装载到一个寄存器中</li>
-<li>系统把运行线程从A切换到B运行。A的寄存器被保存，B的寄存器则恢复。</li>
-<li>线程B执行递减的全部操作，把新值存放到变量的变量中</li>
-<li>线程A被恢复执行，A的寄存器被恢复，于是A从原来离开的地方开始执行，此时寄存器中保留的变量值是线程B执行递减前的值，这时候就出错了。</li>
-</ol>
-<p>可以看到这种并发的错误是因为递减操作不是原子操作而造成的，线程的切换会中断某些步骤，从而出现不预期的错误。</p>
-<h1 id="u7B80_u5355_u5B9E_u4F8B"><a href="#u7B80_u5355_u5B9E_u4F8B" class="headerlink" title="简单实例"></a>简单实例</h1><p>我们通过一个简单的例子来说明如何利用互斥锁来解决并发。程序如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NLOOP    <span class="number">10</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXP     <span class="number">5</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> counter;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> tids[MAXP];</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">int</span> *iptr = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (iptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	    perror(<span class="string">"malloc error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	*iptr = i;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_create(&amp;tids[i], <span class="literal">NULL</span>, doit, iptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread create error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_join(tids[i], <span class="literal">NULL</span>)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread join error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    <span class="keyword">int</span> idx = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">    <span class="built_in">free</span>(arg);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;NLOOP; i++) &#123;</span><br><span class="line">		val = counter;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"%d: %d\n"</span>, idx, val+<span class="number">1</span>);</span><br><span class="line">		counter = val+<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>部分结果如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">...&#10;&#10;2: 1&#10;2: 2&#10;2: 3&#10;2: 4&#10;2: 5&#10;3: 5&#10;3: 6&#10;1: 1&#10;1: 2&#10;0: 1&#10;0: 2&#10;0: 3&#10;0: 4&#10;0: 5&#10;0: 6&#10;0: 7&#10;0: 8&#10;0: 9&#10;0: 10&#10;&#10;...</span><br></pre></td></tr></table></figure>
-<p>可以看到当线程切换时，counter的值明显是错误的。</p>
-<p>解决这种多个线程共享一个变量的问题是使用互斥锁（mutex，mutual exclusion）保护这个共享变量。互斥锁的作用是在线程访问该变量前必须持有互斥锁，否则线程将进入睡眠知道互斥锁可用。对于能够函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值*/</span></span><br></pre></td></tr></table></figure>
-<p>修改之后的程序如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NLOOP    <span class="number">10</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXP     <span class="number">5</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> counter;</span><br><span class="line"><span class="keyword">pthread_mutex_t</span> counter_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> tids[MAXP];</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">int</span> *iptr = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (iptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	    perror(<span class="string">"malloc error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	*iptr = i;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_create(&amp;tids[i], <span class="literal">NULL</span>, doit, iptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread create error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_join(tids[i], <span class="literal">NULL</span>)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread join error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    <span class="keyword">int</span> idx = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">    <span class="built_in">free</span>(arg);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;NLOOP; i++) &#123;</span><br><span class="line">	Pthread_mutex_lock(&amp;counter_mutex);</span><br><span class="line">	val = counter;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d: %d\n"</span>, idx, val+<span class="number">1</span>);</span><br><span class="line">	counter = val+<span class="number">1</span>;</span><br><span class="line">	Pthread_mutex_unlock(&amp;counter_mutex);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_lock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex lock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_unlock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex unlock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>运行结果如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0: 1&#10;4: 2&#10;4: 3&#10;4: 4&#10;4: 5&#10;4: 6&#10;4: 7&#10;4: 8&#10;4: 9&#10;0: 10&#10;4: 11&#10;4: 12&#10;0: 13&#10;2: 14&#10;3: 15&#10;3: 16&#10;3: 17&#10;3: 18&#10;1: 19&#10;1: 20&#10;1: 21&#10;1: 22&#10;1: 23&#10;1: 24&#10;1: 25&#10;1: 26&#10;1: 27&#10;1: 28&#10;0: 29&#10;0: 30&#10;0: 31&#10;0: 32&#10;0: 33&#10;0: 34&#10;0: 35&#10;3: 36&#10;3: 37&#10;3: 38&#10;3: 39&#10;3: 40&#10;3: 41&#10;2: 42&#10;2: 43&#10;2: 44&#10;2: 45&#10;2: 46&#10;2: 47&#10;2: 48&#10;2: 49&#10;2: 50</span><br></pre></td></tr></table></figure>
-<p>结果是正确的。</p>
-<h1 id="u6761_u4EF6_u53D8_u91CF"><a href="#u6761_u4EF6_u53D8_u91CF" class="headerlink" title="条件变量"></a>条件变量</h1><p>互斥锁适合于防止同时访问某个共享变量，但是有的时候我们需要另外某种在等待某个条件发生期间让我们的进入睡眠的东西，这个就是条件变量。这里有一个例子，pthread函数库并没有等待任意一个线程终止的接口，那么如何实现呢？我们可以利用条件变量来实现这一功能。关于条件变量的函数接口如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_wait</span><span class="params">(pthread_cond_t *cptr, pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_signal</span><span class="params">(pthread_cond_t *cptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值*/</span></span><br></pre></td></tr></table></figure>
-<p>先看完整的代码：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NLOOP    <span class="number">10</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXP     <span class="number">5</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> counter;</span><br><span class="line"><span class="keyword">int</span> t_done;</span><br><span class="line"><span class="keyword">int</span> flag[MAXP];</span><br><span class="line"><span class="keyword">int</span> nleft;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pthread_mutex_t</span> counter_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"><span class="keyword">pthread_mutex_t</span> tdone_mutex   = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"><span class="keyword">pthread_cond_t</span>  tdone_cond    = PTHREAD_COND_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_wait</span><span class="params">(pthread_cond_t *cptr, pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_signal</span><span class="params">(pthread_cond_t *cptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_join</span><span class="params">(pthread_t tid, <span class="keyword">void</span> **status)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> tids[MAXP];</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">memset</span>(flag, <span class="number">0</span>, <span class="keyword">sizeof</span>(flag));</span><br><span class="line">    nleft = MAXP;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">int</span> *iptr = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (iptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	    perror(<span class="string">"malloc error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	*iptr = i;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_create(&amp;tids[i], <span class="literal">NULL</span>, doit, iptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread create error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (nleft &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line">	<span class="keyword">while</span> (t_done == <span class="number">0</span>)</span><br><span class="line">	    Pthread_cond_wait(&amp;tdone_cond, &amp;tdone_mutex);</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	    <span class="keyword">if</span> (flag[i] ==  <span class="number">1</span>) &#123;	<span class="comment">/* thread i already done */</span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"thread %d done\n"</span>, i);</span><br><span class="line">		Pthread_join(tids[i], <span class="literal">NULL</span>);</span><br><span class="line">		flag[i] = -<span class="number">1</span>;</span><br><span class="line">		nleft--;</span><br><span class="line">	    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">	Pthread_mutex_unlock(&amp;tdone_mutex);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    <span class="keyword">int</span> idx = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">    <span class="built_in">free</span>(arg);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;NLOOP; i++) &#123;</span><br><span class="line">	Pthread_mutex_lock(&amp;counter_mutex);</span><br><span class="line">	val = counter;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d: %d\n"</span>, idx, val+<span class="number">1</span>);</span><br><span class="line">	counter = val+<span class="number">1</span>;</span><br><span class="line">	Pthread_mutex_unlock(&amp;counter_mutex);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line">    flag[idx] = <span class="number">1</span>;</span><br><span class="line">    t_done++;</span><br><span class="line">    Pthread_cond_signal(&amp;tdone_cond);</span><br><span class="line">    Pthread_mutex_unlock(&amp;tdone_mutex);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_lock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex lock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_unlock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex unlock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_wait</span><span class="params">(pthread_cond_t *cptr, pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>((error = pthread_cond_wait(cptr, mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread condition wait error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_signal</span><span class="params">(pthread_cond_t *cptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_cond_signal(cptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread condition signal error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_join</span><span class="params">(pthread_t tid, <span class="keyword">void</span> **status)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_join(tid, status)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread join error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>首先我们新建一个全局变量<code>t_done</code>表示当前终止的线程数量。</li>
-<li>创建一个<code>tdone_cond</code>条件变量和与之相关联的互斥锁，通过持有该互斥锁期间递增该计数器并发送信号到该条件变量，一个线程通知朱循环自身即将终止。</li>
-<li>主循环在持有条件变量相关联的互斥锁期间检查<code>t_done</code>，如果发现无事可做，那么主线程调用pthread_cond_wait等待信号，该函数把调用线程投入睡眠并释放调用线程持有的互斥锁，当调用线程后来从pthread_cond_wait返回时，<br>线程再次只有该互斥锁。</li>
-<li>我们用一个flag标志来记录线程的状态，1表示线程已经终止，但未被另外一个线程调用pthread_join，-1表示已经被调用了pthread_join。</li>
-</ol>
-<p>每一个条件变量都需要关联一个互斥锁，因为<code>条件</code>通常是线程之间共享的某个变量的值。允许不同线程设置和测试该变量要求有一个与该变量相关联的互斥锁。举个栗子，如果之前的代码我们没有互斥锁，那么主循环的就是如下的形式：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (t_done == <span class="number">0</span>)</span><br><span class="line">	Pthread_cond_wait(&amp;tdone_cond, &amp;tdone_mutex);</span><br></pre></td></tr></table></figure>
-<p>有这样的可能：主线程外的一个线程在主循环测试t_done == 0之后但是在调用pthread_cond_wait之前调用递增了t_done，那么这个信号就会永远的地丢失了（pthread_cond_wait一定要在pthread_cond_signal前调用）。同样的理由要求<br>pthread_cond_wait被调用时，其所关联的互斥锁是必须上锁的，该函数作为单个原子操作解锁该互斥锁并把调用线程投入睡眠也是出于这个理由。如果函数不先解锁，到返回是再给它上锁，调用线程不得不实现解锁事后上锁，测试t_done的循环就变成了</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line"><span class="keyword">while</span> (t_done == <span class="number">0</span>) &#123;</span><br><span class="line">	Pthread_mutex_unlock(&amp;tdone_mutex);</span><br><span class="line">	Pthread_cond_wait(&amp;tdone_cond, &amp;tdone_mutex);</span><br><span class="line">	Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>然而会有这种情况：在Pthread_mutext_unlock与Pthread_cond_wait之间有另外的一个线程递增了t_done，那么这个信号也就永远消失了。</p>
-<p>最后要说明的是，pthread_cond_signal通常唤醒等待相应条件上的单个线程，有时候一个线程需要唤醒多个等待条件的线程，这时候可以调用pthread_cond_broadcast，函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_broadcast</span><span class="params">(pthread_cond_t *cptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_timedwait</span><span class="params">(pthread_cond_t *cptr, pthread_mutext_t *mptr, <span class="keyword">const</span> <span class="keyword">struct</span> timespec *abstime)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值 */</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
     <div>
       
     </div>
@@ -2053,198 +2112,6 @@
       
     </div>
 
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/21/用线程处理客户请求/" itemprop="url">
-                  用线程处理客户请求
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-21T00:00:00+08:00" content="2016-09-21">
-              2016-09-21
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/21/用线程处理客户请求/" class="leancloud_visitors" data-flag-title="用线程处理客户请求">
-               &nbsp; | &nbsp;
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="u7EBF_u7A0B"><a href="#u7EBF_u7A0B" class="headerlink" title="线程"></a>线程</h1><p>传统的UNIX模型中，如果需要异步地完成一个任务，通常我们只要fork一个进程就可以了，但是fork进程存在以下两个问题：</p>
-<ol>
-<li>fork的代价是昂贵的。fork需要把父进程的内存映像复制到子进程，并在子进程中复制所有的描述符，虽然现在的实现是写时复制，但是fork一样是昂贵的。</li>
-<li>fork返回之后父子进程通信需要利用IPC机制，比较费力。</li>
-</ol>
-<p>线程被称为<code>lightweight process</code>，同一进程可以创建多个线程，这些线程共享进程内的全局内存，这使得线程通信变得容易。同时，线程创建的代码大大小于进程创建。但是线程也存在同步的问题。</p>
-<p>同一进程内的所有线程共享全局变量外，还共享：</p>
-<ul>
-<li>进程指令</li>
-<li>大多数数据</li>
-<li>打开的文件（描述符）</li>
-<li>信号处理函数和信号变量</li>
-<li>当前工作目录</li>
-<li>用户ID和组ID</li>
-</ul>
-<p>每个线程也有各自的：</p>
-<ul>
-<li>线程ID</li>
-<li>寄存器集合，包括程序计数器和栈指针</li>
-<li>栈，存放局部变量和返回地址</li>
-<li>errno</li>
-<li>信号掩码</li>
-<li>优先级</li>
-</ul>
-<h1 id="u7EBF_u7A0B_u64CD_u7EB5_u51FD_u6570"><a href="#u7EBF_u7A0B_u64CD_u7EB5_u51FD_u6570" class="headerlink" title="线程操纵函数"></a>线程操纵函数</h1><h3 id="u521B_u5EFA_u7EBF_u7A0B"><a href="#u521B_u5EFA_u7EBF_u7A0B" class="headerlink" title="创建线程"></a>创建线程</h3><p>函数原型为：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;pthread.h&gt;</span><br><span class="line"></span><br><span class="line">int pthread_create(pthread_t *tid, pthread_attr_t *attr, void *(*func)(void *), void *arg);</span><br><span class="line"></span><br><span class="line">/× 成功返回0，否则返回正的Exxx值×/</span><br></pre></td></tr></table></figure>
-<p>进程内的线程有一个线程ID标志，由tid返回。每个线程有许多属性：优先级、初始栈大小、是否应该成为一个守护进程等，若attr为NULL，则取默认值。线程的执行逻辑由func函数指针指定，函数接收一个void指针的<br>参数，第四个参数就是我们传递的参数，如果需要传递多个参数，把参数打包进一个结构指针即可。</p>
-<h3 id="u7B49_u5F85_u7EBF_u7A0B_u7ED3_u675F"><a href="#u7B49_u5F85_u7EBF_u7A0B_u7ED3_u675F" class="headerlink" title="等待线程结束"></a>等待线程结束</h3><p>利用pthread_join等待一个给定线程终止（是的，不能等待任意一个线程终止，如果需要，必须利用其他手段）。函数原型为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_join</span><span class="params">(pthread_t *tid, <span class="keyword">void</span> **status)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值 */</span></span><br></pre></td></tr></table></figure>
-<p>status通常是创建线程时func函数的返回值。</p>
-<h3 id="u7EBF_u7A0B_u7EC8_u6B62"><a href="#u7EBF_u7A0B_u7EC8_u6B62" class="headerlink" title="线程终止"></a>线程终止</h3><p>让一个线程终止的方法之一是调用pthread_exit，函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pthread_exit</span><span class="params">(<span class="keyword">void</span> *status)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>status不能局限于要终止的线程的对象，因为当线程终止时，对象也将消失。如果该线程未曾脱离（下面会说到），它的线程ID和退出状态将一直留存到调用进程内的某个其他线程对它调用pthread_join。</p>
-<p>让一个线程终止的另外的两个方法：</p>
-<ul>
-<li>启动线程的函数可以返回，其返回值就是相应线程的终止状态。</li>
-<li>如果进程的main函数返回或者任何线程调用了exit，整个进程就终止，其中包括它的任何线程。</li>
-</ul>
-<h3 id="pthread_self_u4E0Epthread_detach_u51FD_u6570"><a href="#pthread_self_u4E0Epthread_detach_u51FD_u6570" class="headerlink" title="pthread_self与pthread_detach函数"></a>pthread_self与pthread_detach函数</h3><p>pthread_self返回进程内该线程的ID，pthread_detach后，线程像守护进程一样，当它们终止时，所有的资源都被释放，不需要某个其他进程调用pthread_join。函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">pthread_t</span> pthread_self(<span class="keyword">void</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_detach</span><span class="params">(pthread_t tid)</span></span>;        <span class="comment">/* 成功返回0，否则返回正的Exxx值 */</span></span><br></pre></td></tr></table></figure>
-<p>一般情况下，上述函数的调用情况是</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pthread_detach(pthread_self());</span><br></pre></td></tr></table></figure>
-<p>以此，线程让自己脱离。</p>
-<h1 id="u7EBF_u7A0B_u5B89_u5168_u51FD_u6570"><a href="#u7EBF_u7A0B_u5B89_u5168_u51FD_u6570" class="headerlink" title="线程安全函数"></a>线程安全函数</h1><p>当一个函数修改了全局变量，那么这个函数不是线程安全的，换句话说该函数不可重入。考虑以下的例子：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> listenfd, connfd;</span><br><span class="line">	</span><br><span class="line">	...</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		len = addrlen;</span><br><span class="line">		connfd = Accept(listenfd, cliaddr, &amp;len);</span><br><span class="line">		Pthread_create(&amp;tid, <span class="literal">NULL</span>, doit, &amp;connfd);</span><br><span class="line">	&#125;	</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span>* <span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> connfd;</span><br><span class="line">	</span><br><span class="line">	connfd = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看起来上述代码是没有问题的，但是考虑这样一种情况：</p>
-<ol>
-<li>accept返回，主线程调用pthread_create创建一个新的线程</li>
-<li>调度新创建的线程执行，但是并没有执行到给connfd赋值就被切换了。</li>
-<li>另一个连接就绪，accept返回，返回的描述符存入connfd</li>
-<li>先前切换的线程被调度执行，这时候它所得到的connfd却并不是第一个连接的描述符了。</li>
-</ol>
-<p>POSIX要求许多函数是线程安全的，即它们都是可重入的，这个要求通过对我们透明的库函数内部执行某种形式的同步达到，线程安全函数见UNP P542。</p>
-<h1 id="u7EBF_u7A0B_u7279_u5B9A_u6570_u636E"><a href="#u7EBF_u7A0B_u7279_u5B9A_u6570_u636E" class="headerlink" title="线程特定数据"></a>线程特定数据</h1><p>把一个未线程化的程序转换成使用线程的版本时，有时会碰到因其中有函数使用静态变量而引起的一个常见变成错误。解决这样的错误有许多方法，这里我们介绍使用<code>线程特定数据</code>的方法。</p>
-<p>每个系统支持优先数量的线程特定数据，POSIX要求这个限制不小于128.系统为每个进程维护一个我们称之为Key的结构数据，如图所示：</p>
-<img src="/2016/09/21/用线程处理客户请求/key_tsd.png" alt="key_tsd.png" title="">
-<p>flag表示该项是否被使用，析构函数用于线程终止时释放线程占用的数据内存，由编程人员指定。</p>
-<p>这个Key是进程范围内的，即所有线程共享该数组。除此之外，系统还为每个线程维护特定于线程的Pthread结构，其部分内容是我们称之为pkey数据的128个元素的指针数组。如下所示：</p>
-<img src="/2016/09/21/用线程处理客户请求/pkey_tsd.png" alt="pkey_tsd.png" title="">
-<p>pkey数组的所有元素都被初始化为空指针，这128个指针和进程内的128个可能的Key是逐一关联的。</p>
-<p>举一个例子来说明线程特定的数据如何使用：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_key_t</span> rl_key;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_once_t</span> rl_once = PTHREAD_ONCE_INIT;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_destructor</span><span class="params">(<span class="keyword">void</span> *ptr)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">free</span>(ptr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_once</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    Pthread_key_create(&amp;rl_key, readline_destructor);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ssize_t</span> thread_readline(<span class="keyword">int</span> fd, <span class="keyword">void</span> *vptr, <span class="keyword">size_t</span> maxlen) &#123;</span><br><span class="line">	...</span><br><span class="line">	</span><br><span class="line">	pthread_once(&amp;rl_once, readline_once);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> ((ptr = pthread_getspecific(rl_key)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		ptr = Malloc(...);</span><br><span class="line">		pthread_setspecific(rl_key, ptr);</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">/* use values pointed to by ptr */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当进程内第一个线程调用thread_readline时，一个Key被创建，同时注册对应的析构函数。之后进程内线程的状态如下：</p>
-<img src="/2016/09/21/用线程处理客户请求/thread_statues1.png" alt="thread_statues1.png" title="">
-<p>这时候如果有另外一个线程调用thread_readline，那么pthread_once之前执行过一次，Key已经创建（这两次析构函数是一样的），线程取该Key对应的内存指针，返回为空，于是线程创建一个新的内存区域。进程内线程的状态变为如下所示：</p>
-<img src="/2016/09/21/用线程处理客户请求/thread_statues2.png" alt="thread_statues2.png" title="">
-<p>可以看到每一个线程有特定于线程自身的缓冲区域，这样就不会发生同步的问题。</p>
-<p>可以给出用到的函数原型：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#include d.h&gt;</span><br><span class="line"></span><br><span class="line">int pthread_once(pthread_once_t *onceptr, void (*init)(void));</span><br><span class="line"></span><br><span class="line">int pthread_key_create(pthread_key_t *keyptr, void (*destructor) (void *));</span><br><span class="line"></span><br><span class="line">void *pthread_getspecific(pthread_key_t key);</span><br><span class="line"></span><br><span class="line">void *pthread_setspecific(pthread_key_t key, const void *value);</span><br></pre></td></tr></table></figure>
-<p>注意pthread_once_t类型的变量在传入pthread_once函数之前，要初始化为PTHREAD_ONCE_INIT。</p>
-<h1 id="u4F7F_u7528_u7EBF_u7A0B_u7279_u5B9A_u6570_u636E_u7684readline_u51FD_u6570"><a href="#u4F7F_u7528_u7EBF_u7A0B_u7279_u5B9A_u6570_u636E_u7684readline_u51FD_u6570" class="headerlink" title="使用线程特定数据的readline函数"></a>使用线程特定数据的readline函数</h1><p>这里给出一个具体的例子，该例子是修改过的readline函数，它是利用了线程的特定数据以做到线程安全。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"unpthread.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_key_t</span> rl_key;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">pthread_once_t</span> rl_once = PTHREAD_ONCE_INIT;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_destructor</span><span class="params">(<span class="keyword">void</span> *ptr)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">free</span>(ptr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">readline_once</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    Pthread_key_create(&amp;rl_key, readline_destructor);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="keyword">int</span> rl_cnt;</span><br><span class="line">    <span class="keyword">char</span> *rl_bufptr;</span><br><span class="line">    <span class="keyword">char</span> rl_buf[MAXLINE];</span><br><span class="line">&#125;Rline;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> ssize_t <span class="title">my_read</span><span class="params">(Rline *tsd, <span class="keyword">int</span> fd, <span class="keyword">char</span> *ptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (tsd -&gt; rl_cnt &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="comment">/* no data in buffer */</span></span><br><span class="line">    again:</span><br><span class="line">	<span class="keyword">if</span> ((tsd -&gt; rl_cnt = read(fd, tsd -&gt; rl_buf, MAXLINE)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	    <span class="keyword">if</span> (errno == EINTR)</span><br><span class="line">		<span class="keyword">goto</span> again;</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (tsd -&gt; rl_cnt == <span class="number">0</span>) &#123;</span><br><span class="line">	    <span class="comment">/* EOF */</span></span><br><span class="line">	    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    tsd -&gt; rl_bufptr = tsd -&gt; rl_buf;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    tsd -&gt; rl_cnt--;</span><br><span class="line">    *ptr = *tsd -&gt; rl_bufptr++;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ssize_t</span> thread_readline(<span class="keyword">int</span> fd, <span class="keyword">void</span> *vptr, <span class="keyword">size_t</span> maxlen) &#123;</span><br><span class="line">    Rline *tsd;</span><br><span class="line">    <span class="keyword">size_t</span> n, rc;</span><br><span class="line">    <span class="keyword">char</span> c, *ptr;</span><br><span class="line"></span><br><span class="line">    Pthread_once(&amp;rl_once, readline_once);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((tsd = pthread_getspecific(rl_key)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	<span class="comment">/* alloc thread specific data */</span></span><br><span class="line">	tsd = Calloc(<span class="number">1</span>, <span class="keyword">sizeof</span>(Rline));</span><br><span class="line">	pthread_setspecific(rl_key, tsd);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    ptr = vptr;</span><br><span class="line">    <span class="keyword">for</span> (n = <span class="number">1</span>; n&lt;maxlen; n++) &#123;</span><br><span class="line">	<span class="keyword">if</span> ((rc = my_read(tsd, fd, &amp;c)) == <span class="number">1</span>) &#123;</span><br><span class="line">	    *ptr++ = c;</span><br><span class="line">	    <span class="keyword">if</span> (c == <span class="string">'\n'</span>)</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (rc == <span class="number">0</span>) &#123;</span><br><span class="line">	    <span class="comment">/* end of file */</span></span><br><span class="line">	    *ptr = <span class="number">0</span>;</span><br><span class="line">	    <span class="keyword">return</span> n-<span class="number">1</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    <span class="comment">/* error */</span></span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    *ptr = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
 
     <footer class="post-footer">
       
@@ -2294,7 +2161,7 @@
 
       
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.JPG"
@@ -2305,7 +2172,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">25</span>
+              <span class="site-state-item-count">27</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -2313,7 +2180,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -2322,7 +2189,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -2341,6 +2208,9 @@
 
         
         
+
+        
+
 
       </section>
 
@@ -2366,16 +2236,7 @@
   <span class="author" itemprop="copyrightHolder">Zach</span>
 </div>
 
-<div class="powered-by">
-  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
-</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Muse
-  </a>
-</div>
 
         
 
@@ -2409,22 +2270,22 @@
 
 
   
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
 
   
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
   
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
   
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
 
   
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
 
   
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
   
@@ -2456,8 +2317,15 @@
 
 
 
+
+	
+
+
+
+
   
   
+
   
 
   
@@ -2493,6 +2361,14 @@
 
             $(element).find(COUNT_CONTAINER_REF).text(time);
           }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
         })
         .fail(function (object, error) {
           console.log("Error: " + error.code + " " + error.message);
@@ -2523,6 +2399,12 @@
             });
           } else {
             var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
             newcounter.set("title", title);
             newcounter.set("url", url);
             newcounter.set("time", 1);
@@ -2556,6 +2438,9 @@
 
 
   
+
+  
+
 
 </body>
 </html>

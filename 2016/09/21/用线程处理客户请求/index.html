@@ -5,10 +5,10 @@
   
 
 
-<html class="theme-next muse use-motion">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
 
@@ -27,7 +27,9 @@
 
 
 
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -59,7 +61,9 @@
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
 
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
@@ -112,19 +116,33 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
 
 
-<script type="text/javascript" id="hexo.configuration">
+<script type="text/javascript" id="hexo.configurations">
   var NexT = window.NexT || {};
   var CONFIG = {
+    root: '/',
     scheme: 'Muse',
     sidebar: {"position":"left","display":"post"},
     fancybox: true,
     motion: true,
     duoshuo: {
-      userId: 0,
+      userId: '0',
       author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
     }
   };
 </script>
+
+
+
+
+
+
 
   <title> 用线程处理客户请求 | Zach的博客 </title>
 </head>
@@ -182,7 +200,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
             首页
           </a>
@@ -192,7 +210,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         <li class="menu-item menu-item-categories">
           <a href="/categories" rel="section">
             
-              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
             
             分类
           </a>
@@ -202,7 +220,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
             
-              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
             关于
           </a>
@@ -212,7 +230,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
-              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
           </a>
@@ -222,7 +240,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
             
-              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
             
             标签
           </a>
@@ -235,6 +253,8 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
   
 </nav>
+
+
 
  </div>
     </header>
@@ -249,13 +269,26 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
     
 
   
-  
 
   
   
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/21/用线程处理客户请求/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
 
     
       <header class="post-header">
@@ -274,34 +307,13 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
         <div class="post-meta">
           <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-09-21T00:00:00+08:00" content="2016-09-21">
-              2016-09-21
-            </time>
+            
+
+            
+
+            
           </span>
 
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Unix/" itemprop="url" rel="index">
-                    <span itemprop="name">Unix</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
           
 
           
@@ -313,7 +325,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
           
           
              <span id="/2016/09/21/用线程处理客户请求/" class="leancloud_visitors" data-flag-title="用线程处理客户请求">
-               &nbsp; | &nbsp;
+               <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
                </span>
@@ -323,6 +335,9 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
           
 
           
+
+          
+
         </div>
       </header>
     
@@ -409,28 +424,31 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
       
     </div>
-    
+
     <div>
       
         
+
       
     </div>
 
     <div>
       
         
+
       
     </div>
+
 
     <footer class="post-footer">
       
         <div class="post-tags">
           
-            <a href="/tags/network/" rel="tag">#network</a>
+            <a href="/tags/network/" rel="tag"># network</a>
           
-            <a href="/tags/program/" rel="tag">#program</a>
+            <a href="/tags/program/" rel="tag"># program</a>
           
-            <a href="/tags/thread/" rel="tag">#thread</a>
+            <a href="/tags/thread/" rel="tag"># thread</a>
           
         </div>
       
@@ -444,6 +462,8 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
               </a>
             
           </div>
+
+          <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
@@ -506,7 +526,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         </ul>
       
 
-      <section class="site-overview sidebar-panel ">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.JPG"
@@ -517,7 +537,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">25</span>
+              <span class="site-state-item-count">27</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -525,7 +545,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -534,7 +554,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -554,19 +574,27 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
         
         
 
+        
+
+
       </section>
 
       
+      <!--noindex-->
         <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
           <div class="post-toc">
+
             
               
             
+
             
               <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#u7EBF_u7A0B"><span class="nav-number">1.</span> <span class="nav-text">线程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u7EBF_u7A0B_u64CD_u7EB5_u51FD_u6570"><span class="nav-number">2.</span> <span class="nav-text">线程操纵函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u521B_u5EFA_u7EBF_u7A0B"><span class="nav-number">2.0.1.</span> <span class="nav-text">创建线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u7B49_u5F85_u7EBF_u7A0B_u7ED3_u675F"><span class="nav-number">2.0.2.</span> <span class="nav-text">等待线程结束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u7EBF_u7A0B_u7EC8_u6B62"><span class="nav-number">2.0.3.</span> <span class="nav-text">线程终止</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pthread_self_u4E0Epthread_detach_u51FD_u6570"><span class="nav-number">2.0.4.</span> <span class="nav-text">pthread_self与pthread_detach函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u7EBF_u7A0B_u5B89_u5168_u51FD_u6570"><span class="nav-number">3.</span> <span class="nav-text">线程安全函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u7EBF_u7A0B_u7279_u5B9A_u6570_u636E"><span class="nav-number">4.</span> <span class="nav-text">线程特定数据</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4F7F_u7528_u7EBF_u7A0B_u7279_u5B9A_u6570_u636E_u7684readline_u51FD_u6570"><span class="nav-number">5.</span> <span class="nav-text">使用线程特定数据的readline函数</span></a></li></ol></div>
             
+
           </div>
         </section>
+      <!--/noindex-->
       
 
     </div>
@@ -589,16 +617,7 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
   <span class="author" itemprop="copyrightHolder">Zach</span>
 </div>
 
-<div class="powered-by">
-  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
-</div>
 
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Muse
-  </a>
-</div>
 
         
 
@@ -632,22 +651,22 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
 
   
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
 
   
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
   
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
   
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
 
   
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
 
   
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
   
@@ -683,8 +702,15 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
 
 
+
+	
+
+
+
+
   
   
+
   
 
   
@@ -720,6 +746,14 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
             $(element).find(COUNT_CONTAINER_REF).text(time);
           }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
         })
         .fail(function (object, error) {
           console.log("Error: " + error.code + " " + error.message);
@@ -750,6 +784,12 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
             });
           } else {
             var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
             newcounter.set("title", title);
             newcounter.set("url", url);
             newcounter.set("time", 1);
@@ -783,6 +823,9 @@ fork返回之后父子进程通信需要利用IPC机制，比较费力。
 
 
   
+
+  
+
 
 </body>
 </html>
