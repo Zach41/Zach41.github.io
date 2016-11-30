@@ -257,6 +257,163 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/04/epoll入门/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/10/04/epoll入门/" itemprop="url">
+                  epoll入门
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/10/04/epoll入门/" class="leancloud_visitors" data-flag-title="epoll入门">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h1><p><code>epoll</code>是linux内核的可扩展I/O机制，旨在替代POSIX的<code>select</code>和<code>poll</code>函数，让需要大量文件操作符的程序拥有更佳的性能。</p>
+<h3 id="epoll_u63A5_u53E3"><a href="#epoll_u63A5_u53E3" class="headerlink" title="epoll接口"></a>epoll接口</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/epoll.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_create</span><span class="params">(<span class="keyword">int</span> size)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> op, <span class="keyword">int</span> fd, <span class="keyword">struct</span> epoll_event *ev)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_wait</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">struct</span> epoll_event *events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout)</span></span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>epoll_create</code>创建一个epoll的句柄，参数<code>size</code>告知内核这个epoll需要监听的I/O事件的个数。函数返回一个描述符，在使用完epoll以后，我们需要手动关闭这个描述符，否则可能导致描述符耗尽。</li>
+</ul>
+<ul>
+<li><p><code>epoll_ctl</code>用来操纵epoll所监听的事件，参数<code>op</code>表示这一次操作，其值：</p>
+<ul>
+<li>EPOLL_CTL_ADD：注册新的事件到epoll中</li>
+<li>EPOLL_CTL_DEL：从epoll中删除一个事件</li>
+<li>EPOLL_CTL_MOD：修改之前注册的一个事件</li>
+</ul>
+<p><code>epoll_event</code>是对应的描述符的事件的数据结构，其结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">union</span> epoll_data &#123;</span><br><span class="line">               <span class="keyword">void</span>    *ptr;</span><br><span class="line">               <span class="keyword">int</span>      fd;</span><br><span class="line">               <span class="keyword">uint32_t</span> u32;</span><br><span class="line">               <span class="keyword">uint64_t</span> u64;</span><br><span class="line">           &#125; <span class="keyword">epoll_data_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> epoll_event &#123;</span><br><span class="line">  <span class="keyword">uint32_t</span>     events;    <span class="comment">/* Epoll events */</span></span><br><span class="line">  <span class="keyword">epoll_data_t</span> data;      <span class="comment">/* User data variable */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>epoll_event</code>中events是以下几个值的按位或的集合：</p>
+<ul>
+<li>EPOLLIN：对应的描述符可读</li>
+<li>EPOLLOUT：对应的描述符可写</li>
+<li>EPOLLERR：对应的描述符发生错误</li>
+<li>EPOLLRDHUP：TCP套接字对端被关闭或者用<code>shutdown</code>函数关闭了写半部。</li>
+<li>EPOLLPRI：有紧急数据可读</li>
+<li>EPOLLHUP：对应的文件描述符被挂断</li>
+<li>EPOLLET：将EPOLL设为边缘触发</li>
+<li>EPOLLONESHOT：只监听一次事件，当事件发生之后如果还要监听则需要再次把事件注册入队列。</li>
+</ul>
+<p><code>epoll</code>的工作模式有两种：</p>
+<ol>
+<li>ET（edge trigger）模式：当<code>epoll_wait</code>检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理，如果不处理，下次调用<code>epoll_wait</code>时，不会再次向应用程序通知此事件。</li>
+<li>LT（level trigger）模式：当<code>epoll_wait</code>检测到描述符事件发生并通知此事件时，应用程序不需要立即处理，下次调用<code>epoll_wait</code>时，会再次通知此事件。</li>
+</ol>
+<p>ET模式很大程序上减少了epoll事件被重复触发的次数，因此效率较LT模式高。epoll工作在ET模式时必须使用非阻塞接口，以避免一个阻塞读/写操作把处理多个文件描述符的任务饿死。</p>
+</li>
+<li><p><code>epoll_wait</code>等待事件的发生。<code>maxevents</code>参数告诉内核这次返回的事件最多有多少个，返回的事件存放在<code>events</code>参数对应的数组中，<code>timeoout</code>指定超时事件，若为-1则永久阻塞。</p>
+</li>
+</ul>
+<h1 id="u4E00_u4E2Aecho_server/client_u7684_u4F8B_u5B50"><a href="#u4E00_u4E2Aecho_server/client_u7684_u4F8B_u5B50" class="headerlink" title="一个echo server/client的例子"></a>一个echo server/client的例子</h1><h3 id="u670D_u52A1_u5668_u7AEF"><a href="#u670D_u52A1_u5668_u7AEF" class="headerlink" title="服务器端"></a>服务器端</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;strings.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/epoll.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> IPADDRESS    <span class="string">"127.0.0.1"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> PORT         <span class="number">8080</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXSIZE      <span class="number">1024</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LISTENQ      <span class="number">20</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> EPOLLEVENTS  <span class="number">100</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> FDSIZE       <span class="number">1024</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">socket_bind</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* ip, <span class="keyword">int</span> port)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_epoll</span><span class="params">(<span class="keyword">int</span> listenfd)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_events</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">struct</span> epoll_event *events, <span class="keyword">int</span> num, <span class="keyword">int</span> listenfd, <span class="keyword">char</span> *buf)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_accept</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> listenfd)</span></span>;    </span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_read</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">char</span> *buf)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_write</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">char</span> *buf)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">add_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">modify_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">delete_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;    </span><br><span class="line">    <span class="keyword">int</span> listenfd = socket_bind(IPADDRESS, PORT);</span><br><span class="line">    listen(listenfd, LISTENQ);</span><br><span class="line">    do_epoll(listenfd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">socket_bind</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *ip, <span class="keyword">int</span> port)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> listenfd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (listenfd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"socket create error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">struct</span> sockaddr_in server_addr;</span><br><span class="line">    bzero(&amp;server_addr, <span class="keyword">sizeof</span>(server_addr));</span><br><span class="line">    server_addr.sin_family = AF_INET;</span><br><span class="line">    server_addr.sin_port = htons(port);</span><br><span class="line">    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (bind(listenfd, (<span class="keyword">struct</span> sockaddr *)&amp;server_addr, <span class="keyword">sizeof</span>(server_addr)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"bind socket error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> listenfd;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_epoll</span><span class="params">(<span class="keyword">int</span> listenfd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> epollfd;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event events[EPOLLEVENTS];</span><br><span class="line">    <span class="keyword">char</span> buf[MAXSIZE];</span><br><span class="line">    <span class="built_in">memset</span>(buf, <span class="number">0</span>, <span class="keyword">sizeof</span>(buf));</span><br><span class="line"></span><br><span class="line">    epollfd = epoll_create(FDSIZE); <span class="comment">/* create a epoll fd which can handles FDSIZE fds */</span></span><br><span class="line">    <span class="keyword">if</span> (epollfd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"create epoll error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    add_event(epollfd, listenfd, EPOLLIN);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> ret;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">	ret = epoll_wait(epollfd, events, EPOLLEVENTS, -<span class="number">1</span>);</span><br><span class="line">	<span class="keyword">if</span> (ret &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	    perror(<span class="string">"epoll wait error"</span>);</span><br><span class="line">	    <span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	handle_events(epollfd, events, ret, listenfd, buf);</span><br><span class="line">    &#125;</span><br><span class="line">    close(epollfd);		<span class="comment">/* must close epoll fd */</span>    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_events</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">struct</span> epoll_event *events, <span class="keyword">int</span> num, <span class="keyword">int</span> listenfd, <span class="keyword">char</span> *buf)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i&lt;num; i++) &#123;</span><br><span class="line">	fd = events[i].data.fd;</span><br><span class="line">	<span class="keyword">if</span> (fd == listenfd &amp;&amp; (events[i].events &amp; EPOLLIN))</span><br><span class="line">	    handle_accept(epollfd, listenfd);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (events[i].events &amp; EPOLLIN)</span><br><span class="line">	    do_read(epollfd, fd, buf);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (events[i].events &amp; EPOLLOUT)</span><br><span class="line">	    do_write(epollfd, fd, buf);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_accept</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> listenfd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> sockaddr_in cli_addr;</span><br><span class="line">    <span class="keyword">int</span> cli_size = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> clifd;</span><br><span class="line">    <span class="keyword">if</span> ((clifd = accept(listenfd, (<span class="keyword">struct</span> sockaddr *)&amp;cli_addr, &amp;cli_size)) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"accept error"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	add_event(epollfd, clifd, EPOLLIN);</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_read</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">char</span> *buf)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> nread = read(fd, buf, MAXSIZE);</span><br><span class="line">    <span class="keyword">if</span> (nread == -<span class="number">1</span>) &#123;</span><br><span class="line">	perror(<span class="string">"read error"</span>);</span><br><span class="line">	close(fd);</span><br><span class="line">	delete_event(epollfd, fd, EPOLLIN);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nread == <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"client close.\n"</span>);</span><br><span class="line">	close(fd);</span><br><span class="line">	delete_event(epollfd, fd, EPOLLIN);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"read message: %s"</span>, buf);</span><br><span class="line">	modify_event(epollfd, fd, EPOLLOUT);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_write</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">char</span> *buf)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> nwrite = write(fd, buf, <span class="built_in">strlen</span>(buf));</span><br><span class="line">    <span class="keyword">if</span> (nwrite == -<span class="number">1</span>) &#123;</span><br><span class="line">	perror(<span class="string">"write error"</span>);</span><br><span class="line">	close(fd);</span><br><span class="line">	delete_event(epollfd, fd, EPOLLOUT);</span><br><span class="line">    &#125; <span class="keyword">else</span></span><br><span class="line">	modify_event(epollfd, fd, EPOLLIN);</span><br><span class="line">    <span class="built_in">memset</span>(buf, <span class="number">0</span>, MAXSIZE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">add_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event ev;</span><br><span class="line">    ev.events = state;</span><br><span class="line">    ev.data.fd = fd;</span><br><span class="line">    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &amp;ev);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">delete_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event ev;</span><br><span class="line">    ev.data.fd = fd;</span><br><span class="line">    ev.events = state;</span><br><span class="line">    epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, &amp;ev);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">modify_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event ev;</span><br><span class="line">    ev.data.fd = fd;</span><br><span class="line">    ev.events = state;</span><br><span class="line">    epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &amp;ev);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="u5BA2_u6237_u7AEF"><a href="#u5BA2_u6237_u7AEF" class="headerlink" title="客户端"></a>客户端</h3><p>客户端代码我们也用epoll来实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;strings.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/epoll.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> IPADDRESS    <span class="string">"127.0.0.1"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> PORT         <span class="number">8080</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXSIZE      <span class="number">1024</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LISTENQ      <span class="number">20</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> EPOLLEVENTS  <span class="number">100</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> FDSIZE       <span class="number">1024</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_connection</span><span class="params">(<span class="keyword">int</span> sockfd)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_events</span><span class="params">(<span class="keyword">int</span> pollfd, <span class="keyword">struct</span> epoll_event *events, <span class="keyword">int</span> num, <span class="keyword">int</span> sockfd, <span class="keyword">char</span> *buf)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_read</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> sockfd, <span class="keyword">char</span> *buf)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_write</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> sockfd, <span class="keyword">char</span> *buf)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">add_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">modify_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">delete_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> conn_flag;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> sockfd;</span><br><span class="line">    <span class="keyword">struct</span> sockaddr_in serv_addr;</span><br><span class="line"></span><br><span class="line">    sockfd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (sockfd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"socket create error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    bzero(&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">    serv_addr.sin_family = AF_INET;</span><br><span class="line">    serv_addr.sin_port   = htons(PORT);</span><br><span class="line">    <span class="keyword">if</span> (inet_pton(AF_INET, IPADDRESS, &amp;serv_addr.sin_addr) != <span class="number">1</span>) &#123;</span><br><span class="line">	perror(<span class="string">"inet_pton error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    connect(sockfd, (<span class="keyword">struct</span> sockaddr *)&amp;serv_addr, <span class="keyword">sizeof</span>(serv_addr));</span><br><span class="line">    </span><br><span class="line">    handle_connection(sockfd);</span><br><span class="line">    close(sockfd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_connection</span><span class="params">(<span class="keyword">int</span> sockfd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> epollfd;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event events[EPOLLEVENTS];</span><br><span class="line">    <span class="keyword">char</span> buf[MAXSIZE];</span><br><span class="line"></span><br><span class="line">    epollfd = epoll_create(FDSIZE);</span><br><span class="line">    <span class="keyword">if</span> (epollfd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"create epoll error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    add_event(epollfd, STDIN_FILENO, EPOLLIN);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> ret;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">	ret = epoll_wait(epollfd, events, EPOLLEVENTS, -<span class="number">1</span>);</span><br><span class="line">	handle_events(epollfd, events, ret, sockfd, buf);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handle_events</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">struct</span> epoll_event *events, <span class="keyword">int</span> num, <span class="keyword">int</span> sockfd, <span class="keyword">char</span> *buf)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;num; i++) &#123;</span><br><span class="line">	fd = events[i].data.fd;</span><br><span class="line">	<span class="keyword">if</span> (events[i].events &amp; EPOLLIN)</span><br><span class="line">	    do_read(epollfd, fd, sockfd, buf);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (events[i].events &amp; EPOLLOUT)</span><br><span class="line">	    do_write(epollfd, fd, sockfd, buf);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_read</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> sockfd, <span class="keyword">char</span> *buf)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> nread = read(fd, buf, MAXSIZE);</span><br><span class="line">    <span class="keyword">if</span> (nread &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"read error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (nread == <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"server close.\nbye\n"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (fd == STDIN_FILENO) &#123;</span><br><span class="line">	    add_event(epollfd, sockfd, EPOLLOUT);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    delete_event(epollfd, sockfd, EPOLLIN);</span><br><span class="line">	    add_event(epollfd, STDOUT_FILENO, EPOLLOUT);</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">do_write</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> sockfd, <span class="keyword">char</span> *buf)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> nwrite = write(fd, buf, <span class="built_in">strlen</span>(buf));</span><br><span class="line">    <span class="keyword">if</span> (nwrite &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"write error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (fd == STDOUT_FILENO) &#123;</span><br><span class="line">	    delete_event(epollfd, fd, EPOLLOUT);	    </span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">	    modify_event(epollfd, fd, EPOLLIN);</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">memset</span>(buf, <span class="number">0</span>, MAXSIZE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">add_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event ev;</span><br><span class="line">    ev.events = state;</span><br><span class="line">    ev.data.fd = fd;</span><br><span class="line">    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &amp;ev);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">delete_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event ev;</span><br><span class="line">    ev.data.fd = fd;</span><br><span class="line">    ev.events = state;</span><br><span class="line">    epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, &amp;ev);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">modify_event</span><span class="params">(<span class="keyword">int</span> epollfd, <span class="keyword">int</span> fd, <span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> epoll_event ev;</span><br><span class="line">    ev.data.fd = fd;</span><br><span class="line">    ev.events = state;</span><br><span class="line">    epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &amp;ev);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="See_Also"><a href="#See_Also" class="headerlink" title="See Also"></a>See Also</h3><p>文章内容和代码学习自<a href="http://www.cnblogs.com/Anker/p/3263780.html" target="_blank" rel="external">IO多路复用之epoll总结</a></p>
+<p><a href="http://man7.org/linux/man-pages/man7/epoll.7.html" target="_blank" rel="external">epoll manual</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/22/互斥锁和条件变量/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -600,6 +757,138 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/IPv4与IPv6的户操作性/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/09/19/IPv4与IPv6的户操作性/" itemprop="url">
+                  IPv4与IPv6的户操作性
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/19/IPv4与IPv6的户操作性/" class="leancloud_visitors" data-flag-title="IPv4与IPv6的户操作性">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="IPv4_u6620_u5C04_u7684IPv6_u5730_u5740"><a href="#IPv4_u6620_u5C04_u7684IPv6_u5730_u5740" class="headerlink" title="IPv4映射的IPv6地址"></a>IPv4映射的IPv6地址</h1><p>IPv4映射的IPv6地址允许在因特网向IPv6过度时期让运行在双栈主机上的IPv6应用进程能够与只支持IPv4的主机通信。这些地址是IPv6应用进程查询某个只有IPv4地址的主机的IPv6地址时，DNS解析器按需自动创建的且不存在于任何DNS<br>数据文件中。在IPv6套接字上使用这种类型的地址导致往目的地IPv4主机发送IPv4数据报。</p>
+<p>下图展示了一个IPv4映射的IPv6地址的格式：</p>
+<img src="/2016/09/19/IPv4与IPv6的户操作性/mapped.png" alt="mapped.png" title="">
+<h1 id="IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668"><a href="#IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668" class="headerlink" title="IPv4客户与IPv6服务器"></a>IPv4客户与IPv6服务器</h1><p>双栈主机的一个特性就是其上的IPv6服务器既可以处理IPv4客户，也可以处理IPv6客户。这是通过IPv4映射的IPv6地址实现的。下图是一个例子：</p>
+<img src="/2016/09/19/IPv4与IPv6的户操作性/ipv4to6.png" alt="ipv4to6.png" title="">
+<p>IPv4客户发送一个IPv4的SYN分节以期和服务器建立连接。来自IPv4客户的SYN分节在以太网中表现为一个以太网首部、一个IPv4首部、一个TCP部以及TCP数据。以太网首部中包含的类型字段为0x0800，表示它是一个IPv4帧数据。</p>
+<p>接收数据链路通过查看以太网类型字段把每个帧数据发送给对应的IP模块。IPv4模块结合其上的TCP模块检测到IPv4数据报的目的段端口对应一个IPv4套接字，于是该数据报Ipv4首部中的源IPv4地址被转换成IPv4映射的IPv6地址，当<br>accept系统调用把这个已经接收的IPv4客户连接返回被服务器进程的时候，这个映射后的地址作为客户的IPv6地址返回到服务器的IPv6套接字。该连接上的其余数据同样都是IPv4数据报。服务器进程完全不知道它是在与一个IPv4客户机通信。</p>
+<h1 id="IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668"><a href="#IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668" class="headerlink" title="IPv6客户与IPv4服务器"></a>IPv6客户与IPv4服务器</h1><p>在一个双栈主机上运行一个IPv6客户程序，其于一个IPv4服务器程序交互的流程如下：</p>
+<ol>
+<li>一个IPv4服务器在只支持IPv4的一个主机上启动后创建一个IPv4监听套接字。</li>
+<li>IPv6客户启动后调用getaddrinfo单纯查找IPv6地址（请求AF_INET6地址，hints结构中设置了AI_V4MAPPED标志），最后只有得到只支持IPv4的服务器主机的A记录，那么返回给客户的就是IPv4映射之后的IPv6地址。</li>
+<li>IPv6客户设置这个IPv4映射后的IPv6地址，调用connect，内核检测到这个映射的地址后自动发送一个IPv4的SYN分节到服务器。</li>
+<li>服务器响应一个IPv4 SYN/ACK分节，连接于是用IPv4数据报建立。</li>
+</ol>
+<p>以后在以太网上传递的是IPv4数据报。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/系统服务——daemon/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -724,138 +1013,6 @@
 <h3 id="daytime_daemon_u7A0B_u5E8F"><a href="#daytime_daemon_u7A0B_u5E8F" class="headerlink" title="daytime daemon程序"></a>daytime daemon程序</h3><p>最后这里给出daytimeserver的代码，这是由xinetd作为守护进程启动的时间获取服务器程序。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span></span><br><span class="line"><span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">socklen_t</span>		len;</span><br><span class="line">	<span class="keyword">struct</span> sockaddr	*cliaddr;</span><br><span class="line">	<span class="keyword">char</span>			buff[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span>			ticks;</span><br><span class="line"></span><br><span class="line">	daemon_inetd(argv[<span class="number">0</span>], <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	cliaddr = Malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage));</span><br><span class="line">	len = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage);</span><br><span class="line">	Getpeername(<span class="number">0</span>, cliaddr, &amp;len);</span><br><span class="line">	err_msg(<span class="string">"connection from %s"</span>, Sock_ntop(cliaddr, len));</span><br><span class="line"></span><br><span class="line">    ticks = time(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">snprintf</span>(buff, <span class="keyword">sizeof</span>(buff), <span class="string">"%.24s\r\n"</span>, ctime(&amp;ticks));</span><br><span class="line">    Write(<span class="number">0</span>, buff, <span class="built_in">strlen</span>(buff));</span><br><span class="line"></span><br><span class="line">	Close(<span class="number">0</span>);	<span class="comment">/* close TCP connection */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>可以看到所有套接字的创建代码(tcp_listen和accept的调用)都不见了，这些步骤都有xinetd执行，我们使用描述符0指代已由xinetd接受的TCP连接（套接字描述符被复制到描述符0, 1, 2）。daemon_init只是负责设置daemon_proc<br>标志以及调用openlog，从而发送日志信息给syslogd守护进程。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/IPv4与IPv6的户操作性/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/19/IPv4与IPv6的户操作性/" itemprop="url">
-                  IPv4与IPv6的户操作性
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/19/IPv4与IPv6的户操作性/" class="leancloud_visitors" data-flag-title="IPv4与IPv6的户操作性">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="IPv4_u6620_u5C04_u7684IPv6_u5730_u5740"><a href="#IPv4_u6620_u5C04_u7684IPv6_u5730_u5740" class="headerlink" title="IPv4映射的IPv6地址"></a>IPv4映射的IPv6地址</h1><p>IPv4映射的IPv6地址允许在因特网向IPv6过度时期让运行在双栈主机上的IPv6应用进程能够与只支持IPv4的主机通信。这些地址是IPv6应用进程查询某个只有IPv4地址的主机的IPv6地址时，DNS解析器按需自动创建的且不存在于任何DNS<br>数据文件中。在IPv6套接字上使用这种类型的地址导致往目的地IPv4主机发送IPv4数据报。</p>
-<p>下图展示了一个IPv4映射的IPv6地址的格式：</p>
-<img src="/2016/09/19/IPv4与IPv6的户操作性/mapped.png" alt="mapped.png" title="">
-<h1 id="IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668"><a href="#IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668" class="headerlink" title="IPv4客户与IPv6服务器"></a>IPv4客户与IPv6服务器</h1><p>双栈主机的一个特性就是其上的IPv6服务器既可以处理IPv4客户，也可以处理IPv6客户。这是通过IPv4映射的IPv6地址实现的。下图是一个例子：</p>
-<img src="/2016/09/19/IPv4与IPv6的户操作性/ipv4to6.png" alt="ipv4to6.png" title="">
-<p>IPv4客户发送一个IPv4的SYN分节以期和服务器建立连接。来自IPv4客户的SYN分节在以太网中表现为一个以太网首部、一个IPv4首部、一个TCP部以及TCP数据。以太网首部中包含的类型字段为0x0800，表示它是一个IPv4帧数据。</p>
-<p>接收数据链路通过查看以太网类型字段把每个帧数据发送给对应的IP模块。IPv4模块结合其上的TCP模块检测到IPv4数据报的目的段端口对应一个IPv4套接字，于是该数据报Ipv4首部中的源IPv4地址被转换成IPv4映射的IPv6地址，当<br>accept系统调用把这个已经接收的IPv4客户连接返回被服务器进程的时候，这个映射后的地址作为客户的IPv6地址返回到服务器的IPv6套接字。该连接上的其余数据同样都是IPv4数据报。服务器进程完全不知道它是在与一个IPv4客户机通信。</p>
-<h1 id="IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668"><a href="#IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668" class="headerlink" title="IPv6客户与IPv4服务器"></a>IPv6客户与IPv4服务器</h1><p>在一个双栈主机上运行一个IPv6客户程序，其于一个IPv4服务器程序交互的流程如下：</p>
-<ol>
-<li>一个IPv4服务器在只支持IPv4的一个主机上启动后创建一个IPv4监听套接字。</li>
-<li>IPv6客户启动后调用getaddrinfo单纯查找IPv6地址（请求AF_INET6地址，hints结构中设置了AI_V4MAPPED标志），最后只有得到只支持IPv4的服务器主机的A记录，那么返回给客户的就是IPv4映射之后的IPv6地址。</li>
-<li>IPv6客户设置这个IPv4映射后的IPv6地址，调用connect，内核检测到这个映射的地址后自动发送一个IPv4的SYN分节到服务器。</li>
-<li>服务器响应一个IPv4 SYN/ACK分节，连接于是用IPv4数据报建立。</li>
-</ol>
-<p>以后在以太网上传递的是IPv4数据报。</p>
 
           
         
@@ -1375,152 +1532,6 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/TCP连接建立和终止/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/09/TCP连接建立和终止/" itemprop="url">
-                  TCP连接建立和终止
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/09/TCP连接建立和终止/" class="leancloud_visitors" data-flag-title="TCP连接建立和终止">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62" class="headerlink" title="TCP连接的建立和终止"></a>TCP连接的建立和终止</h1><h3 id="TCP_u8FDE_u63A5_u5EFA_u7ACB"><a href="#TCP_u8FDE_u63A5_u5EFA_u7ACB" class="headerlink" title="TCP连接建立"></a>TCP连接建立</h3><p>建立一个TCP连接的过程图示如下（图片均来源于网络…）：</p>
-<img src="/2016/09/09/TCP连接建立和终止/shakehand3.jpg" alt="shakehand3.jpg" title="">
-<ol>
-<li>服务器在连接建立之前必须准备好接收客户发来的连接，这一般通过创建套接字，绑定服务器地址、监听套接字来完成，即<code>socket</code>，<code>bind</code>，<code>listen</code>三个函数。这一个过程被成为被动打开。</li>
-<li>客户通过<code>connect</code>函数发起主动打开，客户会发送一个SYN分节，它告诉服务器客户将在连接中发送的数据的初始序列号，通常该分节不带数据，其所在IP数据只含有一个IP首部、一个TCP首部以及可能的TCP选项。</li>
-<li>服务器收到客户发来的SYN分节后，服务器必须确认该分节，同时服务器发送一个自己的SYN分节，它含有服务器将在该连接中发送的数据的初始序列号。</li>
-<li>客户收到服务器发回的消息后，确认服务器的分节，连接建立。</li>
-</ol>
-<p>从图中可以看到ACK是SYN分节的序列号加１，类似的，FIN分节的ACK也是FIN分节的序列号加１。</p>
-<h3 id="TCP_u8FDE_u63A5_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7EC8_u6B62" class="headerlink" title="TCP连接终止"></a>TCP连接终止</h3><p>TCP终止一个连接需要４个分节。</p>
-<p>终止一个连接的图示如下：</p>
-<img src="/2016/09/09/TCP连接建立和终止/shakehand4.jpg" alt="shakehand4.jpg" title="">
-<ol>
-<li>某个应用首先调用close，该端主动关闭，发送一个FIN分节</li>
-<li>接收到FIN分节的对端执行被动关闭，这个FIN由TCP确认，FIN分节的接收也作为一个文件结束符（EOF）传递给接收端应用进程。</li>
-<li>一段时间之后，接收到这个文件结束符的引用进程将调用close关闭它的套接字，这会导致它也发送一个FIN分节。</li>
-<li>接收这个最终FIN的对端发送一个ACK确认这个FIN分节。</li>
-</ol>
-<h3 id="u8FDE_u63A5_u548C_u7EC8_u6B62"><a href="#u8FDE_u63A5_u548C_u7EC8_u6B62" class="headerlink" title="连接和终止"></a>连接和终止</h3><p>一个完整的连接和终止的过程示意：</p>
-<img src="/2016/09/09/TCP连接建立和终止/full_process.jpg" alt="full_process.jpg" title="">
-<p>一个完整的TCP状态转换图：</p>
-<img src="/2016/09/09/TCP连接建立和终止/state.jpg" alt="state.jpg" title="">
-<h4 id="TIME_WAIT"><a href="#TIME_WAIT" class="headerlink" title="TIME_WAIT"></a>TIME_WAIT</h4><p>TCP终止中，执行了主动关闭的那端在接收到对端发来的FIN分节和发送对应的ACK之后就进入了TIME_WAIT状态，该状态的持续时间是2个MSL（maximum segment lifetime）。它的存在有两个理由：</p>
-<ol>
-<li>可靠地实现TCP全双工连接的终止</li>
-<li>允许老的重复分节在网络中消逝</li>
-</ol>
-<p>对于第一个理由，如果最后的ACK丢失了，那么服务器需要重发FIN，因此客户必须维护状态信息，以允许它发送最终的那个ACK，如果客户不维护状态信息，那么客户在收到服务器重传的FIN后将直接相应RST，这个分节将会被服务器解释为一个错误。</p>
-<p>对于第二个理由，假设在一个连接被终止了马上又发起来一个相同IP和端口上的连接，后一个连接成为前一个连接的化身，TCP必须防止老的连接的分组在老连接结束之后再现，以防止其被误解为新的连接的分组。TCP不会让处于TIME_WAIT状态的连接发起新的化身，既然TIME_WAIT的时间是MSL的2倍，这就足以让某个方向上的分组最多存活MSL时间即被丢弃，另外一个方向上的应答最多存活MSL时间也被丢弃。通过这种方式，老的重复分组在网络中都已经消逝。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/IO模型/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1687,7 +1698,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/08/Hexo博客同步/">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/TCP连接建立和终止/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="Zach">
@@ -1712,8 +1723,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/09/08/Hexo博客同步/" itemprop="url">
-                  Hexo博客同步
+                <a class="post-title-link" href="/2016/09/09/TCP连接建立和终止/" itemprop="url">
+                  TCP连接建立和终止
                 </a>
               
             
@@ -1739,7 +1750,7 @@
 
           
           
-             <span id="/2016/09/08/Hexo博客同步/" class="leancloud_visitors" data-flag-title="Hexo博客同步">
+             <span id="/2016/09/09/TCP连接建立和终止/" class="leancloud_visitors" data-flag-title="TCP连接建立和终止">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1766,13 +1777,35 @@
       
         
           
-            <h1 id="Hexo_u5728_u591A_u8BBE_u5907_u95F4_u540C_u6B65"><a href="#Hexo_u5728_u591A_u8BBE_u5907_u95F4_u540C_u6B65" class="headerlink" title="Hexo在多设备间同步"></a>Hexo在多设备间同步</h1><p>最近使用的电脑在Mac和实验室的电脑之间不停的转换，就出现了想写博客，可是Mac不在身边没法写的情况，所以就折腾了一下如何让Hexo博客在多个设备间同步。</p>
-<p>简单来说，在部署Hexo的时候，Github上的文件是编译过后的，而我们需要同步的往往是source目录下的源文件（markdown文件、图片等）。所以我们只要新创建一个仓库，然后把要备份的文件上传到仓库即可。<br>如果和我一样，不想太麻烦，直接备份整个hexo根目录下的文件即可。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chdir &#60;Blog dir&#62;&#10;git init&#10;git add --all&#10;git commit -m &#39;first commit&#39;&#10;git remote add &#60;remote name&#62; &#60;remote addr&#62;&#10;git push -u &#60;remote name&#62; master</span><br></pre></td></tr></table></figure>
-<p>然后在每次更新博客之后，即可更新远程仓库就可以了。</p>
-<p>在一台新电脑上恢复博客也是很简单的</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone &#60;remote addr&#62;&#10;cd &#60;Blog dir&#62;&#10;npm install hexo&#10;npm install &#10;npm install hexo-deployer-git</span><br></pre></td></tr></table></figure>
-<p>这样就齐活儿了。</p>
+            <h1 id="TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62" class="headerlink" title="TCP连接的建立和终止"></a>TCP连接的建立和终止</h1><h3 id="TCP_u8FDE_u63A5_u5EFA_u7ACB"><a href="#TCP_u8FDE_u63A5_u5EFA_u7ACB" class="headerlink" title="TCP连接建立"></a>TCP连接建立</h3><p>建立一个TCP连接的过程图示如下（图片均来源于网络…）：</p>
+<img src="/2016/09/09/TCP连接建立和终止/shakehand3.jpg" alt="shakehand3.jpg" title="">
+<ol>
+<li>服务器在连接建立之前必须准备好接收客户发来的连接，这一般通过创建套接字，绑定服务器地址、监听套接字来完成，即<code>socket</code>，<code>bind</code>，<code>listen</code>三个函数。这一个过程被成为被动打开。</li>
+<li>客户通过<code>connect</code>函数发起主动打开，客户会发送一个SYN分节，它告诉服务器客户将在连接中发送的数据的初始序列号，通常该分节不带数据，其所在IP数据只含有一个IP首部、一个TCP首部以及可能的TCP选项。</li>
+<li>服务器收到客户发来的SYN分节后，服务器必须确认该分节，同时服务器发送一个自己的SYN分节，它含有服务器将在该连接中发送的数据的初始序列号。</li>
+<li>客户收到服务器发回的消息后，确认服务器的分节，连接建立。</li>
+</ol>
+<p>从图中可以看到ACK是SYN分节的序列号加１，类似的，FIN分节的ACK也是FIN分节的序列号加１。</p>
+<h3 id="TCP_u8FDE_u63A5_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7EC8_u6B62" class="headerlink" title="TCP连接终止"></a>TCP连接终止</h3><p>TCP终止一个连接需要４个分节。</p>
+<p>终止一个连接的图示如下：</p>
+<img src="/2016/09/09/TCP连接建立和终止/shakehand4.jpg" alt="shakehand4.jpg" title="">
+<ol>
+<li>某个应用首先调用close，该端主动关闭，发送一个FIN分节</li>
+<li>接收到FIN分节的对端执行被动关闭，这个FIN由TCP确认，FIN分节的接收也作为一个文件结束符（EOF）传递给接收端应用进程。</li>
+<li>一段时间之后，接收到这个文件结束符的引用进程将调用close关闭它的套接字，这会导致它也发送一个FIN分节。</li>
+<li>接收这个最终FIN的对端发送一个ACK确认这个FIN分节。</li>
+</ol>
+<h3 id="u8FDE_u63A5_u548C_u7EC8_u6B62"><a href="#u8FDE_u63A5_u548C_u7EC8_u6B62" class="headerlink" title="连接和终止"></a>连接和终止</h3><p>一个完整的连接和终止的过程示意：</p>
+<img src="/2016/09/09/TCP连接建立和终止/full_process.jpg" alt="full_process.jpg" title="">
+<p>一个完整的TCP状态转换图：</p>
+<img src="/2016/09/09/TCP连接建立和终止/state.jpg" alt="state.jpg" title="">
+<h4 id="TIME_WAIT"><a href="#TIME_WAIT" class="headerlink" title="TIME_WAIT"></a>TIME_WAIT</h4><p>TCP终止中，执行了主动关闭的那端在接收到对端发来的FIN分节和发送对应的ACK之后就进入了TIME_WAIT状态，该状态的持续时间是2个MSL（maximum segment lifetime）。它的存在有两个理由：</p>
+<ol>
+<li>可靠地实现TCP全双工连接的终止</li>
+<li>允许老的重复分节在网络中消逝</li>
+</ol>
+<p>对于第一个理由，如果最后的ACK丢失了，那么服务器需要重发FIN，因此客户必须维护状态信息，以允许它发送最终的那个ACK，如果客户不维护状态信息，那么客户在收到服务器重传的FIN后将直接相应RST，这个分节将会被服务器解释为一个错误。</p>
+<p>对于第二个理由，假设在一个连接被终止了马上又发起来一个相同IP和端口上的连接，后一个连接成为前一个连接的化身，TCP必须防止老的连接的分组在老连接结束之后再现，以防止其被误解为新的连接的分组。TCP不会让处于TIME_WAIT状态的连接发起新的化身，既然TIME_WAIT的时间是MSL的2倍，这就足以让某个方向上的分组最多存活MSL时间即被丢弃，另外一个方向上的应答最多存活MSL时间也被丢弃。通过这种方式，老的重复分组在网络中都已经消逝。</p>
 
           
         
@@ -1847,7 +1880,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">27</span>
+              <span class="site-state-item-count">28</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1864,7 +1897,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-count">35</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

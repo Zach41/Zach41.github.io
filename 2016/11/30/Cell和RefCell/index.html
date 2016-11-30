@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="program," />
+  <meta name="keywords" content="Cell & RefCell,Mutability," />
 
 
 
@@ -84,37 +84,37 @@
 
 
 
-<meta name="description" content="FBKVOController 源码阅读笔记FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。
-结构分析FBKVOController主要由以下三个部分组成：
-
-FBKVOInfo
-FBKVOSharedController
-FBKVOControlller
-
-FBKVOInfoFBKVOInfo">
+<meta name="description" content="Mutability在Rust中，如果我们这样操作一个变量：
+12let x = 5;x = 6;	// error
+我们就会得到一个编译错误。
+如果要更改一个变量，我们需要添加mut关键字：
+12let mut x = 5;x = 6;
+我们也可以像下面一样更改一个变量的值：
+123let mut x = 5;let y = &amp;amp;mut x;*y = 4;
+注意到y是可变变量x的可变引用，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="FBKVOController源码阅读笔记">
-<meta property="og:url" content="http://yoursite.com/2016/04/25/FBKVOController源码阅读笔记/index.html">
+<meta property="og:title" content="Cell和RefCell">
+<meta property="og:url" content="http://yoursite.com/2016/11/30/Cell和RefCell/index.html">
 <meta property="og:site_name" content="Zach的博客">
-<meta property="og:description" content="FBKVOController 源码阅读笔记FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。
-结构分析FBKVOController主要由以下三个部分组成：
-
-FBKVOInfo
-FBKVOSharedController
-FBKVOControlller
-
-FBKVOInfoFBKVOInfo">
-<meta property="og:updated_time" content="2016-04-25T03:45:36.000Z">
+<meta property="og:description" content="Mutability在Rust中，如果我们这样操作一个变量：
+12let x = 5;x = 6;	// error
+我们就会得到一个编译错误。
+如果要更改一个变量，我们需要添加mut关键字：
+12let mut x = 5;x = 6;
+我们也可以像下面一样更改一个变量的值：
+123let mut x = 5;let y = &amp;amp;mut x;*y = 4;
+注意到y是可变变量x的可变引用，">
+<meta property="og:updated_time" content="2016-11-30T13:17:49.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="FBKVOController源码阅读笔记">
-<meta name="twitter:description" content="FBKVOController 源码阅读笔记FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。
-结构分析FBKVOController主要由以下三个部分组成：
-
-FBKVOInfo
-FBKVOSharedController
-FBKVOControlller
-
-FBKVOInfoFBKVOInfo">
+<meta name="twitter:title" content="Cell和RefCell">
+<meta name="twitter:description" content="Mutability在Rust中，如果我们这样操作一个变量：
+12let x = 5;x = 6;	// error
+我们就会得到一个编译错误。
+如果要更改一个变量，我们需要添加mut关键字：
+12let mut x = 5;x = 6;
+我们也可以像下面一样更改一个变量的值：
+123let mut x = 5;let y = &amp;amp;mut x;*y = 4;
+注意到y是可变变量x的可变引用，">
 
 
 
@@ -146,7 +146,7 @@ FBKVOInfoFBKVOInfo">
 
 
 
-  <title> FBKVOController源码阅读笔记 | Zach的博客 </title>
+  <title> Cell和RefCell | Zach的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -277,7 +277,7 @@ FBKVOInfoFBKVOInfo">
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/25/FBKVOController源码阅读笔记/">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/30/Cell和RefCell/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="Zach">
@@ -301,7 +301,7 @@ FBKVOInfoFBKVOInfo">
             
             
               
-                FBKVOController源码阅读笔记
+                Cell和RefCell
               
             
           </h1>
@@ -326,7 +326,7 @@ FBKVOInfoFBKVOInfo">
 
           
           
-             <span id="/2016/04/25/FBKVOController源码阅读笔记/" class="leancloud_visitors" data-flag-title="FBKVOController源码阅读笔记">
+             <span id="/2016/11/30/Cell和RefCell/" class="leancloud_visitors" data-flag-title="Cell和RefCell">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -351,26 +351,27 @@ FBKVOInfoFBKVOInfo">
       
 
       
-        <h1 id="FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0"><a href="#FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0" class="headerlink" title="FBKVOController 源码阅读笔记"></a>FBKVOController 源码阅读笔记</h1><p>FBKVOContoller是Facebook推出的KVO的库，目的在于简化KVO的代码编写，它提供了干净的block回调，避免了散落到各处的处理逻辑。</p>
-<h3 id="u7ED3_u6784_u5206_u6790"><a href="#u7ED3_u6784_u5206_u6790" class="headerlink" title="结构分析"></a>结构分析</h3><p>FBKVOController主要由以下三个部分组成：</p>
-<ol>
-<li>FBKVOInfo</li>
-<li>FBKVOSharedController</li>
-<li>FBKVOControlller</li>
-</ol>
-<h4 id="FBKVOInfo"><a href="#FBKVOInfo" class="headerlink" title="FBKVOInfo"></a>FBKVOInfo</h4><p><code>FBKVOInfo</code>用来作为KVO中的Context，它的定义如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@implementation _FBKVOInfo&#10;&#123;&#10;@public&#10;  __weak FBKVOController *_controller;&#10;  NSString *_keyPath;&#10;  NSKeyValueObservingOptions _options;&#10;  SEL _action;&#10;  void *_context;&#10;  FBKVONotificationBlock _block;&#10;  _FBKVOInfoState _state;&#10;&#125;</span><br></pre></td></tr></table></figure>
-<p><code>_FBKVOInfoState</code>的定义如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef NS_ENUM(uint8_t, _FBKVOInfoState) &#123;&#10;  _FBKVOInfoStateInitial = 0,&#10;&#10;  // whether the observer registration in Foundation has completed&#10;  _FBKVOInfoStateObserving,&#10;&#10;  // whether `unobserve` was called before observer registration in Foundation has completed&#10;  // this could happen when `NSKeyValueObservingOptionInitial` is one of the NSKeyValueObservingOptions&#10;  _FBKVOInfoStateNotObserving,&#10;&#125;;</span><br></pre></td></tr></table></figure>
-<p>以上的定义基本可以后名字推断，就不再赘述。</p>
-<h3 id="FBKVOSharedController"><a href="#FBKVOSharedController" class="headerlink" title="FBKVOSharedController"></a>FBKVOSharedController</h3><p>FBKVOSharedController是一个单例，所有的观察信息以FBKVOInfo的形式交由其处理，FBKVOSharedController内部实现了KVO机制，当FBKVOInfo中的keypath对应的属性发生改变，那么对应的回调就会被执行。</p>
-<p>具体的代码如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observeValueForKeyPath:(nullable NSString *)keyPath&#10;                      ofObject:(nullable id)object&#10;                        change:(nullable NSDictionary&#60;NSString *, id&#62; *)change&#10;                       context:(nullable void *)context&#10;&#123;&#10;  NSAssert(context, @&#34;missing context keyPath:%@ object:%@ change:%@&#34;, keyPath, object, change);&#10;  &#10;  _FBKVOInfo *info;&#10;  &#10;  &#123;&#10;    // lookup context in registered infos, taking out a strong reference only if it exists&#10;    OSSpinLockLock(&#38;_lock);&#10;    info = [_infos member:(__bridge id)context];&#10;    OSSpinLockUnlock(&#38;_lock);&#10;  &#125;&#10;  &#10;  if (nil != info) &#123;&#10;    &#10;    // take strong reference to controller&#10;    FBKVOController *controller = info-&#62;_controller;&#10;    if (nil != controller) &#123;&#10;      &#10;      // take strong reference to observer&#10;      id observer = controller.observer;&#10;      if (nil != observer) &#123;&#10;        &#10;        // dispatch custom block or action, fall back to default action&#10;        if (info-&#62;_block) &#123;&#10;          info-&#62;_block(observer, object, change);&#10;        &#125; else if (info-&#62;_action) &#123;&#10;#pragma clang diagnostic push&#10;#pragma clang diagnostic ignored &#34;-Warc-performSelector-leaks&#34;&#10;          [observer performSelector:info-&#62;_action withObject:change withObject:object];&#10;#pragma clang diagnostic pop&#10;        &#125; else &#123;&#10;          [observer observeValueForKeyPath:keyPath ofObject:object change:change context:info-&#62;_context];&#10;        &#125;&#10;      &#125;&#10;    &#125;&#10;  &#125;&#10;&#125;</span><br></pre></td></tr></table></figure>
-<p>FBKVOSharedController还定义了以下三个方法，用于添加删除FBKVOInfo到其维护的一个NSHashTabe<_fbkvoinfo *="">中。</_fbkvoinfo></p>
-<p>代码如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)observe:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object info:(nullable _FBKVOInfo *)info&#10;&#10;- (void)unobserve:(id)object infos:(nullable NSSet&#60;_FBKVOInfo *&#62; *)infos</span><br></pre></td></tr></table></figure>
-<h3 id="FBKVOController"><a href="#FBKVOController" class="headerlink" title="FBKVOController"></a>FBKVOController</h3><p>FBKVOController内部维护了一个NSMapTable<id, nshasktable<_fbkvoinfo="" *=""> *&gt;用于建立一个被观察对象和被观察对象的KVOInfos（一个被观察对象可以又许多keypath被观察）的映射。</id,></p>
-<p>除此之外，FBKVOController只是简单的地调用FBKVOSharedController提供的方法来添加/删除观察对象。</p>
+        <h1 id="Mutability"><a href="#Mutability" class="headerlink" title="Mutability"></a>Mutability</h1><p>在Rust中，如果我们这样操作一个变量：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> x = <span class="number">5</span>;</span><br><span class="line">x = <span class="number">6</span>;	<span class="comment">// error</span></span><br></pre></td></tr></table></figure>
+<p>我们就会得到一个编译错误。</p>
+<p>如果要更改一个变量，我们需要添加<code>mut</code>关键字：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> x = <span class="number">5</span>;</span><br><span class="line">x = <span class="number">6</span>;</span><br></pre></td></tr></table></figure>
+<p>我们也可以像下面一样更改一个变量的值：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> x = <span class="number">5</span>;</span><br><span class="line"><span class="keyword">let</span> y = &amp;<span class="keyword">mut</span> x;</span><br><span class="line">*y = <span class="number">4</span>;</span><br></pre></td></tr></table></figure>
+<p>注意到<code>y</code>是可变变量<code>x</code>的可变引用，所以我们可以<code>y</code>来更改<code>x</code>的值，但是我们并不能更改<code>y</code>，在这里只有<code>x</code>是可变的。</p>
+<h1 id="Interior_Mutability__26amp_3B_Exterior_Mutability"><a href="#Interior_Mutability__26amp_3B_Exterior_Mutability" class="headerlink" title="Interior Mutability &amp; Exterior Mutability"></a>Interior Mutability &amp; Exterior Mutability</h1><p>考虑下面一个例子：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::sync::Arc;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = Arc::new(<span class="number">5</span>);</span><br><span class="line"><span class="keyword">let</span> y = x.clone();</span><br></pre></td></tr></table></figure>
+<p>当<code>clone</code>函数被调用后，<code>Arc&lt;T&gt;</code>会增加它的引用计数，这咋一看和<code>x</code>是不可变的变量矛盾了不是吗？在这里，<code>Arc&lt;T&gt;</code>暴露在用户面前的是不可变的，但是其内部却是可以改变的，因为它使用了<code>RefCell</code>。标准库对<code>Cell</code>和<code>RefCell</code>的定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Values of the Cell&#60;T&#62; and RefCell&#60;T&#62; types may be mutated through shared references (i.e. the common &#38;T type), whereas most Rust types can only be mutated through unique (&#38;mut T) references. We say that Cell&#60;T&#62; and RefCell&#60;T&#62; provide &#39;interior mutability&#39;, in contrast with typical Rust types that exhibit &#39;inherited mutability&#39;.</span><br></pre></td></tr></table></figure>
+<p>也就是说我们可以像这样操作变量：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::cell::RefCell;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = RefCell::new(<span class="number">42</span>);</span><br><span class="line">*x.borrow_mut() = <span class="number">7</span>;</span><br><span class="line"><span class="built_in">assert_eq!</span>(*x.borrow_mut(), <span class="number">7</span>);</span><br></pre></td></tr></table></figure>
+<p><code>borrow_mut</code>将变量内部的可变借给了用户，这样我们就可以修改<code>x</code>的值了。还记得Rust的借用规则吗？我们说Rust的一个变量可以有多个不可变的借用，但是有且仅有一个可变的借用，所以如果我们这样操作：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::cell::RefCell;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = RefCell::new(<span class="number">42</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> y = x.borrow_mut();</span><br><span class="line"><span class="keyword">let</span> z = x.borrow_mut();</span><br></pre></td></tr></table></figure>
+<p>那么这段代码就会在运行时崩溃（panic in runtime），这也说明了一点：<code>RefCell</code>在运行时执行了Rust的借用规则。</p>
+<p><code>RefCell</code>和<code>Cell</code> 的区别在于，<code>Cell</code>只能用于那么实现了<code>Copy</code>Trait的类型，其余的类型使用<code>RefCell</code>，<code>RefCell</code>让程序在修改变量时必须先获得一个写锁。</p>
+<h1 id="Cell_u548CRefCell_u7684_u8FD0_u7528"><a href="#Cell_u548CRefCell_u7684_u8FD0_u7528" class="headerlink" title="Cell和RefCell的运用"></a>Cell和RefCell的运用</h1><p>如果我们自定义了一个变量，变量的某些属性是可以修改的，而某些属性不能修改，那么这个时候就可以用<code>Cell</code> 或者<code>RefCell</code>了：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::cell::Cell;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> Point &#123;</span><br><span class="line">    x: <span class="keyword">i32</span>,</span><br><span class="line">    y: Cell&lt;<span class="keyword">i32</span>&gt;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> point = Point &#123; x: <span class="number">5</span>, y: Cell::new(<span class="number">6</span>) &#125;;</span><br><span class="line"></span><br><span class="line">point.y.set(<span class="number">7</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">println!</span>(<span class="string">"y: &#123;:?&#125;"</span>, point.y);</span><br></pre></td></tr></table></figure>
+<h1 id="u53C2_u8003"><a href="#u53C2_u8003" class="headerlink" title="参考"></a>参考</h1><p><a href="https://doc.rust-lang.org/stable/book/mutability.html" target="_blank" rel="external">The Rust Programming Language, Mutability</a></p>
 
       
     </div>
@@ -394,7 +395,9 @@ FBKVOInfoFBKVOInfo">
       
         <div class="post-tags">
           
-            <a href="/tags/program/" rel="tag"># program</a>
+            <a href="/tags/Cell-RefCell/" rel="tag"># Cell & RefCell</a>
+          
+            <a href="/tags/Mutability/" rel="tag"># Mutability</a>
           
         </div>
       
@@ -403,8 +406,8 @@ FBKVOInfoFBKVOInfo">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/04/20/Web_xml标签记录/" rel="next" title="Web.xml标签记录">
-                <i class="fa fa-chevron-left"></i> Web.xml标签记录
+              <a href="/2016/11/28/Rust FFI/" rel="next" title="Rust FFI">
+                <i class="fa fa-chevron-left"></i> Rust FFI
               </a>
             
           </div>
@@ -412,10 +415,6 @@ FBKVOInfoFBKVOInfo">
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/05/23/Swift Collections/" rel="prev" title="Swift Collections">
-                Swift Collections <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -535,7 +534,7 @@ FBKVOInfoFBKVOInfo">
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#FBKVOController__u6E90_u7801_u9605_u8BFB_u7B14_u8BB0"><span class="nav-number">1.</span> <span class="nav-text">FBKVOController 源码阅读笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u7ED3_u6784_u5206_u6790"><span class="nav-number">1.0.1.</span> <span class="nav-text">结构分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#FBKVOInfo"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">FBKVOInfo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FBKVOSharedController"><span class="nav-number">1.0.2.</span> <span class="nav-text">FBKVOSharedController</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FBKVOController"><span class="nav-number">1.0.3.</span> <span class="nav-text">FBKVOController</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Mutability"><span class="nav-number">1.</span> <span class="nav-text">Mutability</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Interior_Mutability__26amp_3B_Exterior_Mutability"><span class="nav-number">2.</span> <span class="nav-text">Interior Mutability & Exterior Mutability</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cell_u548CRefCell_u7684_u8FD0_u7528"><span class="nav-number">3.</span> <span class="nav-text">Cell和RefCell的运用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u53C2_u8003"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
