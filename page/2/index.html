@@ -257,6 +257,162 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/08/进程/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/10/08/进程/" itemprop="url">
+                  进程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/10/08/进程/" class="leancloud_visitors" data-flag-title="进程">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="u8FDB_u7A0B_u7684_u6982_u5FF5"><a href="#u8FDB_u7A0B_u7684_u6982_u5FF5" class="headerlink" title="进程的概念"></a>进程的概念</h1><p>进程是一个可执行程序的实例。而程序包含了一系列的文件信息，这些信息描述了如何在运行时创建一个进程，其所包括的内容有：</p>
+<ul>
+<li>二进制格式标识：用于描述可执行文件格式的元信息，内核用它来解释文件中的其他信息。Linux采用<code>ELF文件系统</code>。</li>
+<li>机器语言指令</li>
+<li>程序入口地址</li>
+<li>数据：程序文件包含的变量初始值和程序使用的字面常量值（如字符串）.</li>
+<li>符号表及重定位表</li>
+<li>共享库和动态链接库的信息</li>
+<li>其他信息，用以描述如何创建进程。</li>
+</ul>
+<p>可以用一个程序创建许多个进程，反过来，许多进程运行的可以是同一个程序。从内核角度来说，进程由用户内存空间和一系列内核数据结构组成，其中用户内存空间包含了程序代码以及代码所使用的变量，而内核数据结构则用于维护进程状态信息，如进程号、虚拟内存表、进程打开的文件描述符、信号传递及处理的有关信息、当前工作目录、进程资源使用及限制和其他大量信息。</p>
+<p>一个进程运行时的信息可以在<code>/proc/{PID}/</code>目录下看到。</p>
+<h1 id="u8FDB_u7A0B_u5185_u5B58_u5E03_u5C40"><a href="#u8FDB_u7A0B_u5185_u5B58_u5E03_u5C40" class="headerlink" title="进程内存布局"></a>进程内存布局</h1><p>每个进程所分配的内存由许多部分组成，通常称之为<code>段</code>，各个段如下：</p>
+<ul>
+<li>文本段：包含了进程运行的程序机器语言指令。文本段具有只读属性，以防止进程通过错误指针意外修改自身指令；同时，文本段是共享的，从而可以让一份程序代码的拷贝映射到所有共享这份代码的进程中，从而让多个进程运行同一个程序。</li>
+<li>初始化数据段：包含显示初始化的全局变量和静态变量。</li>
+<li>未初始化的数据段：包含了为进程显示初始化的全局变量和静态变量，程序启动之前，系统将本段内所有内存初始化为0，该段常被成为BSS段。为初始化和初始化的变量分开存放主要是由于没有必要为未初始化的变量在文件中分配存储空间，相反，可执行文件只要记录未初始化数据段的位置及其所需要的大小，知道运行时再由程序加载器来分配空间。</li>
+<li>栈是一个动态增长和收缩的段，由<code>栈帧</code>组成。系统为每个当前调用的函数分配一个栈帧。栈帧中存储了函数的局部变量（即自动变量）、实参和返回值。</li>
+<li>堆是可在运行时动态进行内存分配的一块区域。堆顶称为<code>program break</code>。</li>
+</ul>
+<p>大多数UNIX实现（包括Linux）中C语言编程环境提供了3个全局变量<code>etext</code>、<code>edata</code>、<code>end</code>，它们分别用来标识<code>文本段</code>、<code>初始化数据段</code>、<code>非初始化数据段</code>结尾处的下一个字节位置。在x86-32体系结构进程在内存中的布局如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#34394;&#25311;&#20869;&#23384;&#22320;&#22336;&#65288;&#20174;&#19979;&#24448;&#19978;&#22686;&#38271;&#65289;&#10;          |----------------------------------------&#10;          |&#9;     Kernel&#26144;&#23556;&#21040;&#36827;&#31243;&#34394;&#25311;&#20869;&#23384;&#65292;&#21306;&#22495;          &#10;          |      &#25552;&#20379;&#20102;&#20869;&#23384;&#31526;&#21495;&#30340;&#22320;&#22336;&#12290;&#65288;/proc/kallsyms) &#65288;&#26080;&#27861;&#20351;&#29992;&#65289;&#10;          |----------------------------------------&#10;          |&#9;&#9;argv, environ&#9;&#9;&#9;    &#10;          |----------------------------------------&#26632;&#39030;&#10;          |&#9;&#9;&#26632;&#65288;&#21521;&#19979;&#22686;&#38271;&#65289;&#10;          |----------------------------------------&#10;          |&#10;          |&#9;&#9;&#26410;&#20998;&#37197;&#30340;&#20869;&#23384;&#65288;&#26080;&#27861;&#20351;&#29992;&#65289;&#10;          |&#10;          |----------------------------------------&#31243;&#24207;&#20013;&#26029;&#10;          |     &#22534;&#65288;&#21521;&#19978;&#22686;&#38271;&#65289;&#10;          |----------------------------------------end&#10;          |     &#26410;&#21021;&#22987;&#21270;&#30340;&#25968;&#25454;&#65288;bss&#65289;&#10;          |----------------------------------------edata&#10;          |     &#21021;&#22987;&#21270;&#30340;&#25968;&#25454;&#10;          |----------------------------------------etext&#10;          |     &#25991;&#26412;&#27573;&#10;          |-----------------------------------------0x08048000&#10;          |     (&#26080;&#27861;&#20351;&#29992;)&#10;          |-----------------------------------------0x00000000</span><br></pre></td></tr></table></figure>
+<p>上述布局存在于虚拟内存之中。</p>
+<h1 id="u547D_u4EE4_u884C_u53C2_u6570_u548C_u73AF_u5883_u53D8_u91CF"><a href="#u547D_u4EE4_u884C_u53C2_u6570_u548C_u73AF_u5883_u53D8_u91CF" class="headerlink" title="命令行参数和环境变量"></a>命令行参数和环境变量</h1><p>上一节的内存布局图中，<code>argv和eviron</code>那一部分存储了进程启动时用户输入的命令行参数和环境变量，关于命令行参数，即<code>main</code>函数的参数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argc)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> i;</span><br><span class="line">  <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;argc; i++)</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"argv[%d] = %s\n"</span>, i, argv[i]);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于环境变量，每一个进程都有与之相关联的环境变量列表，其结构式字符串数组，每一个字符串以<code>name=value</code>形式定义。新进程在创建之时，会继承其父进程的环境变量副本，这是一种原始的进程间通信方式，却颇为有用。</p>
+<p>关于环境变量的几个接口和变量如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">char</span> **environ;		<span class="comment">// 全局变量，用于访问进程的环境变量，每一个以`name=value`的形式</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">char</span>* <span class="title">getenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* name)</span></span>;			<span class="comment">// 成功返回环境变量字符串，否则返回NULL</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">putenv</span><span class="params">(<span class="keyword">char</span> *<span class="built_in">string</span>)</span></span>;			   <span class="comment">// 0表示公共，否则失败。`string`为`name=value`形式</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">clearenv</span><span class="params">()</span></span>;		<span class="comment">// 0表示成功，否则失败</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 注意以下函数不用`name=value`形式</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name, <span class="keyword">const</span> <span class="keyword">char</span> *value, <span class="keyword">int</span> overwrite)</span></span>;		<span class="comment">// 0表示成功，-1表示失败</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">unsetenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span>;		<span class="comment">// 0表示成功，-1表示失败。</span></span><br></pre></td></tr></table></figure>
+<p>需要注意的是，<code>putenv</code>不为字符串分配一个缓冲区，它仅仅改变对应的<code>environ</code>数组中的对应指针，因此<code>string</code>参数应该是一个静态或者全局变量，而不是自动变量。</p>
+<p><code>setenv</code>会为字符串分配一个内存缓冲区，并将name和value的字符串复制到该缓冲区中，以此来创建一个新的环境变量。若<code>overwrite</code>值非0，那么<code>setenv</code>总是覆写原来的环境变量；否则，若环境变量已经存在，那么它不会改变。</p>
+<p><code>clearenv</code>仅仅是把<code>environ</code>置为NULL，在某些时候可能会导致内存泄漏。</p>
+<h3 id="u4E00_u4E2A_u4F8B_u5B50_uFF1A"><a href="#u4E00_u4E2A_u4F8B_u5B50_uFF1A" class="headerlink" title="一个例子："></a>一个例子：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> _GNU_SOURCE</span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> errExit(fmt, ...) do &#123;fprintf(stderr, fmt, ##__VA_ARGS__); perror(<span class="string">""</span>); exit(-<span class="number">1</span>);&#125; while (<span class="number">0</span>)</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">char</span> **environ;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">char</span> **ep;</span><br><span class="line"></span><br><span class="line">    clearenv();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;argc; i++) &#123;</span><br><span class="line">	<span class="keyword">if</span> (putenv(argv[i]) != <span class="number">0</span>)</span><br><span class="line">	    errExit(<span class="string">"putenv: %s"</span>, argv[i]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (setenv(<span class="string">"GREET"</span>, <span class="string">"Hello world"</span>, <span class="number">0</span>) == -<span class="number">1</span>)</span><br><span class="line">	errExit(<span class="string">"setenv"</span>);</span><br><span class="line"></span><br><span class="line">    unsetenv(<span class="string">"BYE"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (ep=environ; *ep!=<span class="literal">NULL</span>; ep++)</span><br><span class="line">	<span class="built_in">puts</span>(*ep);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@VM-121-120-ubuntu:~/UNIX-Demos/proc_demos$ ./a.out G=&#34;HAGA&#34;&#10;G=HAGA&#10;GREET=Hello world&#10;&#10;ubuntu@VM-121-120-ubuntu:~/UNIX-Demos/proc_demos$ ./a.out G=&#34;HAGA&#34; GREET=&#34;Hello&#34;&#10;G=HAGA&#10;GREET=Hello</span><br></pre></td></tr></table></figure>
+<h1 id="u975E_u5C40_u90E8_u8DF3_u8F6C"><a href="#u975E_u5C40_u90E8_u8DF3_u8F6C" class="headerlink" title="非局部跳转"></a>非局部跳转</h1><p>C语言中的<code>goto</code>语句允许我们进行语句跳转，但是这仅仅局限在同一个函数中。虽然跳转会让我们的代码变得难以维护，看着就头大，但是有时候有这样一个语句还是能解决很大的问题的，前提是不要滥用。为了能够解决非局部跳转的问题，UNIX系统提供了两个接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;setjmp.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setjump</span><span class="params">(jump_buf env)</span></span>;		<span class="comment">// 0表示初始化操作，非0时返回的是`longjmp`设定的`val`值</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">longjmp</span><span class="params">(jump_buf env, <span class="keyword">int</span> val)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>setjmp</code>为后续的<code>longjmp</code>设立了跳转目标，<code>setjmp</code>把当前进程环境的各种信息保存到<code>env</code>参数中，调用<code>longjmp</code>时必须指定相同的<code>env</code>变量，一般将<code>env</code>设定为全局变量。</p>
+<h3 id="u4E00_u4E2A_u4F8B_u5B50"><a href="#u4E00_u4E2A_u4F8B_u5B50" class="headerlink" title="一个例子"></a>一个例子</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;setjmp.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> jmp_buf env;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">f2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    longjmp(env, <span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">f1</span><span class="params">(<span class="keyword">int</span> argc)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (argc == <span class="number">1</span>)</span><br><span class="line">	longjmp(env, <span class="number">1</span>);</span><br><span class="line">    f2();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (setjmp(env)) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">0</span>: &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"Calling f1() after initial setjmp()\n"</span>);</span><br><span class="line">	f1(argc);</span><br><span class="line">	<span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>: &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"We jumped back from f1()\n"</span>);</span><br><span class="line">	<span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>: &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"We jumped back from f2()\n"</span>);</span><br><span class="line">	<span class="keyword">break</span>;</span><br><span class="line">    &#125;	</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">	<span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@VM-121-120-ubuntu:~/UNIX-Demos/proc_demos$ ./a.out &#10;Calling f1() after initial setjmp()&#10;We jumped back from f1()&#10;&#10;ubuntu@VM-121-120-ubuntu:~/UNIX-Demos/proc_demos$ ./a.out  ss&#10;Calling f1() after initial setjmp()&#10;We jumped back from f2()</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/04/epoll入门/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -757,138 +913,6 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/IPv4与IPv6的户操作性/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/19/IPv4与IPv6的户操作性/" itemprop="url">
-                  IPv4与IPv6的户操作性
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/19/IPv4与IPv6的户操作性/" class="leancloud_visitors" data-flag-title="IPv4与IPv6的户操作性">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="IPv4_u6620_u5C04_u7684IPv6_u5730_u5740"><a href="#IPv4_u6620_u5C04_u7684IPv6_u5730_u5740" class="headerlink" title="IPv4映射的IPv6地址"></a>IPv4映射的IPv6地址</h1><p>IPv4映射的IPv6地址允许在因特网向IPv6过度时期让运行在双栈主机上的IPv6应用进程能够与只支持IPv4的主机通信。这些地址是IPv6应用进程查询某个只有IPv4地址的主机的IPv6地址时，DNS解析器按需自动创建的且不存在于任何DNS<br>数据文件中。在IPv6套接字上使用这种类型的地址导致往目的地IPv4主机发送IPv4数据报。</p>
-<p>下图展示了一个IPv4映射的IPv6地址的格式：</p>
-<img src="/2016/09/19/IPv4与IPv6的户操作性/mapped.png" alt="mapped.png" title="">
-<h1 id="IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668"><a href="#IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668" class="headerlink" title="IPv4客户与IPv6服务器"></a>IPv4客户与IPv6服务器</h1><p>双栈主机的一个特性就是其上的IPv6服务器既可以处理IPv4客户，也可以处理IPv6客户。这是通过IPv4映射的IPv6地址实现的。下图是一个例子：</p>
-<img src="/2016/09/19/IPv4与IPv6的户操作性/ipv4to6.png" alt="ipv4to6.png" title="">
-<p>IPv4客户发送一个IPv4的SYN分节以期和服务器建立连接。来自IPv4客户的SYN分节在以太网中表现为一个以太网首部、一个IPv4首部、一个TCP部以及TCP数据。以太网首部中包含的类型字段为0x0800，表示它是一个IPv4帧数据。</p>
-<p>接收数据链路通过查看以太网类型字段把每个帧数据发送给对应的IP模块。IPv4模块结合其上的TCP模块检测到IPv4数据报的目的段端口对应一个IPv4套接字，于是该数据报Ipv4首部中的源IPv4地址被转换成IPv4映射的IPv6地址，当<br>accept系统调用把这个已经接收的IPv4客户连接返回被服务器进程的时候，这个映射后的地址作为客户的IPv6地址返回到服务器的IPv6套接字。该连接上的其余数据同样都是IPv4数据报。服务器进程完全不知道它是在与一个IPv4客户机通信。</p>
-<h1 id="IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668"><a href="#IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668" class="headerlink" title="IPv6客户与IPv4服务器"></a>IPv6客户与IPv4服务器</h1><p>在一个双栈主机上运行一个IPv6客户程序，其于一个IPv4服务器程序交互的流程如下：</p>
-<ol>
-<li>一个IPv4服务器在只支持IPv4的一个主机上启动后创建一个IPv4监听套接字。</li>
-<li>IPv6客户启动后调用getaddrinfo单纯查找IPv6地址（请求AF_INET6地址，hints结构中设置了AI_V4MAPPED标志），最后只有得到只支持IPv4的服务器主机的A记录，那么返回给客户的就是IPv4映射之后的IPv6地址。</li>
-<li>IPv6客户设置这个IPv4映射后的IPv6地址，调用connect，内核检测到这个映射的地址后自动发送一个IPv4的SYN分节到服务器。</li>
-<li>服务器响应一个IPv4 SYN/ACK分节，连接于是用IPv4数据报建立。</li>
-</ol>
-<p>以后在以太网上传递的是IPv4数据报。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/系统服务——daemon/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1013,6 +1037,138 @@
 <h3 id="daytime_daemon_u7A0B_u5E8F"><a href="#daytime_daemon_u7A0B_u5E8F" class="headerlink" title="daytime daemon程序"></a>daytime daemon程序</h3><p>最后这里给出daytimeserver的代码，这是由xinetd作为守护进程启动的时间获取服务器程序。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span></span><br><span class="line"><span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">socklen_t</span>		len;</span><br><span class="line">	<span class="keyword">struct</span> sockaddr	*cliaddr;</span><br><span class="line">	<span class="keyword">char</span>			buff[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span>			ticks;</span><br><span class="line"></span><br><span class="line">	daemon_inetd(argv[<span class="number">0</span>], <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	cliaddr = Malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage));</span><br><span class="line">	len = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage);</span><br><span class="line">	Getpeername(<span class="number">0</span>, cliaddr, &amp;len);</span><br><span class="line">	err_msg(<span class="string">"connection from %s"</span>, Sock_ntop(cliaddr, len));</span><br><span class="line"></span><br><span class="line">    ticks = time(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">snprintf</span>(buff, <span class="keyword">sizeof</span>(buff), <span class="string">"%.24s\r\n"</span>, ctime(&amp;ticks));</span><br><span class="line">    Write(<span class="number">0</span>, buff, <span class="built_in">strlen</span>(buff));</span><br><span class="line"></span><br><span class="line">	Close(<span class="number">0</span>);	<span class="comment">/* close TCP connection */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>可以看到所有套接字的创建代码(tcp_listen和accept的调用)都不见了，这些步骤都有xinetd执行，我们使用描述符0指代已由xinetd接受的TCP连接（套接字描述符被复制到描述符0, 1, 2）。daemon_init只是负责设置daemon_proc<br>标志以及调用openlog，从而发送日志信息给syslogd守护进程。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/IPv4与IPv6的户操作性/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/09/19/IPv4与IPv6的户操作性/" itemprop="url">
+                  IPv4与IPv6的户操作性
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/19/IPv4与IPv6的户操作性/" class="leancloud_visitors" data-flag-title="IPv4与IPv6的户操作性">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="IPv4_u6620_u5C04_u7684IPv6_u5730_u5740"><a href="#IPv4_u6620_u5C04_u7684IPv6_u5730_u5740" class="headerlink" title="IPv4映射的IPv6地址"></a>IPv4映射的IPv6地址</h1><p>IPv4映射的IPv6地址允许在因特网向IPv6过度时期让运行在双栈主机上的IPv6应用进程能够与只支持IPv4的主机通信。这些地址是IPv6应用进程查询某个只有IPv4地址的主机的IPv6地址时，DNS解析器按需自动创建的且不存在于任何DNS<br>数据文件中。在IPv6套接字上使用这种类型的地址导致往目的地IPv4主机发送IPv4数据报。</p>
+<p>下图展示了一个IPv4映射的IPv6地址的格式：</p>
+<img src="/2016/09/19/IPv4与IPv6的户操作性/mapped.png" alt="mapped.png" title="">
+<h1 id="IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668"><a href="#IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668" class="headerlink" title="IPv4客户与IPv6服务器"></a>IPv4客户与IPv6服务器</h1><p>双栈主机的一个特性就是其上的IPv6服务器既可以处理IPv4客户，也可以处理IPv6客户。这是通过IPv4映射的IPv6地址实现的。下图是一个例子：</p>
+<img src="/2016/09/19/IPv4与IPv6的户操作性/ipv4to6.png" alt="ipv4to6.png" title="">
+<p>IPv4客户发送一个IPv4的SYN分节以期和服务器建立连接。来自IPv4客户的SYN分节在以太网中表现为一个以太网首部、一个IPv4首部、一个TCP部以及TCP数据。以太网首部中包含的类型字段为0x0800，表示它是一个IPv4帧数据。</p>
+<p>接收数据链路通过查看以太网类型字段把每个帧数据发送给对应的IP模块。IPv4模块结合其上的TCP模块检测到IPv4数据报的目的段端口对应一个IPv4套接字，于是该数据报Ipv4首部中的源IPv4地址被转换成IPv4映射的IPv6地址，当<br>accept系统调用把这个已经接收的IPv4客户连接返回被服务器进程的时候，这个映射后的地址作为客户的IPv6地址返回到服务器的IPv6套接字。该连接上的其余数据同样都是IPv4数据报。服务器进程完全不知道它是在与一个IPv4客户机通信。</p>
+<h1 id="IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668"><a href="#IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668" class="headerlink" title="IPv6客户与IPv4服务器"></a>IPv6客户与IPv4服务器</h1><p>在一个双栈主机上运行一个IPv6客户程序，其于一个IPv4服务器程序交互的流程如下：</p>
+<ol>
+<li>一个IPv4服务器在只支持IPv4的一个主机上启动后创建一个IPv4监听套接字。</li>
+<li>IPv6客户启动后调用getaddrinfo单纯查找IPv6地址（请求AF_INET6地址，hints结构中设置了AI_V4MAPPED标志），最后只有得到只支持IPv4的服务器主机的A记录，那么返回给客户的就是IPv4映射之后的IPv6地址。</li>
+<li>IPv6客户设置这个IPv4映射后的IPv6地址，调用connect，内核检测到这个映射的地址后自动发送一个IPv4的SYN分节到服务器。</li>
+<li>服务器响应一个IPv4 SYN/ACK分节，连接于是用IPv4数据报建立。</li>
+</ol>
+<p>以后在以太网上传递的是IPv4数据报。</p>
 
           
         
@@ -1532,172 +1688,6 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/IO模型/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/09/IO模型/" itemprop="url">
-                  I/O模型
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/09/IO模型/" class="leancloud_visitors" data-flag-title="I/O模型">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="I/O_u6A21_u578B_u7684_u79CD_u7C7B"><a href="#I/O_u6A21_u578B_u7684_u79CD_u7C7B" class="headerlink" title="I/O模型的种类"></a>I/O模型的种类</h1><p>Unix环境下可用的5种I/O模型分别为：</p>
-<ul>
-<li>阻塞式I/Ob</li>
-<li>非阻塞式I/O</li>
-<li>I/O复用（select和poll）</li>
-<li>信号驱动I/O（SIGIO）</li>
-<li>异步I/O（POSIX的aio_系列函数）</li>
-</ul>
-<p>一个输入操作的通常包括两个步骤：</p>
-<ol>
-<li>等待数据准备好</li>
-<li>从内核向进程复制数据</li>
-</ol>
-<h2 id="u963B_u585E_u5F0FI/O_u6A21_u578B"><a href="#u963B_u585E_u5F0FI/O_u6A21_u578B" class="headerlink" title="阻塞式I/O模型"></a>阻塞式I/O模型</h2><img src="/2016/09/09/IO模型/io_block.png" alt="io_block.png" title="">
-<p>在图示中，进程调用<code>recvfrom</code>，其系统调用直到数据到达且被复制到应用进程的缓冲区中或者发生错误才返回，最常见的错误就是被信号中断。</p>
-<h2 id="u975E_u963B_u585EI/O_u6A21_u578B"><a href="#u975E_u963B_u585EI/O_u6A21_u578B" class="headerlink" title="非阻塞I/O模型"></a>非阻塞I/O模型</h2><img src="/2016/09/09/IO模型/io_nonblock.png" alt="io_nonblock.png" title="">
-<p>从图示中我们可以看出，当recvfrom没有数据可返回时，内核立即返回一个<code>EWOULDBLOCK</code>错误；如果有数据准备好了，那么s内核开始将数据复制到应用进程缓冲区，于是recvfrom成功返回。</p>
-<p>这样一种对一个非阻塞描述符循环调用recvfrom的方式，我们称之为<code>polling</code>。</p>
-<h2 id="I/O_u590D_u7528_u6A21_u578B"><a href="#I/O_u590D_u7528_u6A21_u578B" class="headerlink" title="I/O复用模型"></a>I/O复用模型</h2><img src="/2016/09/09/IO模型/io_multiplexing.png" alt="io_multiplexing.png" title="">
-<p>I/O复用模型中，我们的进程阻塞于select或者poll函数，而不是阻塞在真正的I/O系统调用上，当某一个描述符数据准备好时，我们的进程被唤醒，从而可以处理数据，通过I/O复用模型，我们可以让应用进程等待多个I/O的操作完成，而不是单单阻塞于一个I/O操作。</p>
-<h2 id="u4FE1_u53F7_u9A71_u52A8_u7684I/O_u6A21_u578B"><a href="#u4FE1_u53F7_u9A71_u52A8_u7684I/O_u6A21_u578B" class="headerlink" title="信号驱动的I/O模型"></a>信号驱动的I/O模型</h2><img src="/2016/09/09/IO模型/io_signal.png" alt="io_signal.png" title="">
-<p>信号驱动模型在数据就绪时通过发送<code>SIGIO</code>通知应用进程，应用进程收到信号后可以在信号处理函数中调用recvfrom读取数据。这种模式的优势在于等待数据报到达期间，进程不会被阻塞，主循环可继续执行。但是在内核复制数据到应用进程缓冲区期间，应用进程被阻塞。</p>
-<h2 id="u5F02_u6B65I/O_u6A21_u578B"><a href="#u5F02_u6B65I/O_u6A21_u578B" class="headerlink" title="异步I/O模型"></a>异步I/O模型</h2>
-<p>POSIX定义同步和异步I/O操作如下：</p>
-<ol>
-<li>同步I/O操作：导致请求进程阻塞，直到I/O操作完成（前面四个模型按照该定义都是同步I/O）</li>
-<li>异步I/O操作：不导致请求进程阻塞。</li>
-</ol>
-<p>异步I/O由POSIX规范定义，它告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到应用进程的缓冲区）完成后通知我们。它于信号驱动的I/O模型相比，区别在于异步模型由内核通知我们什么时候I/O操作完成，而信号驱动模型由内核通知我们什么时候可以启动一个I/O操作。</p>
-<h1 id="select_u51FD_u6570"><a href="#select_u51FD_u6570" class="headerlink" title="select函数"></a>select函数</h1><p>select函数允许进程指示等到多个时间中的任何一个发生，并只在有一个或者多个时间发生或经历一段指定时间后才唤醒它。</p>
-<p>函数的原型为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/select.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">select</span><span class="params">(<span class="keyword">int</span> maxfd1, fd_set *readset, fd_set *writeset, fd_set *excepset, <span class="keyword">const</span> <span class="keyword">struct</span> timeval *timeout)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>中断三个参数<code>readset</code>，<code>writeset</code>，<code>exceptset</code>指定要让内核测试读、写和异常条件的描述符。<code>maxfd1</code>参数指定待测试的描述符的个数，它的值是待测试描述符的最大描述符加1。在函数返回后，描述符集内任何与未就绪描述符对应的位都会被清为0，为此，每次重新调用select函数时，我们都得再次把所有需要测试的描述符对应位置位。</p>
-<p>一般来说，为了提升性能而引入缓冲机制会增加网络应用程序的复杂性。比如用fgets读取文本行，这转而会使得一可用的文本行被读入到stdio缓冲区中，然而fgets只返回1行，其余仍然在缓冲区中，当fgets完成任务后，select函数会被再次调用以等待新的工作，它不管stdio缓冲区中是否还有数据，究其原因是select不知道stdio使用了缓冲区，它只是从read系统调用的角度指出是否有数据可用。所以在混合使用stdio和select时需要格外小心。</p>
-<h1 id="shutdown_u51FD_u6570"><a href="#shutdown_u51FD_u6570" class="headerlink" title="shutdown函数"></a>shutdown函数</h1><p>终止网络连接的通常方法是调用close函数，但是close函数有两个限制：</p>
-<ol>
-<li>close把描述符的引用计数见减1，仅仅在计数变为0时关闭套接字。</li>
-<li>close终止读和写两个方向的数据传送。</li>
-</ol>
-<p>利用shutdown函数，可以避免这两个限制，shutdown函数可以不管引用计数就激发TCP的正常终止序列，也可以在我们发送完数据后，只关闭写半部，仍然等待远端数据接收（反之亦可）。</p>
-<p>函数原型为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">shutdown</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> howto)</span></span></span><br></pre></td></tr></table></figure>
-<p>函数的行为依赖于<code>howto</code>参数：</p>
-<ul>
-<li>SHUT_RD：关闭读半部，套接字中不再有数据可以接收，而且套接字接收缓冲区中的现有数据都被丢弃。进程不能再对这样的套接字调用任何读函数，对一个TCP套接字这样调用shutdown函数后，由该套接字接收的来自对端的任何数据都被确认，然后悄然丢弃。</li>
-<li>SHUT_WR：关闭写半部，对于TCP套接字这称为半关闭。当前留在套接字发送缓冲区中的数据将被发送掉，之后发送TCP的FIN分节，不管套接字描述符引用是否为0，写半部关闭都会执行，进程不能再对这样的套接字调用任何写函数。</li>
-<li>SHUT_RDWR：连接的读半部和写半部都关闭，这和调用两次shutdown等效。</li>
-</ul>
-<h1 id="u4E00_u4E2AI/O_u590D_u7528_u7684_u4F8B_u5B50"><a href="#u4E00_u4E2AI/O_u590D_u7528_u7684_u4F8B_u5B50" class="headerlink" title="一个I/O复用的例子"></a>一个I/O复用的例子</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">select_strcli</span><span class="params">(FILE *fp, <span class="keyword">int</span> sockfd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> maxfdp1, stdineof, n;</span><br><span class="line">    fd_set rset;</span><br><span class="line">    <span class="keyword">char</span> buf[MAXLINE];</span><br><span class="line"></span><br><span class="line">    stdineof = <span class="number">0</span>;</span><br><span class="line">    FD_ZERO(&amp;rset);</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		<span class="comment">/* 每次select返回后，任何未就绪的描述符清0，所以每次都要置位*/</span></span><br><span class="line">		<span class="keyword">if</span> (stdineof == <span class="number">0</span>)</span><br><span class="line">			FD_SET(fileno(fp), &amp;rset);</span><br><span class="line">		FD_SET(sockfd, &amp;rset);</span><br><span class="line">		maxfdp1 = max(fileno(fp), sockfd) + <span class="number">1</span>;</span><br><span class="line">	</span><br><span class="line">		n = select(maxfdp1, &amp;rset, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">		<span class="keyword">if</span> (n &lt; <span class="number">0</span>)</span><br><span class="line">			err_sys(<span class="string">"select error"</span>);</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">if</span> (FD_ISSET(sockfd, &amp;rset)) &#123;</span><br><span class="line">			<span class="keyword">if</span> ((n = Read(sockfd, buf, MAXLINE)) == <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">if</span> (stdineof == <span class="number">1</span>)</span><br><span class="line">				<span class="keyword">return</span>;	<span class="comment">/* terminated normally */</span></span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				err_quit(<span class="string">"str_cli: server terminated prematurelly"</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			Write(fileno(<span class="built_in">stdout</span>), buf, n);</span><br><span class="line">		&#125;</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">if</span> (FD_ISSET(fileno(fp), &amp;rset)) &#123;</span><br><span class="line">			<span class="keyword">if</span> ((n = Read(fileno(fp), buf, MAXLINE)) == <span class="number">0</span>) &#123;</span><br><span class="line">			stdineof = <span class="number">1</span>;</span><br><span class="line">			Shutdown(sockfd, SHUT_WR); <span class="comment">/* send FIN, still can read */</span></span><br><span class="line">			FD_CLR(fileno(fp), &amp;rset);</span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			Writen(sockfd, buf, n);</span><br><span class="line">		&#125;	</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/TCP连接建立和终止/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1880,7 +1870,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">28</span>
+              <span class="site-state-item-count">29</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1897,7 +1887,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">35</span>
+                <span class="site-state-item-count">38</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

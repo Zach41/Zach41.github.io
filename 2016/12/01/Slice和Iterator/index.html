@@ -1,0 +1,828 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Contiguous regions of memory,Iterator,Slice," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Contiguous regions of memoryRust用以下三种类型来处理连续的内存：
+
+Vec\：可变大小的堆向量数组
+[T; N]：编译器确定大小的数组
+[T]：用于代表连续内存的slice
+
+一个Slice只能通过特定类型的指针来操作，指针类型为以下三种：
+
+&amp;amp;[T]
+&amp;amp;mut [T]
+Box&amp;lt;[T]&amp;gt;
+
+如果我们有一个Vec&amp;lt;T&amp;gt;变量，那么">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Slice和Iterator">
+<meta property="og:url" content="http://yoursite.com/2016/12/01/Slice和Iterator/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="Contiguous regions of memoryRust用以下三种类型来处理连续的内存：
+
+Vec\：可变大小的堆向量数组
+[T; N]：编译器确定大小的数组
+[T]：用于代表连续内存的slice
+
+一个Slice只能通过特定类型的指针来操作，指针类型为以下三种：
+
+&amp;amp;[T]
+&amp;amp;mut [T]
+Box&amp;lt;[T]&amp;gt;
+
+如果我们有一个Vec&amp;lt;T&amp;gt;变量，那么">
+<meta property="og:updated_time" content="2016-12-01T14:03:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Slice和Iterator">
+<meta name="twitter:description" content="Contiguous regions of memoryRust用以下三种类型来处理连续的内存：
+
+Vec\：可变大小的堆向量数组
+[T; N]：编译器确定大小的数组
+[T]：用于代表连续内存的slice
+
+一个Slice只能通过特定类型的指针来操作，指针类型为以下三种：
+
+&amp;amp;[T]
+&amp;amp;mut [T]
+Box&amp;lt;[T]&amp;gt;
+
+如果我们有一个Vec&amp;lt;T&amp;gt;变量，那么">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title> Slice和Iterator | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/12/01/Slice和Iterator/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Slice和Iterator
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/12/01/Slice和Iterator/" class="leancloud_visitors" data-flag-title="Slice和Iterator">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Contiguous_regions_of_memory"><a href="#Contiguous_regions_of_memory" class="headerlink" title="Contiguous regions of memory"></a>Contiguous regions of memory</h1><p>Rust用以下三种类型来处理连续的内存：</p>
+<ul>
+<li>Vec\<t>：可变大小的堆向量数组</t></li>
+<li>[T; N]：编译器确定大小的数组</li>
+<li>[T]：用于代表连续内存的slice</li>
+</ul>
+<p>一个Slice只能通过特定类型的指针来操作，指针类型为以下三种：</p>
+<ul>
+<li>&amp;[T]</li>
+<li>&amp;mut [T]</li>
+<li>Box&lt;[T]&gt;</li>
+</ul>
+<p>如果我们有一个<code>Vec&lt;T&gt;</code>变量，那么我们可以通过下面的方法得到对应的Slice：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> vec = <span class="built_in">vec!</span>[<span class="number">12</span>, <span class="number">3</span>, <span class="number">4</span>];</span><br><span class="line"><span class="keyword">let</span> int_slice = &amp;vec[..];</span><br></pre></td></tr></table></figure>
+<p>当然也可以直接创建一个Slice变量：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> str_slice: &amp;[&amp;<span class="keyword">str</span>] = &amp;[<span class="string">"one"</span>, <span class="string">"two"</span>, <span class="string">"three"</span>];</span><br></pre></td></tr></table></figure>
+<h1 id="5BT_3B_N_5D"><a href="#5BT_3B_N_5D" class="headerlink" title="[T; N]"></a>[T; N]</h1><p><code>[T; N]</code>是在编译器就确定长度的数组，有两种方式创建这种数组：</p>
+<ul>
+<li>[x, y, z]</li>
+<li>[x; N]：<code>x</code>被重复N次</li>
+</ul>
+<p>如果数组的长度小于等于32，那么如果数组的元素类型允许（即元素类型实现了对应的Trait），那么数组自动实现以下Trait：</p>
+<ul>
+<li><code>Clone</code>（<code>T: Copy</code>）</li>
+<li><code>Debug</code></li>
+<li><code>IntoIterator</code>（<code>&amp;[T; N]</code>和<code>&amp;mut [T; N]</code>实现了这个Trait）</li>
+<li><code>PartialEq</code>，<code>PartialOrd</code>，<code>Ord</code>，<code>Eq</code></li>
+<li><code>Hash</code></li>
+<li><code>AsRef</code>，<code>AsMut</code></li>
+<li><code>Borrow</code>，<code>BorrowMut</code></li>
+<li><code>Default</code></li>
+</ul>
+<p>之所以有长度的限制，是因为Rust不支持在数组长度上的泛型，所以就实现到了长度32为止。</p>
+<h1 id="Iterator"><a href="#Iterator" class="headerlink" title="Iterator"></a>Iterator</h1><p>迭代器可以说在Rust中占有重要的位置，在日常编码过程中我们经常会用到迭代器。这里我只是记录几点自己看标准库文档的心得，具体使用还是请看标准库文档吧。</p>
+<h3 id="u7F16_u5199_u4E00_u4E2A_u8FED_u4EE3_u5668"><a href="#u7F16_u5199_u4E00_u4E2A_u8FED_u4EE3_u5668" class="headerlink" title="编写一个迭代器"></a>编写一个迭代器</h3><p>编写一个迭代器很简单，我们只要实现<code>Iterator</code>这个Trait中的<code>next</code>方法就好了，其余的方法我们都可以免费获得：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> Counter &#123;</span><br><span class="line">    count: usize,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Counter &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">new</span></span>() -&gt; Counter &#123;</span><br><span class="line">        Counter &#123; count: <span class="number">0</span> &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="built_in">Iterator</span> <span class="keyword">for</span> Counter &#123;</span><br><span class="line">    <span class="keyword">type</span> <span class="title">Item</span> = usize;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">next</span></span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>) -&gt; <span class="built_in">Option</span>&lt;usize&gt; &#123;</span><br><span class="line">        <span class="keyword">self</span>.count += <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">self</span>.count &lt; <span class="number">6</span> &#123;</span><br><span class="line">            <span class="built_in">Some</span>(<span class="keyword">self</span>.count)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">None</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> <span class="keyword">mut</span> counter = Counter::new();</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = counter.next().unwrap();</span><br><span class="line"><span class="built_in">println!</span>(<span class="string">"&#123;&#125;"</span>, x);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> x = counter.next().unwrap();</span><br><span class="line"><span class="built_in">println!</span>(<span class="string">"&#123;&#125;"</span>, x);</span><br></pre></td></tr></table></figure>
+<p>再来看一下<code>Iterator</code>这个Trait：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">pub trait Iterator &#123;</span><br><span class="line">    type Item;</span><br><span class="line">    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;</span><br><span class="line"></span><br><span class="line">    fn size_hint(&amp;self) -&gt; (usize, Option&lt;usize&gt;) &#123; ... &#125;</span><br><span class="line">    fn count(self) -&gt; usize &#123; ... &#125;</span><br><span class="line">    fn last(self) -&gt; Option&lt;Self::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn nth(&amp;mut self, n: usize) -&gt; Option&lt;Self::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn chain&lt;U&gt;(self, other: U) -&gt; Chain&lt;Self, U::IntoIter&gt; where U: IntoIterator&lt;Item=Self::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn zip&lt;U&gt;(self, other: U) -&gt; Zip&lt;Self, U::IntoIter&gt; where U: IntoIterator &#123; ... &#125;</span><br><span class="line">    fn map&lt;B, F&gt;(self, f: F) -&gt; Map&lt;Self, F&gt; where F: FnMut(Self::Item) -&gt; B &#123; ... &#125;</span><br><span class="line">    fn filter&lt;P&gt;(self, predicate: P) -&gt; Filter&lt;Self, P&gt; where P: FnMut(&amp;Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn filter_map&lt;B, F&gt;(self, f: F) -&gt; FilterMap&lt;Self, F&gt; where F: FnMut(Self::Item) -&gt; Option&lt;B&gt; &#123; ... &#125;</span><br><span class="line">    fn enumerate(self) -&gt; Enumerate&lt;Self&gt; &#123; ... &#125;</span><br><span class="line">    fn peekable(self) -&gt; Peekable&lt;Self&gt; &#123; ... &#125;</span><br><span class="line">    fn skip_while&lt;P&gt;(self, predicate: P) -&gt; SkipWhile&lt;Self, P&gt; where P: FnMut(&amp;Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn take_while&lt;P&gt;(self, predicate: P) -&gt; TakeWhile&lt;Self, P&gt; where P: FnMut(&amp;Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn skip(self, n: usize) -&gt; Skip&lt;Self&gt; &#123; ... &#125;</span><br><span class="line">    fn take(self, n: usize) -&gt; Take&lt;Self&gt; &#123; ... &#125;</span><br><span class="line">    fn scan&lt;St, B, F&gt;(self, initial_state: St, f: F) -&gt; Scan&lt;Self, St, F&gt; where F: FnMut(&amp;mut St, Self::Item) -&gt; Option&lt;B&gt; &#123; ... &#125;</span><br><span class="line">    fn flat_map&lt;U, F&gt;(self, f: F) -&gt; FlatMap&lt;Self, U, F&gt; where F: FnMut(Self::Item) -&gt; U, U: IntoIterator &#123; ... &#125;</span><br><span class="line">    fn fuse(self) -&gt; Fuse&lt;Self&gt; &#123; ... &#125;</span><br><span class="line">    fn inspect&lt;F&gt;(self, f: F) -&gt; Inspect&lt;Self, F&gt; where F: FnMut(&amp;Self::Item) -&gt; () &#123; ... &#125;</span><br><span class="line">    fn by_ref(&amp;mut self) -&gt; &amp;mut Self &#123; ... &#125;</span><br><span class="line">    fn collect&lt;B&gt;(self) -&gt; B where B: FromIterator&lt;Self::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn partition&lt;B, F&gt;(self, f: F) -&gt; (B, B) where B: Default + Extend&lt;Self::Item&gt;, F: FnMut(&amp;Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn fold&lt;B, F&gt;(self, init: B, f: F) -&gt; B where F: FnMut(B, Self::Item) -&gt; B &#123; ... &#125;</span><br><span class="line">    fn all&lt;F&gt;(&amp;mut self, f: F) -&gt; bool where F: FnMut(Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn any&lt;F&gt;(&amp;mut self, f: F) -&gt; bool where F: FnMut(Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn find&lt;P&gt;(&amp;mut self, predicate: P) -&gt; Option&lt;Self::Item&gt; where P: FnMut(&amp;Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn position&lt;P&gt;(&amp;mut self, predicate: P) -&gt; Option&lt;usize&gt; where P: FnMut(Self::Item) -&gt; bool &#123; ... &#125;</span><br><span class="line">    fn rposition&lt;P&gt;(&amp;mut self, predicate: P) -&gt; Option&lt;usize&gt; where P: FnMut(Self::Item) -&gt; bool, Self: ExactSizeIterator + DoubleEndedIterator &#123; ... &#125;</span><br><span class="line">    fn max(self) -&gt; Option&lt;Self::Item&gt; where Self::Item: Ord &#123; ... &#125;</span><br><span class="line">    fn min(self) -&gt; Option&lt;Self::Item&gt; where Self::Item: Ord &#123; ... &#125;</span><br><span class="line">    fn max_by_key&lt;B, F&gt;(self, f: F) -&gt; Option&lt;Self::Item&gt; where B: Ord, F: FnMut(&amp;Self::Item) -&gt; B &#123; ... &#125;</span><br><span class="line">    fn max_by&lt;F&gt;(self, compare: F) -&gt; Option&lt;Self::Item&gt; where F: FnMut(&amp;Self::Item, &amp;Self::Item) -&gt; Ordering &#123; ... &#125;</span><br><span class="line">    fn min_by_key&lt;B, F&gt;(self, f: F) -&gt; Option&lt;Self::Item&gt; where B: Ord, F: FnMut(&amp;Self::Item) -&gt; B &#123; ... &#125;</span><br><span class="line">    fn min_by&lt;F&gt;(self, compare: F) -&gt; Option&lt;Self::Item&gt; where F: FnMut(&amp;Self::Item, &amp;Self::Item) -&gt; Ordering &#123; ... &#125;</span><br><span class="line">    fn rev(self) -&gt; Rev&lt;Self&gt; where Self: DoubleEndedIterator &#123; ... &#125;</span><br><span class="line">    fn unzip&lt;A, B, FromA, FromB&gt;(self) -&gt; (FromA, FromB) where FromA: Default + Extend&lt;A&gt;, FromB: Default + Extend&lt;B&gt;, Self: Iterator&lt;Item=(A, B)&gt; &#123; ... &#125;</span><br><span class="line">    fn cloned&lt;'a, T&gt;(self) -&gt; Cloned&lt;Self&gt; where Self: Iterator&lt;Item=&amp;'a T&gt;, T: 'a + Clone &#123; ... &#125;</span><br><span class="line">    fn cycle(self) -&gt; Cycle&lt;Self&gt; where Self: Clone &#123; ... &#125;</span><br><span class="line">    fn sum&lt;S&gt;(self) -&gt; S where S: Sum&lt;Self::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn product&lt;P&gt;(self) -&gt; P where P: Product&lt;Self::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn cmp&lt;I&gt;(self, other: I) -&gt; Ordering where I: IntoIterator&lt;Item=Self::Item&gt;, Self::Item: Ord &#123; ... &#125;</span><br><span class="line">    fn partial_cmp&lt;I&gt;(self, other: I) -&gt; Option&lt;Ordering&gt; where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn eq&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialEq&lt;I::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn ne&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialEq&lt;I::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn lt&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn le&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn gt&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt; &#123; ... &#125;</span><br><span class="line">    fn ge&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt; &#123; ... &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们必须要实现的就只是<code>next</code>方法，其余的都是构建在<code>next</code>之上，也就是说我们可以直接使用其余的方法。</p>
+<h3 id="Collections_to_Iterator"><a href="#Collections_to_Iterator" class="headerlink" title="Collections to Iterator"></a>Collections to Iterator</h3><p>有三种方法得到一个集合的迭代器：</p>
+<ul>
+<li>iter：迭代类型为<code>&amp;T</code></li>
+<li>iter_mut：迭代类型为<code>&amp;mut T</code></li>
+<li>into_iter：迭代类型为<code>T</code></li>
+</ul>
+<p>前两个方法是Slice中定义的方法，因为一个集合是一段连续的内存，所以可以调用前面两个方法。第三个方法是Trait<code>IntoIterator</code>中定义的接口：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pub trait IntoIterator where Self::IntoIter::Item == Self::Item &#123;</span><br><span class="line">    type Item;</span><br><span class="line">    type IntoIter: Iterator;</span><br><span class="line">    fn into_iter(self) -&gt; Self::IntoIter;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里有一个地方需要注意，对于一个集合，比如说<code>Vec&lt;T&gt;</code>，我们在该变量上调用<code>into_iter</code>，那么迭代的对象是集合的类型，在迭代之后变量的所有权就被转移了：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> v = <span class="built_in">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> v.into_iter() &#123;</span><br><span class="line">	x;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// error</span></span><br><span class="line"><span class="comment">// v;</span></span><br></pre></td></tr></table></figure>
+<p>但是如果是一个Slice呢，在它上面调用<code>into_iter</code>，迭代的对象实际上是<code>&amp;T</code>：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> v = &amp;[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];</span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> v.into_iter() &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"&#123;&#125;"</span>, x);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// will compile</span></span><br><span class="line">v;</span><br></pre></td></tr></table></figure>
+<p>这是为什么呢？我们来看一下Slice文档中关于<code>IntoIterator</code>这个Trait的实现说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">impl&#60;&#39;a, T&#62; IntoIterator for &#38;&#39;a [T]&#10;type Item = &#38;&#39;a T&#10;&#9;The type of the elements being iterated over&#10;type IntoIter = Iter&#60;&#39;a, T&#62;&#10;&#9;Which kind of iterator are we turning this into?</span><br></pre></td></tr></table></figure>
+<p>只有一句话写在那里我们也不能很相信它，于是再来看看<code>std::iter::Iter</code>这结构中关于<code>Iterator</code> 实现的说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">impl&#60;&#39;a, T&#62; Iterator for Iter&#60;&#39;a, T&#62;&#10;type Item = &#38;&#39;a T&#10;&#10;The type of the elements being iterated over.&#10;&#10;fn next(&#38;mut self) -&#62; Option&#60;&#38;&#39;a T&#62;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>Iterator</code>这个Trait的关联类型是<code>&amp;T</code>，所以我们迭代的对象的类型实际上是<code>&amp;T</code>，所以在迭代之后Slice的所有权并没有转移。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Contiguous-regions-of-memory/" rel="tag"># Contiguous regions of memory</a>
+          
+            <a href="/tags/Iterator/" rel="tag"># Iterator</a>
+          
+            <a href="/tags/Slice/" rel="tag"># Slice</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/30/Cell和RefCell/" rel="next" title="Cell和RefCell">
+                <i class="fa fa-chevron-left"></i> Cell和RefCell
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">29</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">38</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Contiguous_regions_of_memory"><span class="nav-number">1.</span> <span class="nav-text">Contiguous regions of memory</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5BT_3B_N_5D"><span class="nav-number">2.</span> <span class="nav-text">[T; N]</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Iterator"><span class="nav-number">3.</span> <span class="nav-text">Iterator</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u7F16_u5199_u4E00_u4E2A_u8FED_u4EE3_u5668"><span class="nav-number">3.0.1.</span> <span class="nav-text">编写一个迭代器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Collections_to_Iterator"><span class="nav-number">3.0.2.</span> <span class="nav-text">Collections to Iterator</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>
