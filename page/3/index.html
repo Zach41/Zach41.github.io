@@ -257,6 +257,138 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/IPv4与IPv6的户操作性/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/09/19/IPv4与IPv6的户操作性/" itemprop="url">
+                  IPv4与IPv6的户操作性
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/19/IPv4与IPv6的户操作性/" class="leancloud_visitors" data-flag-title="IPv4与IPv6的户操作性">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="IPv4_u6620_u5C04_u7684IPv6_u5730_u5740"><a href="#IPv4_u6620_u5C04_u7684IPv6_u5730_u5740" class="headerlink" title="IPv4映射的IPv6地址"></a>IPv4映射的IPv6地址</h1><p>IPv4映射的IPv6地址允许在因特网向IPv6过度时期让运行在双栈主机上的IPv6应用进程能够与只支持IPv4的主机通信。这些地址是IPv6应用进程查询某个只有IPv4地址的主机的IPv6地址时，DNS解析器按需自动创建的且不存在于任何DNS<br>数据文件中。在IPv6套接字上使用这种类型的地址导致往目的地IPv4主机发送IPv4数据报。</p>
+<p>下图展示了一个IPv4映射的IPv6地址的格式：</p>
+<img src="/2016/09/19/IPv4与IPv6的户操作性/mapped.png" alt="mapped.png" title="">
+<h1 id="IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668"><a href="#IPv4_u5BA2_u6237_u4E0EIPv6_u670D_u52A1_u5668" class="headerlink" title="IPv4客户与IPv6服务器"></a>IPv4客户与IPv6服务器</h1><p>双栈主机的一个特性就是其上的IPv6服务器既可以处理IPv4客户，也可以处理IPv6客户。这是通过IPv4映射的IPv6地址实现的。下图是一个例子：</p>
+<img src="/2016/09/19/IPv4与IPv6的户操作性/ipv4to6.png" alt="ipv4to6.png" title="">
+<p>IPv4客户发送一个IPv4的SYN分节以期和服务器建立连接。来自IPv4客户的SYN分节在以太网中表现为一个以太网首部、一个IPv4首部、一个TCP部以及TCP数据。以太网首部中包含的类型字段为0x0800，表示它是一个IPv4帧数据。</p>
+<p>接收数据链路通过查看以太网类型字段把每个帧数据发送给对应的IP模块。IPv4模块结合其上的TCP模块检测到IPv4数据报的目的段端口对应一个IPv4套接字，于是该数据报Ipv4首部中的源IPv4地址被转换成IPv4映射的IPv6地址，当<br>accept系统调用把这个已经接收的IPv4客户连接返回被服务器进程的时候，这个映射后的地址作为客户的IPv6地址返回到服务器的IPv6套接字。该连接上的其余数据同样都是IPv4数据报。服务器进程完全不知道它是在与一个IPv4客户机通信。</p>
+<h1 id="IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668"><a href="#IPv6_u5BA2_u6237_u4E0EIPv4_u670D_u52A1_u5668" class="headerlink" title="IPv6客户与IPv4服务器"></a>IPv6客户与IPv4服务器</h1><p>在一个双栈主机上运行一个IPv6客户程序，其于一个IPv4服务器程序交互的流程如下：</p>
+<ol>
+<li>一个IPv4服务器在只支持IPv4的一个主机上启动后创建一个IPv4监听套接字。</li>
+<li>IPv6客户启动后调用getaddrinfo单纯查找IPv6地址（请求AF_INET6地址，hints结构中设置了AI_V4MAPPED标志），最后只有得到只支持IPv4的服务器主机的A记录，那么返回给客户的就是IPv4映射之后的IPv6地址。</li>
+<li>IPv6客户设置这个IPv4映射后的IPv6地址，调用connect，内核检测到这个映射的地址后自动发送一个IPv4的SYN分节到服务器。</li>
+<li>服务器响应一个IPv4 SYN/ACK分节，连接于是用IPv4数据报建立。</li>
+</ol>
+<p>以后在以太网上传递的是IPv4数据报。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/13/套接字选项/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1635,151 +1767,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/26/自定Modal-Transition/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/26/自定Modal-Transition/" itemprop="url">
-                  自定Modal Transition
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/05/26/自定Modal-Transition/" class="leancloud_visitors" data-flag-title="自定Modal Transition">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="u81EA_u5B9A_u4E49Modal_Transition"><a href="#u81EA_u5B9A_u4E49Modal_Transition" class="headerlink" title="自定义Modal Transition"></a>自定义Modal Transition</h1><h2 id="u5E8F"><a href="#u5E8F" class="headerlink" title="序"></a>序</h2><p>iOS 7提供了一套新的自定义转场动画的API，这套API可以大大降低了我们自定过渡动画的难度。下面用Ray Wenderlich的一张流程图说明API各个部分的作用。</p>
-<img src="/2016/05/26/自定Modal-Transition/process.jpg" alt="process.jpg" title="">
-<p>可以看到一个ViewController被呈现或者消除的时候，UIKit会想Transition Delegate请求一个Animator，Animator负责转场动画的实现。可见我们需要自定义个Animator。</p>
-<p>一个Animator应该遵循<code>UIViewControllerAnimatedTransitioning</code>协议，这个包含三个方法：</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">transitionDuration</span><span class="params">(<span class="number">_</span> transitionContext: UIViewControllerContextTransitioning?)</span></span> -&gt; <span class="type">NSTimeInterval</span></span><br><span class="line"></span><br><span class="line"><span class="func"><span class="keyword">func</span> <span class="title">animateTransition</span><span class="params">(<span class="number">_</span> transitionContext: UIViewControllerContextTransitioning)</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">optional</span> <span class="func"><span class="keyword">func</span> <span class="title">animationEnded</span><span class="params">(<span class="number">_</span> transitionCompleted: Bool)</span></span></span><br></pre></td></tr></table></figure>
-<p>这里出现了一个UIViewControllerContextTransitioning，它是转场动画的上下文对象，通过它可以获得将要被显示的view、将要被消除的view、将要显示的viewController等等相关对象。需要注意一定是，可能你自己持有了destinationController，但是，但是，但是，一定要通过transitionContext对象来获得desctinationController，以避免出现一些棘手的错误。</p>
-<h2 id="u5F00_u59CB"><a href="#u5F00_u59CB" class="headerlink" title="开始"></a>开始</h2><p>下面我们就来着手写一个Modal Transition。这个转场动画参考了<a href="https://github.com/andreamazz/BubbleTransition" target="_blank" rel="external">Bubble Transition</a></p>
-<p>先看一下效果：</p>
-<img src="/2016/05/26/自定Modal-Transition/preview.gif" alt="preview.gif" title="">
-<p>首先创建一个BubbleTransition类。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BubbleTransition</span>: <span class="title">NSObject</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> bubbleColor: <span class="type">UIColor</span> = <span class="type">UIColor</span>.whiteColor()</span><br><span class="line">    <span class="keyword">var</span> startPoint: <span class="type">CGPoint</span> = <span class="type">CGPointZero</span> &#123;</span><br><span class="line">        <span class="keyword">didSet</span> &#123;</span><br><span class="line">            bubble.center = startPoint</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span>(<span class="keyword">set</span>) <span class="keyword">var</span> bubble: <span class="type">UIView</span> = <span class="type">UIView</span>()</span><br><span class="line">    <span class="keyword">var</span> duration: <span class="type">Double</span> = <span class="number">0.5</span></span><br><span class="line">    </span><br><span class="line">    <span class="class"><span class="keyword">enum</span> <span class="title">BubbleTransitionType</span> </span>&#123;</span><br><span class="line">        <span class="keyword">case</span> dismiss, present</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> mode: <span class="type">BubbleTransitionType</span> = .present</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>BubbleTransition现在只是定义了一个变量，其中最主要的是BubbleTransitionType，<code>present</code>表示显示viewController，<code>dismiss</code>表示消除viewController。<code>startPoint</code>是将要呈现的viewController.view的起始位置，后面我们将看到它的作用。</p>
-<p>现在我们利用扩展来BubbleTransition实现UIViewControllerAnimatedTransitioning协议。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">BubbleTransition</span>: <span class="title">UIViewControllerAnimatedTransitioning</span> </span>&#123;</span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">transitionDuration</span><span class="params">(transitionContext: UIViewControllerContextTransitioning?)</span></span> -&gt; <span class="type">NSTimeInterval</span> &#123;</span><br><span class="line">		<span class="comment">// 1</span></span><br><span class="line">        <span class="keyword">return</span> duration</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">animateTransition</span><span class="params">(transitionContext: UIViewControllerContextTransitioning)</span></span> &#123;</span><br><span class="line">        <span class="keyword">guard</span> <span class="keyword">let</span> containerView = transitionContext.containerView() <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> mode == .present &#123;</span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> presentedView = transitionContext.viewForKey(<span class="type">UITransitionContextToViewKey</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">let</span> originalSize = presentedView.frame.size</span><br><span class="line">            <span class="keyword">let</span> originalCenter = presentedView.center</span><br><span class="line">            </span><br><span class="line">			<span class="comment">// 2</span></span><br><span class="line">            <span class="keyword">let</span> bubbleFrame = bubbleFrameFrom(originalSize: originalSize, startPoint: startPoint)</span><br><span class="line">            bubble.backgroundColor = bubbleColor</span><br><span class="line">            bubble.frame = bubbleFrame</span><br><span class="line">            bubble.center = startPoint</span><br><span class="line">            bubble.layer.cornerRadius = bubble.frame.size.height / <span class="number">2.0</span></span><br><span class="line">            bubble.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>)</span><br><span class="line">            containerView.addSubview(bubble)</span><br><span class="line">            </span><br><span class="line">			<span class="comment">// 3</span></span><br><span class="line">            presentedView.center = bubble.center</span><br><span class="line">            presentedView.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>);</span><br><span class="line">            presentedView.alpha = <span class="number">0</span></span><br><span class="line">            containerView.addSubview(presentedView)</span><br><span class="line">            </span><br><span class="line">            <span class="type">UIView</span>.animateWithDuration(duration, animations: &#123;() <span class="keyword">in</span></span><br><span class="line">                presentedView.center = originalCenter</span><br><span class="line">                presentedView.alpha = <span class="number">1</span></span><br><span class="line">                presentedView.transform = <span class="type">CGAffineTransformIdentity</span></span><br><span class="line">                </span><br><span class="line">                <span class="keyword">self</span>.bubble.transform = <span class="type">CGAffineTransformIdentity</span></span><br><span class="line">            &#125;) &#123;(<span class="number">_</span>) <span class="keyword">in</span></span><br><span class="line">				<span class="comment">// 4</span></span><br><span class="line">                transitionContext.completeTransition(<span class="literal">true</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">guard</span> <span class="keyword">let</span> returningView = transitionContext.viewForKey(<span class="type">UITransitionContextFromViewKey</span>) <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">let</span> originalSize = returningView.frame.size</span><br><span class="line">            <span class="keyword">let</span> originalCenter = returningView.center</span><br><span class="line">            <span class="keyword">let</span> bubbleFrame = bubbleFrameFrom(originalSize: originalSize, startPoint: startPoint)</span><br><span class="line">            bubble.frame = bubbleFrame</span><br><span class="line">            bubble.layer.cornerRadius = bubble.frame.size.height / <span class="number">2.0</span></span><br><span class="line">            bubble.backgroundColor = bubbleColor</span><br><span class="line">            bubble.center = startPoint</span><br><span class="line">            </span><br><span class="line">            <span class="type">UIView</span>.animateWithDuration(duration, animations: &#123;</span><br><span class="line">                <span class="keyword">self</span>.bubble.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>)</span><br><span class="line">                returningView.center = <span class="keyword">self</span>.startPoint</span><br><span class="line">                returningView.alpha = <span class="number">0.0</span></span><br><span class="line">                returningView.transform = <span class="type">CGAffineTransformMakeScale</span>(<span class="number">0.001</span>, <span class="number">0.001</span>)</span><br><span class="line">            &#125;) &#123;(<span class="number">_</span>) <span class="keyword">in</span></span><br><span class="line">				<span class="comment">// 5</span></span><br><span class="line">                returningView.center = originalCenter</span><br><span class="line">                <span class="keyword">self</span>.bubble.transform = <span class="type">CGAffineTransformIdentity</span></span><br><span class="line">                <span class="keyword">self</span>.bubble.removeFromSuperview()</span><br><span class="line">                returningView.removeFromSuperview()</span><br><span class="line">                transitionContext.completeTransition(<span class="literal">true</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 6</span></span><br><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">BubbleTransition</span> </span>&#123;</span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">bubbleFrameFrom</span><span class="params">(originalSize size: CGSize, startPoint start: CGPoint)</span></span> -&gt; <span class="type">CGRect</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> lengthX = fmax(start.x, size.width-start.x)</span><br><span class="line">        <span class="keyword">let</span> lengthY = fmax(start.y, size.height-start.y)</span><br><span class="line">        <span class="keyword">let</span> radius  = sqrt(lengthX*lengthX + lengthY*lengthY)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="type">CGRectMake</span>(<span class="number">0</span>, <span class="number">0</span>, radius*<span class="number">2</span>, radius*<span class="number">2</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>先解释一下整体的思路：</p>
-<img src="/2016/05/26/自定Modal-Transition/cordinator2.png" alt="cordinator2.png" title="">
-<p>小圆圈表示button的位置，点击button会呈现我们要显示的view，就称它是modalView吧。在动画发生之前，我们在containerView中加入一个bubbleView，然后加入modalView（顺序很重要），bubbleView就作为modalView的背景，它们一起从0.001的比例缩放到1比例，这样看起来就像是一个气泡的效果。因为气泡要充满整个屏幕，所以我们就要像上述图示所示的那样得到最大的半径，然后将bubbleView的长宽设置为半径的两倍。</p>
-<p>对应标签位置的解释：</p>
-<ol>
-<li>转场动画的时间长度</li>
-<li>得到bubbl视图的frame，将它的缩放比列设为0.001，然后添加到containerView中</li>
-<li>添加将要呈现的视图，将它的比例也设置为0.001，以便和bubble视图一起放到</li>
-<li>在动画结束之后一定要调用transitionContext.completeTransition(true)以表示这次转场动画结束。</li>
-<li>dismiss基本上是present的逆过程，需要注意的是在动画完成后要把bubble视图和modalView从containerView中移除。</li>
-<li>计算最大半径，并返回bubbleView的Frame。</li>
-</ol>
-<p>最后，为了让我们的BubbleTransition成为转场动画的Animator，我们要在prepareForSegue中设置destinationController的transitioningDelegate，并实现协议对应的方法。</p>
-<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="func"><span class="keyword">func</span> <span class="title">prepareForSegue</span><span class="params">(segue: UIStoryboardSegue, sender: AnyObject?)</span></span> &#123;</span><br><span class="line">        <span class="keyword">let</span> destinationController = segue.destinationViewController</span><br><span class="line">        </span><br><span class="line">        destinationController.modalPresentationStyle = .<span class="type">Custom</span>    <span class="comment">// 自定义modalPresentationStyle</span></span><br><span class="line">        destinationController.transitioningDelegate = <span class="keyword">self</span>;       <span class="comment">// 设置delegate</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// UIViewControllerTransitioningDelegate</span></span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">animationControllerForPresentedController</span><span class="params">(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController)</span></span> -&gt; <span class="type">UIViewControllerAnimatedTransitioning</span>? &#123;</span><br><span class="line">        transition.bubbleColor = bubbleBtn.backgroundColor!</span><br><span class="line">        transition.startPoint = bubbleBtn.center</span><br><span class="line">        transition.mode = .present</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> transition</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">animationControllerForDismissedController</span><span class="params">(dismissed: UIViewController)</span></span> -&gt; <span class="type">UIViewControllerAnimatedTransitioning</span>? &#123;</span><br><span class="line">        transition.bubbleColor = bubbleBtn.backgroundColor!</span><br><span class="line">        transition.startPoint = bubbleBtn.center</span><br><span class="line">        transition.mode = .dismiss</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> transition</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1825,7 +1812,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">33</span>
+              <span class="site-state-item-count">34</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1833,7 +1820,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1842,7 +1829,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">42</span>
+                <span class="site-state-item-count">43</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

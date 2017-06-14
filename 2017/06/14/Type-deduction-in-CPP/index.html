@@ -1,0 +1,782 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="类型推导," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="模板类型推导假设我们有如下的模板函数：12template &amp;lt;typename T&amp;gt;void f(ParamType param);
+一个该模板函数的调用语句可能如下所示：1f(expr);
+在编译阶段，编译器利用expr来推导出两个类型：T和ParamType。ParamType常带有变量的限定符，如const和引用符号。模板的类型推到不仅仅依赖于expr的类型，还依赖于ParamT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Type deduction in CPP">
+<meta property="og:url" content="http://yoursite.com/2017/06/14/Type-deduction-in-CPP/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="模板类型推导假设我们有如下的模板函数：12template &amp;lt;typename T&amp;gt;void f(ParamType param);
+一个该模板函数的调用语句可能如下所示：1f(expr);
+在编译阶段，编译器利用expr来推导出两个类型：T和ParamType。ParamType常带有变量的限定符，如const和引用符号。模板的类型推到不仅仅依赖于expr的类型，还依赖于ParamT">
+<meta property="og:updated_time" content="2017-06-14T13:48:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Type deduction in CPP">
+<meta name="twitter:description" content="模板类型推导假设我们有如下的模板函数：12template &amp;lt;typename T&amp;gt;void f(ParamType param);
+一个该模板函数的调用语句可能如下所示：1f(expr);
+在编译阶段，编译器利用expr来推导出两个类型：T和ParamType。ParamType常带有变量的限定符，如const和引用符号。模板的类型推到不仅仅依赖于expr的类型，还依赖于ParamT">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title> Type deduction in CPP | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/14/Type-deduction-in-CPP/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Type deduction in CPP
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/06/14/Type-deduction-in-CPP/" class="leancloud_visitors" data-flag-title="Type deduction in CPP">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="u6A21_u677F_u7C7B_u578B_u63A8_u5BFC"><a href="#u6A21_u677F_u7C7B_u578B_u63A8_u5BFC" class="headerlink" title="模板类型推导"></a>模板类型推导</h1><p>假设我们有如下的模板函数：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(ParamType param)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>一个该模板函数的调用语句可能如下所示：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">f(expr);</span><br></pre></td></tr></table></figure></p>
+<p>在编译阶段，编译器利用<code>expr</code>来推导出两个类型：<code>T</code>和<code>ParamType</code>。<code>ParamType</code>常带有变量的限定符，如<code>const</code>和引用符号。<br>模板的类型推到不仅仅依赖于<code>expr</code>的类型，还依赖于<code>ParamType</code>的类型，<code>ParamType</code>共分为三种类型：</p>
+<ol>
+<li>ParamType是一个指针或者引用（但不是universal reference, T&amp;&amp;)</li>
+<li>ParamType是一个universal reference</li>
+<li>ParamType既不是一个指针也不是一个引用<br>根据<code>ParamType</code>的类型，模板的类型推到规则也有三种。</li>
+</ol>
+<h3 id="1-_ParamType_u662F_u4E00_u4E2A_u6307_u9488_u6216_u8005_u5F15_u7528_uFF08_u4F46_u4E0D_u662F_u4E00_u4E2Auniversal_reference_uFF09"><a href="#1-_ParamType_u662F_u4E00_u4E2A_u6307_u9488_u6216_u8005_u5F15_u7528_uFF08_u4F46_u4E0D_u662F_u4E00_u4E2Auniversal_reference_uFF09" class="headerlink" title="1. ParamType是一个指针或者引用（但不是一个universal reference）"></a>1. ParamType是一个指针或者引用（但不是一个universal reference）</h3><p>这种情况下的推导规则为：</p>
+<ol>
+<li>如果<code>expr</code>是一个引用，那么忽略<code>expr</code>的引用</li>
+<li>然后根据<code>expr</code>的类型和<code>ParamType</code>的类型，推导出T</li>
+</ol>
+<p>举几个例子：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T&amp; param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> x = <span class="number">27</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> cx = x;       <span class="comment">// cx is const int</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span>&amp; rx = x;      <span class="comment">// rx is const int&amp;</span></span><br><span class="line"></span><br><span class="line">f(x);       <span class="comment">// x is int =&gt; T is int, param's type is int&amp;</span></span><br><span class="line">f(cx);      <span class="comment">// cx is const int =&gt; T is const int, param's is const int&amp;</span></span><br><span class="line">f(rx);      <span class="comment">// rx is const int&amp; =&gt; T is const int, param's type is const int&amp;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T* param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> x = <span class="number">27</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> *px = &amp;x;</span><br><span class="line"></span><br><span class="line">f(&amp;x);      <span class="comment">// T is int, param's type is int*</span></span><br><span class="line">f(px);      <span class="comment">// T is const int, param's type is const int*</span></span><br></pre></td></tr></table></figure></p>
+<p>###2. ParamType是一个universal reference<br>一般来说函数模板有以下形式：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T&amp;&amp; param)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p><code>param</code>类型由以下规则得得出：</p>
+<ol>
+<li>T&amp; + T&amp;   =&gt; T&amp;</li>
+<li>T&amp; + T&amp;&amp;  =&gt; T&amp;</li>
+<li>T&amp;&amp; + T&amp;  =&gt; T&amp;</li>
+<li>T&amp;&amp; + T&amp;&amp; =&gt; T&amp;&amp;</li>
+</ol>
+<p>举几个例子：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T&amp;&amp; param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> x = <span class="number">27</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> cx = x;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span>&amp; rx = x;</span><br><span class="line"></span><br><span class="line">f(x);       <span class="comment">// x is lvalue, T is int&amp;, param's type is int&amp;</span></span><br><span class="line">f(cx);      <span class="comment">// cx is lvalue, T is const int&amp;. param's type is const int&amp;</span></span><br><span class="line">f(rx);      <span class="comment">// rx is lval, T and param is const int&amp;</span></span><br><span class="line">f(<span class="number">27</span>);      <span class="comment">// 27 is rvalue, T is int, param's type is int&amp;&amp;</span></span><br></pre></td></tr></table></figure></p>
+<p>###3. ParamType既不是指针也不是引用<br>一般来说函数模板有以下形式：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T param)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>此时，传递给函数的实参会被拷贝。此时函数模板的推导规则如下：</p>
+<ol>
+<li>如果<code>expr</code>是引用，那么它的引用被忽略</li>
+<li>之后，如果<code>expr</code>有<code>const</code>限定符，那么<code>const</code>被忽略，如果有<code>volatile</code>限定符，<code>volatile</code>被忽略。<br>还是例子：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> x = <span class="number">27</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> cx = x;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span>&amp; rx = x;</span><br><span class="line"></span><br><span class="line">f(x);       <span class="comment">// T's and param's types are both int</span></span><br><span class="line">f(cx);      <span class="comment">// T's and param's types are both int</span></span><br><span class="line">f(rx);      <span class="comment">// ditto</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>注意到只是顶级<code>const</code>被忽略，如果有这样一次函数调用：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="keyword">const</span> ptr = <span class="string">"Fun with pointers"</span>;</span><br><span class="line">f(ptr);</span><br></pre></td></tr></table></figure></p>
+<p>那么在函数中修改ptr所指向的字符串是不被允许的，而修改<code>ptr</code>这个指针（如使其为nullptr）则是可以的。</p>
+<h4 id="u6570_u7EC4_u53C2_u6570"><a href="#u6570_u7EC4_u53C2_u6570" class="headerlink" title="数组参数"></a>数组参数</h4><p>数组和指针是不同的类型，但是数组类型自动转换成指针类型，于是下面的代码是成立的：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> name[] = <span class="string">"Test"</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* ptrName = name;</span><br></pre></td></tr></table></figure></p>
+<p>在模板函数中，如果数组是有<em>by-value</em>传递给函数的，那么数组自动转换成指针，如果<em>by-reference</em>传递给函数，那么函数得到的是一个数组的引用。即：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f1</span><span class="params">(T param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f2</span><span class="params">(T&amp; param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> arr[] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line"></span><br><span class="line">f1(arr);        <span class="comment">// T is int*</span></span><br><span class="line">f2(arr);        <span class="comment">// T is int[], parameter's type is int (&amp;)[]</span></span><br></pre></td></tr></table></figure></p>
+<p>于是我们可以用以下函数在编译期得到一个数组的大小：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="built_in">std</span>::<span class="keyword">size_t</span> N&gt;</span><br><span class="line"><span class="keyword">constexpr</span> <span class="built_in">std</span>::<span class="keyword">size_t</span> arraySize(T (&amp;)[N]) <span class="keyword">noexcept</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> N;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当然在<em>C++11</em>标准中，更推荐用<code>std::array</code>来使用数组<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> keyVals[] = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;</span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">array</span>&lt;<span class="keyword">int</span>, arraySize(keyVals)&gt; anotherArray;</span><br></pre></td></tr></table></figure></p>
+<h4 id="u51FD_u6570_u53C2_u6570"><a href="#u51FD_u6570_u53C2_u6570" class="headerlink" title="函数参数"></a>函数参数</h4><p>函数在C++中也是一种类型，而函数指针是一个指针类型，只是函数类型可以自动转换成函数指针。在函数模板中，函数的转换规则和数组类型相同。<br>举几个例子：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">someFunc</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">double</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f1</span><span class="params">(T param)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f2</span><span class="params">(T&amp; param)</span></span>;</span><br><span class="line"></span><br><span class="line">f1(someFunc);       <span class="comment">// param's type is void (*)(int, double)</span></span><br><span class="line">f2(someFunc);       <span class="comment">// param's type is void (&amp;)(int, double)</span></span><br></pre></td></tr></table></figure></p>
+<p>#2. auto类型推导<br><code>auto</code>关键字是由<em>C++11</em>引入的，本质上<code>auto</code>类型推导和模板类型推导是一样的，只要把<code>auto</code>当作是<code>T</code>，而变量的类型当作是模板参数类型，等号右侧当作是<code>expr</code>即可。如：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> x = <span class="number">27</span>;        <span class="comment">// auto -&gt; T, auto -&gt; paramType, so x is int</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">auto</span> cx = <span class="number">27</span>;  <span class="comment">// auto -&gt; T, const auto -&gt; paramType, so T is int, cx is const int</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">auto</span>&amp; rx = x; <span class="comment">// auto -&gt; T, const auto&amp; -&gt; paramType, so T is int, rx is const int&amp;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span>&amp;&amp; uref1 = x;   <span class="comment">// x is lvalue =&gt; uref1 is int&amp;</span></span><br><span class="line"><span class="keyword">auto</span>&amp;&amp; uref2 = cx;  <span class="comment">// cx is lvalue =&gt; uref2 is const int&amp;</span></span><br><span class="line"><span class="keyword">auto</span>&amp;&amp; uref3 = <span class="number">28</span>;  <span class="comment">// 28 is rvalue =&gt; uref3 is int&amp;&amp;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span> name[] = <span class="string">"Test"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> arr1 = name;   <span class="comment">// arr1 is const char*</span></span><br><span class="line"><span class="keyword">auto</span>&amp; arr2 = name;  <span class="comment">// arr2 is const char (&amp;)[5]</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">someFunc</span><span class="params">(<span class="keyword">int</span>, <span class="keyword">double</span>)</span></span>;</span><br><span class="line"><span class="keyword">auto</span> func1 = someFunc;  <span class="comment">// func1 is void (*)(int, double)</span></span><br><span class="line"><span class="keyword">auto</span>&amp; func2 = someFunc; <span class="comment">// func2 is void (&amp;)(int, double)</span></span><br></pre></td></tr></table></figure></p>
+<p>唯一的不同是，对于auto，如果等号右边是大括号包围的列表，那么变量自动推导为<code>std::initializer_list&lt;T&gt;</code>，而对于模板函数，传递一个<code>{t1, t2, ..., tn}</code>给函数会导致编译错误。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> t = &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;;     <span class="comment">// t's type is std::initializer_list&lt;int&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T param)</span></span>;</span><br><span class="line"></span><br><span class="line">f(&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;);       <span class="comment">// error!</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f_</span><span class="params">(<span class="built_in">std</span>::initializer&lt;T&gt; il)</span></span>;</span><br><span class="line"></span><br><span class="line">f_(&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;);      <span class="comment">// correct</span></span><br></pre></td></tr></table></figure></p>
+<p>#3. decltype类型推导<br><code>decltype</code>关键字用来得到表达式的类型。给几个例子：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> i = <span class="number">0</span>;    <span class="comment">// decltype(i) is const int</span></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">f</span><span class="params">(<span class="keyword">const</span> Widget&amp; w)</span></span>;    <span class="comment">// decltype(f) is bool(const Widget&amp;), function type</span></span><br><span class="line">                            <span class="comment">// decltype(w) is const Widget&amp;</span></span><br><span class="line"><span class="keyword">struct</span> Point &#123;</span><br><span class="line">    <span class="keyword">int</span> x, y;</span><br><span class="line">&#125;;                          <span class="comment">// decltype(Point::x) is int</span></span><br><span class="line">                            <span class="comment">// decltype(Point::y) is int</span></span><br><span class="line">Widget w;   <span class="comment">// decltype(w) is Widget</span></span><br><span class="line"><span class="keyword">if</span> (f(w)) &#123;...&#125; <span class="comment">// decltype(f(w)) is bool or can convert to bool</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt; v;     <span class="comment">// decltype(v) is std::vector&lt;int&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>于是我们可以写出以下函数：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">template &lt;typename T, typename Index&gt;</span><br><span class="line">auto authAndAccess(Container&amp; c, Index i) -&gt; decltype(c[i])</span><br><span class="line">&#123;</span><br><span class="line">    authUser();</span><br><span class="line">    return c[i];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>operator[]</code>可能返回容器中的一个元素的引用或者返回容器中元素的拷贝，通过上述函数我们可以将这两种情况一同处理。<br><code>decltype</code>有一个特殊情况需要注意，如果括号内是一个变量名，那么通常我们得到的是我们想要的类型，如果括号内是一个表达式，那么我们得到的是一个<code>T&amp;</code>，即<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> x = <span class="number">0</span>;</span><br><span class="line"><span class="comment">// decltype(x)  is int</span></span><br><span class="line"><span class="comment">// decltype((x)) is int&amp;</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="4-_boost_3A_3Atypeindex"><a href="#4-_boost_3A_3Atypeindex" class="headerlink" title="4. boost::typeindex"></a>4. boost::typeindex</h1><p><code>boost</code>中的<code>typeindex</code>模块可以在运行时得到正确的推导类型，一个例子如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;boost/type_index.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> Widget &#123;</span><br><span class="line">    <span class="keyword">int</span> x;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(<span class="keyword">const</span> T&amp; param)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">using</span> <span class="built_in">std</span>::<span class="built_in">cout</span>;</span><br><span class="line">    <span class="keyword">using</span> boost::typeindex::type_id_with_cvr;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"T =\t"</span></span><br><span class="line">         &lt;&lt; type_id_with_cvr&lt;T&gt;().pretty_name()</span><br><span class="line">         &lt;&lt; <span class="string">'\n'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">"param =\t"</span></span><br><span class="line">         &lt;&lt; type_id_with_cvr&lt;<span class="keyword">decltype</span>(param)&gt;().pretty_name()</span><br><span class="line">         &lt;&lt; <span class="string">'\n'</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;Widget&gt; vw = &#123;&#123;<span class="number">1</span>&#125;, &#123;<span class="number">2</span>&#125;, &#123;<span class="number">3</span>&#125;&#125;;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">auto</span> k = vw;</span><br><span class="line">    f(&amp;k[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">T =     Widget const*&#10;param =     Widget const* const&#38;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/类型推导/" rel="tag"># 类型推导</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/14/Websocket协议/" rel="next" title="Websocket协议">
+                <i class="fa fa-chevron-left"></i> Websocket协议
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#u6A21_u677F_u7C7B_u578B_u63A8_u5BFC"><span class="nav-number">1.</span> <span class="nav-text">模板类型推导</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-_ParamType_u662F_u4E00_u4E2A_u6307_u9488_u6216_u8005_u5F15_u7528_uFF08_u4F46_u4E0D_u662F_u4E00_u4E2Auniversal_reference_uFF09"><span class="nav-number">1.0.1.</span> <span class="nav-text">1. ParamType是一个指针或者引用（但不是一个universal reference）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#u6570_u7EC4_u53C2_u6570"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">数组参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u51FD_u6570_u53C2_u6570"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">函数参数</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-_boost_3A_3Atypeindex"><span class="nav-number">2.</span> <span class="nav-text">4. boost::typeindex</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>
