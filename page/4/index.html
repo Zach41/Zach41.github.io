@@ -257,6 +257,147 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/23/Swift Collections/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/23/Swift Collections/" itemprop="url">
+                  Swift Collections
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/05/23/Swift Collections/" class="leancloud_visitors" data-flag-title="Swift Collections">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Swift_Collections"><a href="#Swift_Collections" class="headerlink" title="Swift Collections"></a>Swift Collections</h1><p>在Swift中自定义一个CollectionType或者是SequenceType类型的数据结构需要实现对应的协议。这里首先给出一个自定义的SequenceType类型的数据结构，然后我们再来逐步分解代码解析之。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">extension</span> <span class="title">Array</span> </span>&#123;</span><br><span class="line">    <span class="keyword">subscript</span>(safe index: <span class="type">Int</span>) -&gt; <span class="type">Element</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> index&gt;=<span class="number">0</span> &amp;&amp; index&lt;<span class="built_in">count</span> ? <span class="keyword">self</span>[index] : <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">ArrayGenerator</span>&lt;<span class="title">T</span>&gt;: <span class="title">GeneratorType</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> array: [<span class="type">T</span>]</span><br><span class="line">    <span class="keyword">var</span> currentIndex = <span class="number">0</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">init</span>(<span class="number">_</span> array:[<span class="type">T</span>]) &#123;</span><br><span class="line">        <span class="keyword">self</span>.array = array</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">mutating</span> <span class="func"><span class="keyword">func</span> <span class="title">next</span><span class="params">()</span></span> -&gt; <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.array[safe: currentIndex++]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Section</span>&lt;<span class="title">T</span>&gt; : <span class="title">SequenceType</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> title: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> elements: [<span class="type">T</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">subscript</span>(index: <span class="type">Int</span>) -&gt; <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> elements[safe: index]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">generate</span><span class="params">()</span></span> -&gt; <span class="type">ArrayGenerator</span>&lt;<span class="type">T</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">ArrayGenerator</span>(elements)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Sequence在Swift中的定义：</p>
+<pre><code>A type that can be ietrated in a `for...in` loop
+</code></pre><p>要成为一个Sequence，必须实现SequenceType协议，该协议要求实现一个方法以返回一个Generator，而一个Generator又实现了一个GeneratorType的协议，它封装了我们自定的Sequence类型里面的数据，并且保留了迭代的过程。</p>
+<p>在上述代码中，我们首先定一个一个ArrayGenerator作为我们的Generator，然后在我们自定的Section类型中实现generate方法，返回我们的Generator，这样我们就可以在for…in中使用我们的Section了。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> elements = [<span class="string">"hello"</span>, <span class="string">"world"</span>, <span class="string">"haha"</span>]</span><br><span class="line"><span class="keyword">let</span> section = <span class="type">Section</span>(title: <span class="string">"Test"</span>, elements: elements)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> e <span class="keyword">in</span> section &#123;</span><br><span class="line">    <span class="built_in">print</span>(e)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> generator = section.generate()</span><br><span class="line"><span class="keyword">while</span> <span class="keyword">let</span> e = generator.next() &#123;</span><br><span class="line">    <span class="built_in">print</span>(e)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码中，for…in和while循环实际上是一样的。</p>
+<p>在实现SequenceType以后，我们还自动获得了许多方法，比如：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">section.<span class="built_in">sort</span>() <span class="comment">// ["haha", "hello", "world"]</span></span><br><span class="line">section.<span class="built_in">maxElement</span>() <span class="comment">// "world"</span></span><br><span class="line">section.<span class="built_in">minElement</span>() <span class="comment">// "haha"</span></span><br></pre></td></tr></table></figure>
+<p>因为字符串是可比较的，所以上述三个方法均可返回正确的数值。</p>
+<p>在讨论SequenceType之后，我们来看看CollectionType的定义：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">protocol</span> <span class="title">CollectionType</span>: <span class="title">Indexable</span>, <span class="title">SequenceType</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以要定义一个CollectionType类型的数据结构，只要我们的Section再实现Indexable协议即可。我们改写Section的代码。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Section</span>&lt;<span class="title">T</span>&gt; : <span class="title">CollectionType</span> </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> title: <span class="type">String</span></span><br><span class="line">    <span class="keyword">let</span> elements: [<span class="type">T</span>]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">subscript</span>(safe index: <span class="type">Int</span>) -&gt; <span class="type">T</span>? &#123;</span><br><span class="line">        <span class="keyword">return</span> index&gt;=<span class="number">0</span> &amp;&amp; index&lt;elements.<span class="built_in">count</span> ? elements[index] : <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="func"><span class="keyword">func</span> <span class="title">generate</span><span class="params">()</span></span> -&gt; <span class="type">ArrayGenerator</span>&lt;<span class="type">T</span>&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="type">ArrayGenerator</span>(elements)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> startIndex: <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">var</span> endIndex: <span class="type">Int</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> elements.<span class="built_in">count</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">subscript</span>(index: <span class="type">Int</span>) -&gt; <span class="type">T</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> elements[index]</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于遵守Indexable协议的类型必须实现一个下标脚本，其返回值是一个non-optinal的值，所以我们需要改写Section为上述形式。</p>
+<p>至此我们就创建了一个CollectionType类型的Section。</p>
+<p>在这里需要额外说一点：在我们用下标语法来取值的时候，swift中的array和dictionary的行为是不一致的，举个栗子：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> arr = [<span class="string">"h"</span>, <span class="string">"e"</span>, <span class="string">"l"</span>];</span><br><span class="line"><span class="keyword">let</span> dict = [<span class="string">"hello"</span>:<span class="number">1</span>, <span class="string">"world"</span>:<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">dict[<span class="string">"haha"</span>]    <span class="comment">// nil</span></span><br><span class="line">arr[<span class="number">3</span>]     <span class="comment">// error</span></span><br></pre></td></tr></table></figure>
+<p>字典和数组都是实现了CollectionType协议，换言之，它们都实现了返回一个non-optional的下表脚本，那为什么上述代码中字典返回nil呢？我们看字典的下表语法：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Dictionary</span>&lt;<span class="title">Key</span> : <span class="title">Hashable</span>, <span class="title">Value</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">subscript</span>(key: <span class="type">Key</span>) -&gt; <span class="type">Value</span>?</span><br><span class="line">    <span class="keyword">subscript</span>(position: <span class="type">DictionaryIndex</span>&lt;<span class="type">Key</span>, <span class="type">Value</span>&gt;) -&gt; (<span class="type">Key</span>, <span class="type">Value</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际上在字典中返回non-optional的是第二个脚本。所以当我们按照以下方法来操作字典时就会报错。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> startIndex = dict.startIndex</span><br><span class="line">dict[startIndex.advancedBy(<span class="number">3</span>)]    <span class="comment">// error</span></span><br></pre></td></tr></table></figure>
+<p>Indexable要求返回一个non-optional的值仅仅为了性能，毕竟直接crash比检查一个index的有效性快。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/25/FBKVOController源码阅读笔记/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -583,7 +724,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-count">33</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -591,7 +732,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -600,7 +741,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-count">42</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

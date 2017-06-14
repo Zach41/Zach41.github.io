@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="gitignore," />
+  <meta name="keywords" content="Websocket," />
 
 
 
@@ -84,25 +84,19 @@
 
 
 
-<meta name="description" content="gitignore.iogitignore.io是一个可以在线快速生成项目.gitignore文件的网站。github也维护了一个gitignore文件的repo。
-可以从上述网站很快得到想要的gitignore文件。
-当然如果你和我一样喜欢命令行，那么官方推荐的方法更值得拥有：
-1#!/bin/bash&amp;#10;$ echo &amp;#34;function gi() &amp;#123; curl -L -">
+<meta name="description" content="Websocket握手客户端握手请求客户端发送一个正常的HTTP报文，报头信息类似为：
+1234567GET /chat HTTP/1.1Host: example.com:8080Upgrade: websocketConnection: UpgradeSec-Websocket-Key: dGhlIHNhbXBsZSBub25jZQ==Sec-Websocket-Protocol: chat,">
 <meta property="og:type" content="article">
-<meta property="og:title" content="快速添加gitignore">
-<meta property="og:url" content="http://yoursite.com/2016/11/02/gitignore/index.html">
+<meta property="og:title" content="Websocket协议">
+<meta property="og:url" content="http://yoursite.com/2017/06/14/Websocket协议/index.html">
 <meta property="og:site_name" content="Zach的博客">
-<meta property="og:description" content="gitignore.iogitignore.io是一个可以在线快速生成项目.gitignore文件的网站。github也维护了一个gitignore文件的repo。
-可以从上述网站很快得到想要的gitignore文件。
-当然如果你和我一样喜欢命令行，那么官方推荐的方法更值得拥有：
-1#!/bin/bash&amp;#10;$ echo &amp;#34;function gi() &amp;#123; curl -L -">
-<meta property="og:updated_time" content="2016-11-09T04:51:53.000Z">
+<meta property="og:description" content="Websocket握手客户端握手请求客户端发送一个正常的HTTP报文，报头信息类似为：
+1234567GET /chat HTTP/1.1Host: example.com:8080Upgrade: websocketConnection: UpgradeSec-Websocket-Key: dGhlIHNhbXBsZSBub25jZQ==Sec-Websocket-Protocol: chat,">
+<meta property="og:updated_time" content="2017-06-14T07:08:33.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="快速添加gitignore">
-<meta name="twitter:description" content="gitignore.iogitignore.io是一个可以在线快速生成项目.gitignore文件的网站。github也维护了一个gitignore文件的repo。
-可以从上述网站很快得到想要的gitignore文件。
-当然如果你和我一样喜欢命令行，那么官方推荐的方法更值得拥有：
-1#!/bin/bash&amp;#10;$ echo &amp;#34;function gi() &amp;#123; curl -L -">
+<meta name="twitter:title" content="Websocket协议">
+<meta name="twitter:description" content="Websocket握手客户端握手请求客户端发送一个正常的HTTP报文，报头信息类似为：
+1234567GET /chat HTTP/1.1Host: example.com:8080Upgrade: websocketConnection: UpgradeSec-Websocket-Key: dGhlIHNhbXBsZSBub25jZQ==Sec-Websocket-Protocol: chat,">
 
 
 
@@ -134,7 +128,7 @@
 
 
 
-  <title> 快速添加gitignore | Zach的博客 </title>
+  <title> Websocket协议 | Zach的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -265,7 +259,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/02/gitignore/">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/14/Websocket协议/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="Zach">
@@ -289,7 +283,7 @@
             
             
               
-                快速添加gitignore
+                Websocket协议
               
             
           </h1>
@@ -314,7 +308,7 @@
 
           
           
-             <span id="/2016/11/02/gitignore/" class="leancloud_visitors" data-flag-title="快速添加gitignore">
+             <span id="/2017/06/14/Websocket协议/" class="leancloud_visitors" data-flag-title="Websocket协议">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -339,12 +333,19 @@
       
 
       
-        <h1 id="gitignore-io"><a href="#gitignore-io" class="headerlink" title="gitignore.io"></a>gitignore.io</h1><p><a href="https://www.gitignore.io/" target="_blank" rel="external">gitignore.io</a>是一个可以在线快速生成项目<code>.gitignore</code>文件的网站。<br><strong>github</strong>也维护了一个<code>gitignore</code>文件的<a href="https://github.com/github/gitignore" target="_blank" rel="external">repo</a>。</p>
-<p>可以从上述网站很快得到想要的<code>gitignore</code>文件。</p>
-<p>当然如果你和我一样喜欢命令行，那么官方推荐的方法更值得拥有：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash&#10;$ echo &#34;function gi() &#123; curl -L -s https://www.gitignore.io/api/\$@ ;&#125;&#34; &#62;&#62; ~/.bashrc &#38;&#38; source ~/.bashrc&#10;&#10;#!/bin/zsh&#10;$ echo &#34;function gi() &#123; curl -L -s https://www.gitignore.io/api/\$@ ;&#125;&#34; &#62;&#62; ~/.zshrc &#38;&#38; source ~/.zshrc</span><br></pre></td></tr></table></figure>
-<p>上述代码在用户环境变量文件中添加了一个函数<code>gi</code>，以后我们就可以这样来添加<code>gitignore</code>了：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gi CMake &#62; .gitignore&#10;gi C &#62;&#62; .gitignore</span><br></pre></td></tr></table></figure>
+        <h1 id="Websocket_u63E1_u624B"><a href="#Websocket_u63E1_u624B" class="headerlink" title="Websocket握手"></a>Websocket握手</h1><h2 id="u5BA2_u6237_u7AEF_u63E1_u624B_u8BF7_u6C42"><a href="#u5BA2_u6237_u7AEF_u63E1_u624B_u8BF7_u6C42" class="headerlink" title="客户端握手请求"></a>客户端握手请求</h2><p>客户端发送一个正常的HTTP报文，报头信息类似为：</p>
+<figure class="highlight h"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">GET /chat HTTP/<span class="number">1.1</span></span><br><span class="line">Host: example.com:<span class="number">8080</span></span><br><span class="line">Upgrade: websocket</span><br><span class="line">Connection: Upgrade</span><br><span class="line">Sec-Websocket-Key: dGhlIHNhbXBsZSBub25jZQ==</span><br><span class="line">Sec-Websocket-Protocol: chat, superchat</span><br><span class="line">Sec-Websocket-Version: <span class="number">13</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Upgrade: websocket&#10;Connection: Upgrade</span><br></pre></td></tr></table></figure>
+<p>这两个字端告诉服务器客户端请求的是Websocket协议</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Sec-Websocket-Key: dGhlIHNhbXBsZSBub25jZQ==</span><br></pre></td></tr></table></figure>
+<p>由客户端随机生成，用于验证服务端的服务器用语处理这个请求的处理是否是Websocket助理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Sec-Websocket-Protocol: chat, superchat</span><br></pre></td></tr></table></figure>
+<p>子协议，用于表明客户端期望的子协议，服务器在子协议中选择支持的协议返回给客户端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Sec-Websocket-Version: 13</span><br></pre></td></tr></table></figure>
+<p>Websocket协议版本，固定为13</p>
+<h2 id="u670D_u52A1_u5668_u8FD4_u56DE_u63E1_u624B_u8BF7_u6C42"><a href="#u670D_u52A1_u5668_u8FD4_u56DE_u63E1_u624B_u8BF7_u6C42" class="headerlink" title="服务器返回握手请求"></a>服务器返回握手请求</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 101 Switching Protocols&#10;Upgrade: websocket&#10;Connection: Upgrade&#10;Sec-Websocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=&#10;Sec-Websocket-Protocol: chat</span><br></pre></td></tr></table></figure>
+<p>这里就不对服务器的响应再作叙述。</p>
+<p>在握手完成之后客户端和服务器就可以开始发送Websocket报文了，报文以桢的形式发送，和HTTP报文再没有什么关系，报文格式参考RFC即可。</p>
 
       
     </div>
@@ -368,7 +369,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/gitignore/" rel="tag"># gitignore</a>
+            <a href="/tags/Websocket/" rel="tag"># Websocket</a>
           
         </div>
       
@@ -377,8 +378,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/10/28/线程基础/" rel="next" title="线程基础">
-                <i class="fa fa-chevron-left"></i> 线程基础
+              <a href="/2017/06/14/Type-Coercision/" rel="next" title="Type Conversions">
+                <i class="fa fa-chevron-left"></i> Type Conversions
               </a>
             
           </div>
@@ -386,10 +387,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/11/09/Emacs Rust环境配置/" rel="prev" title="Emacs Rust环境配置">
-                Emacs Rust环境配置 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -509,7 +506,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#gitignore-io"><span class="nav-number">1.</span> <span class="nav-text">gitignore.io</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Websocket_u63E1_u624B"><span class="nav-number">1.</span> <span class="nav-text">Websocket握手</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#u5BA2_u6237_u7AEF_u63E1_u624B_u8BF7_u6C42"><span class="nav-number">1.1.</span> <span class="nav-text">客户端握手请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u670D_u52A1_u5668_u8FD4_u56DE_u63E1_u624B_u8BF7_u6C42"><span class="nav-number">1.2.</span> <span class="nav-text">服务器返回握手请求</span></a></li></ol></li></ol></div>
             
 
           </div>

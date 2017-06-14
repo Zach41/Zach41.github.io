@@ -426,6 +426,164 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/23/守护进程/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/10/23/守护进程/" itemprop="url">
+                  守护进程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/10/23/守护进程/" class="leancloud_visitors" data-flag-title="守护进程">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="u5B88_u62A4_u8FDB_u7A0B"><a href="#u5B88_u62A4_u8FDB_u7A0B" class="headerlink" title="守护进程"></a>守护进程</h1><p>守护进程（daemon）是生存期长的一种进程。它们常常在系统引导装入时启动，在系统关闭时才终止。它们没有控制终端，所以它们一直在后台运行。UNIX系统中有很多守护进程，它们执行日常事务活动。</p>
+<h1 id="u7F16_u5199_u5B88_u62A4_u8FDB_u7A0B"><a href="#u7F16_u5199_u5B88_u62A4_u8FDB_u7A0B" class="headerlink" title="编写守护进程"></a>编写守护进程</h1><ol>
+<li>首先调用<code>umask</code>设置文件模式创建屏蔽字。如果守护进程要创建文件，那么它可能要设定特定的权限，继承而来的文件模式创建屏蔽字可能会屏蔽某些权限。一般调用为<code>umask(0)</code>。</li>
+<li>调用<code>fork</code>保证守护进程不是一个进程的组长进程，同时获得一个新的进程ID。</li>
+<li>调用<code>setsid</code>创建一个会话</li>
+<li>再次调用<code>fork</code>以保证当前进程不是会话的首进程，以防止日后打开一个终端时获得一个控制终端。</li>
+<li>更改当前工作目录为根目录。这样可以防止某些文件系统不能被卸载。</li>
+<li>关闭不需要的文件系统，通知把标准输入、标准输出和标准错误重定向到<code>/def/null</code>，这样可以防止某些利用这些描述符的库函数不会得不到描述符而出错。</li>
+</ol>
+<p>一个将普通进程转换成守护进程的函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">daemonize</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *cmd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd0, fd1, fd2;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line">    <span class="keyword">struct</span> rlimit rl;</span><br><span class="line">    <span class="keyword">struct</span> sigaction sa;</span><br><span class="line"></span><br><span class="line">    umask(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (getrlimit(RLIMIT_NOFILE, &amp;rl) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">" getrlimit error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// become a session leader to lose controlling TTY</span></span><br><span class="line">    <span class="keyword">if</span> ((pid = fork()) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"fork error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="comment">/* parent */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    setsid();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* fork again, ensure future opens won;t allocate controlling TTY */</span></span><br><span class="line">    sa.sa_handler = SIG_IGN;</span><br><span class="line">    sigemptyset(&amp;sa.sa_mask);</span><br><span class="line">    sa.sa_flags = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (sigaction(SIGHUP, &amp;sa, <span class="literal">NULL</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"%s: can't ignore SIGHUP"</span>, cmd);</span><br><span class="line">	perror(<span class="string">""</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((pid = fork()) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"fork error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Change the current working directory to the root</span><br><span class="line">       so we won;t prevent file systems from being unmounted.</span><br><span class="line">       */</span></span><br><span class="line">    <span class="keyword">if</span> (chdir(<span class="string">"/"</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"chdir error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* close all open file descriptors */</span></span><br><span class="line">    <span class="keyword">if</span> (rl.rlim_max == RLIM_INFINITY) &#123;</span><br><span class="line">	rl.rlim_max = <span class="number">1024</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;rl.rlim_max; i++) &#123;</span><br><span class="line">	close(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* attach stdin, stdout, stderr to /dev/null */</span></span><br><span class="line">    fd0 = open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line">    fd1 = dup(<span class="number">0</span>);</span><br><span class="line">    fd2 = dup(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Initialize log file */</span></span><br><span class="line">    openlog(cmd, LOG_CONS, LOG_DAEMON);</span><br><span class="line">    <span class="keyword">if</span> (fd0 != <span class="number">0</span> || fd1 != <span class="number">1</span> || fd2 != <span class="number">2</span>) &#123;</span><br><span class="line">	syslog(LOG_ERR, <span class="string">"unexpected file descriptors %d %d %d"</span>, fd0, fd1, fd2);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="syslog"><a href="#syslog" class="headerlink" title="syslog"></a>syslog</h1><p>守护进程的一个问题是如何处理出错信息，因为它没有控制终端，所以不能简单的写到标准错误上。可以利用<code>syslog</code>来记录守护进程的错误信息。<code>syslog</code>的组织结构如下：</p>
+<img src="/2016/10/23/守护进程/syslog.png" alt="syslog.png" title="">
+<p>有以下三种产生日志消息的方法：</p>
+<ol>
+<li>内核例程调用<code>log</code>函数。</li>
+<li>大多数用户进程（守护进程）调用<code>syslog</code>函数产生日志消息</li>
+<li>无论一个用户进程是否在此主机上，都可将日志消息发向UDP端口514.</li>
+</ol>
+<p><code>syslog</code>的接口为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">openlog</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *ident, <span class="keyword">int</span> option, <span class="keyword">int</span> facility)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">syslog</span><span class="params">(<span class="keyword">int</span> priority, <span class="keyword">const</span> <span class="keyword">char</span> *fmt, ...)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">viud <span class="title">closelog</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setlogmask</span><span class="params">(<span class="keyword">int</span> maskpri)</span></span>;</span><br></pre></td></tr></table></figure>
+<h1 id="u6587_u4EF6_u9501_u548C_u5355_u5B9E_u4F8B_u5B88_u62A4_u8FDB_u7A0B"><a href="#u6587_u4EF6_u9501_u548C_u5355_u5B9E_u4F8B_u5B88_u62A4_u8FDB_u7A0B" class="headerlink" title="文件锁和单实例守护进程"></a>文件锁和单实例守护进程</h1><p><code>fcntl</code>函数可以用来给一整个文件或者是文件的部分区域加建议锁。文件锁分为<code>shared lock</code>和<code>execlusive lock</code>，一个文件可以加多个<code>shared lock</code>，就如同可以有多个读者一样，但是一个文件只能加一个<code>exclusive loc</code>，而且文件要么加<code>shared lock</code>要么加<code>exclusive lock</code>，不能同时加两个锁。</p>
+<p>在设置文件锁时，需要传入<code>flock</code>结构的指针。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> flock &#123;</span><br><span class="line">               ...</span><br><span class="line">               <span class="keyword">short</span> l_type;    <span class="comment">/* Type of lock: F_RDLCK,</span><br><span class="line">                                   F_WRLCK, F_UNLCK */</span></span><br><span class="line">               <span class="keyword">short</span> l_whence;  <span class="comment">/* How to interpret l_start:</span><br><span class="line">                                   SEEK_SET, SEEK_CUR, SEEK_END */</span></span><br><span class="line">               <span class="keyword">off_t</span> l_start;   <span class="comment">/* Starting offset for lock */</span></span><br><span class="line">               <span class="keyword">off_t</span> l_len;     <span class="comment">/* Number of bytes to lock */</span></span><br><span class="line">               <span class="keyword">pid_t</span> l_pid;     <span class="comment">/* PID of process blocking our lock</span><br><span class="line">                                   (F_GETLK only) */</span></span><br><span class="line">               ...</span><br><span class="line">           &#125;;</span><br></pre></td></tr></table></figure>
+<p>需要说明的是，如果<code>l_len</code>被设置成0，那么从<code>l_whence</code>和<code>l_start</code>指定的位置开始到文件的末尾都被加上了文件锁。</p>
+<p><code>fcntl</code>有三种和文件锁有关的操作：</p>
+<ol>
+<li>F_GETLK：<code>flock</code>参数表示调用者这时候想要加上的锁，如果锁能被加上，那么<code>fcntl</code>并没有实际上锁，它将<code>l_type</code>置为<code>F_UNLCK</code>。如果不能上锁，那么就把文件锁的相关信息填入<code>flock</code>参数中。</li>
+<li>F_SETLK：给文件设置锁，如果另外一个进程已经持有锁而使得当前进程无法获得锁，返回-1。</li>
+<li>F_SETLKW：和F_SETLCK一样，但是当锁无法获得时，调用进程被阻塞，直至锁可用。</li>
+</ol>
+<p>需要注意一点是，当对应的文件被关闭时，其上的锁被自动释放，子进程也无法继承父进程的锁。当拥有锁的进程终止时，锁也被自动释放。</p>
+<p><code>flock</code>接口也可以获得文件锁（另外一种文件锁，不一定和上文的文件锁兼容），不同的是，子进程可以继承父进程的文件锁，但是子进程得到的只是文件锁的引用，即如果子进程释放文件锁，那么父进程的文件锁也被释放。具体可以参看<code>flock(2)</code>的manual。</p>
+<p>我们利用<code>fcntl</code>函数设置文件锁，只有当前运行的守护进程拥有文件锁，之后尝试启动的守护进程都将无法得到该文件锁，从而无法启动，于是就可以达到单实例守护进程的目的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/resource.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LOCKFILE <span class="string">"/var/run/daemon.pid"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LOCKMODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">sigset_t</span> mask;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">reread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// re-read configuration</span></span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">lockfile</span><span class="params">(<span class="keyword">int</span> fd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> flock fl;</span><br><span class="line"></span><br><span class="line">    fl.l_start = <span class="number">0</span>;</span><br><span class="line">    fl.l_len = <span class="number">0</span>;</span><br><span class="line">    fl.l_whence = SEEK_SET;</span><br><span class="line">    fl.l_type = F_WRLCK;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> fcntl(fd, F_SETLK, &amp;fl);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">daemonize</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *cmd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd0, fd1, fd2;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line">    <span class="keyword">struct</span> rlimit rl;</span><br><span class="line">    <span class="keyword">struct</span> sigaction sa;</span><br><span class="line"></span><br><span class="line">    umask(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (getrlimit(RLIMIT_NOFILE, &amp;rl) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">" getrlimit error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// become a session leader to lose controlling TTY</span></span><br><span class="line">    <span class="keyword">if</span> ((pid = fork()) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"fork error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="comment">/* parent */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    setsid();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* fork again, ensure future opens won;t allocate controlling TTY */</span></span><br><span class="line">    sa.sa_handler = SIG_IGN;</span><br><span class="line">    sigemptyset(&amp;sa.sa_mask);</span><br><span class="line">    sa.sa_flags = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (sigaction(SIGHUP, &amp;sa, <span class="literal">NULL</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"%s: can't ignore SIGHUP"</span>, cmd);</span><br><span class="line">	perror(<span class="string">""</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((pid = fork()) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"fork error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Change the current working directory to the root</span><br><span class="line">       so we won;t prevent file systems from being unmounted.</span><br><span class="line">       */</span></span><br><span class="line">    <span class="keyword">if</span> (chdir(<span class="string">"/"</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"chdir error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* close all open file descriptors */</span></span><br><span class="line">    <span class="keyword">if</span> (rl.rlim_max == RLIM_INFINITY) &#123;</span><br><span class="line">	rl.rlim_max = <span class="number">1024</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;rl.rlim_max; i++) &#123;</span><br><span class="line">	close(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* attach stdin, stdout, stderr to /dev/null */</span></span><br><span class="line">    fd0 = open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line">    fd1 = dup(<span class="number">0</span>);</span><br><span class="line">    fd2 = dup(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Initialize log file */</span></span><br><span class="line">    openlog(cmd, LOG_CONS, LOG_DAEMON);</span><br><span class="line">    <span class="keyword">if</span> (fd0 != <span class="number">0</span> || fd1 != <span class="number">1</span> || fd2 != <span class="number">2</span>) &#123;</span><br><span class="line">	syslog(LOG_ERR, <span class="string">"unexpected file descriptors %d %d %d"</span>, fd0, fd1, fd2);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">already_running</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd;</span><br><span class="line">    <span class="keyword">char</span> buf[<span class="number">16</span>];</span><br><span class="line"></span><br><span class="line">    fd = open(LOCKFILE, O_RDWR | O_CREAT, LOCKMODE);</span><br><span class="line">    <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	syslog(LOG_ERR, <span class="string">"can't open %s: %s"</span>, LOCKFILE, strerror(errno));</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (lockfile(fd) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> (errno == EACCES || errno == EAGAIN) &#123;</span><br><span class="line">	    <span class="comment">/* already has one daemon running */</span></span><br><span class="line">	    close(fd);</span><br><span class="line">	    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	syslog(LOG_ERR, <span class="string">"can't lock %s: %s"</span>, LOCKFILE, strerror(errno));</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ftruncate(fd, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">sprintf</span>(buf, <span class="string">"%ld"</span>, (<span class="keyword">long</span>)getpid());</span><br><span class="line">    write(fd, buf, <span class="built_in">strlen</span>(buf) + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> err;</span><br><span class="line">    <span class="keyword">pthread_t</span> tid;</span><br><span class="line">    <span class="keyword">char</span> *cmd;</span><br><span class="line">    <span class="keyword">struct</span> sigaction sa;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((cmd = <span class="built_in">strrchr</span>(argv[<span class="number">0</span>], <span class="string">'/'</span>)) == <span class="literal">NULL</span>)</span><br><span class="line">	cmd = argv[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">	cmd++;</span><br><span class="line"></span><br><span class="line">    daemonize(cmd);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (already_running()) &#123;</span><br><span class="line">    	syslog(LOG_ERR, <span class="string">"daemon already running"</span>);</span><br><span class="line">    	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* do daemon's work */</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在运行一次之后，我们尝试在此运行，查看<code>/var/log/syslog</code>得到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Oct 23 17:00:35 localhost a.out: daemon already running</span><br></pre></td></tr></table></figure>
+<h1 id="u4F7F_u7528sigwait_u4EE5_u53CA_u591A_u7EBF_u7A0B_u5904_u7406_u4FE1_u53F7"><a href="#u4F7F_u7528sigwait_u4EE5_u53CA_u591A_u7EBF_u7A0B_u5904_u7406_u4FE1_u53F7" class="headerlink" title="使用sigwait以及多线程处理信号"></a>使用sigwait以及多线程处理信号</h1><p>守护进程一般在接受到SIGHUP信号后重新读区其配置文件。这是因为守护进程没有控制终端，它永远不会收到来自终端的SIGHUP信号，那么就可以将SIGHUP信号重复使用，收到该信号就重新读取配置文件。</p>
+<p>一个例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/resource.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LOCKFILE <span class="string">"/var/run/daemon.pid"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> LOCKMODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">sigset_t</span> mask;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">reread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// re-read configuration</span></span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">lockfile</span><span class="params">(<span class="keyword">int</span> fd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">struct</span> flock fl;</span><br><span class="line"></span><br><span class="line">    fl.l_start = <span class="number">0</span>;</span><br><span class="line">    fl.l_len = <span class="number">0</span>;</span><br><span class="line">    fl.l_whence = SEEK_SET;</span><br><span class="line">    fl.l_type = F_WRLCK;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> fcntl(fd, F_SETLK, &amp;fl);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">daemonize</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *cmd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd0, fd1, fd2;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line">    <span class="keyword">struct</span> rlimit rl;</span><br><span class="line">    <span class="keyword">struct</span> sigaction sa;</span><br><span class="line"></span><br><span class="line">    umask(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (getrlimit(RLIMIT_NOFILE, &amp;rl) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">" getrlimit error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// become a session leader to lose controlling TTY</span></span><br><span class="line">    <span class="keyword">if</span> ((pid = fork()) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"fork error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="comment">/* parent */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    setsid();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* fork again, ensure future opens won;t allocate controlling TTY */</span></span><br><span class="line">    sa.sa_handler = SIG_IGN;</span><br><span class="line">    sigemptyset(&amp;sa.sa_mask);</span><br><span class="line">    sa.sa_flags = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (sigaction(SIGHUP, &amp;sa, <span class="literal">NULL</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"%s: can't ignore SIGHUP"</span>, cmd);</span><br><span class="line">	perror(<span class="string">""</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((pid = fork()) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"fork error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Change the current working directory to the root</span><br><span class="line">       so we won;t prevent file systems from being unmounted.</span><br><span class="line">       */</span></span><br><span class="line">    <span class="keyword">if</span> (chdir(<span class="string">"/"</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">"chdir error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* close all open file descriptors */</span></span><br><span class="line">    <span class="keyword">if</span> (rl.rlim_max == RLIM_INFINITY) &#123;</span><br><span class="line">	rl.rlim_max = <span class="number">1024</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;rl.rlim_max; i++) &#123;</span><br><span class="line">	close(i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* attach stdin, stdout, stderr to /dev/null */</span></span><br><span class="line">    fd0 = open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line">    fd1 = dup(<span class="number">0</span>);</span><br><span class="line">    fd2 = dup(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Initialize log file */</span></span><br><span class="line">    openlog(cmd, LOG_CONS, LOG_DAEMON);</span><br><span class="line">    <span class="keyword">if</span> (fd0 != <span class="number">0</span> || fd1 != <span class="number">1</span> || fd2 != <span class="number">2</span>) &#123;</span><br><span class="line">	syslog(LOG_ERR, <span class="string">"unexpected file descriptors %d %d %d"</span>, fd0, fd1, fd2);</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">already_running</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> fd;</span><br><span class="line">    <span class="keyword">char</span> buf[<span class="number">16</span>];</span><br><span class="line"></span><br><span class="line">    fd = open(LOCKFILE, O_RDWR | O_CREAT, LOCKMODE);</span><br><span class="line">    <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	syslog(LOG_ERR, <span class="string">"can't open %s: %s"</span>, LOCKFILE, strerror(errno));</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (lockfile(fd) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> (errno == EACCES || errno == EAGAIN) &#123;</span><br><span class="line">	    <span class="comment">/* already has one daemon running */</span></span><br><span class="line">	    close(fd);</span><br><span class="line">	    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	syslog(LOG_ERR, <span class="string">"can't lock %s: %s"</span>, LOCKFILE, strerror(errno));</span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ftruncate(fd, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">sprintf</span>(buf, <span class="string">"%ld"</span>, (<span class="keyword">long</span>)getpid());</span><br><span class="line">    write(fd, buf, <span class="built_in">strlen</span>(buf) + <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">thr_fn</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> err, signo;</span><br><span class="line">    <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">	err = sigwait(&amp;mask, &amp;signo);</span><br><span class="line">	<span class="keyword">if</span> (err != <span class="number">0</span>) &#123;</span><br><span class="line">	    syslog(LOG_ERR, <span class="string">"sigwait failed"</span>);</span><br><span class="line">	    <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (signo) &#123;</span><br><span class="line">	<span class="keyword">case</span> SIGHUP: &#123;</span><br><span class="line">	    syslog(LOG_INFO, <span class="string">"Re-reading configuration file"</span>);</span><br><span class="line">	    reread();</span><br><span class="line">	    <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">case</span> SIGTERM: &#123;</span><br><span class="line">	    syslog(LOG_INFO, <span class="string">"got SIGTERM; exiting"</span>);</span><br><span class="line">	    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">	    syslog(LOG_INFO, <span class="string">"unexpected signal %d\n"</span>, signo);</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> err;</span><br><span class="line">    <span class="keyword">pthread_t</span> tid;</span><br><span class="line">    <span class="keyword">char</span> *cmd;</span><br><span class="line">    <span class="keyword">struct</span> sigaction sa;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((cmd = <span class="built_in">strrchr</span>(argv[<span class="number">0</span>], <span class="string">'/'</span>)) == <span class="literal">NULL</span>)</span><br><span class="line">	cmd = argv[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">	cmd++;</span><br><span class="line"></span><br><span class="line">    daemonize(cmd);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (already_running()) &#123;</span><br><span class="line">    	syslog(LOG_ERR, <span class="string">"daemon already running"</span>);</span><br><span class="line">    	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span><br><span class="line">      Restore SIGHUP default and block all signals</span><br><span class="line">      */</span></span><br><span class="line">    sa.sa_handler = SIG_DFL;</span><br><span class="line">    sigemptyset(&amp;sa.sa_mask);</span><br><span class="line">    sa.sa_flags = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (sigaction(SIGHUP, &amp;sa, <span class="literal">NULL</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    	syslog(LOG_ERR, <span class="string">"%s: can't restore SIGHUP default"</span>, cmd);</span><br><span class="line">    	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sigfillset(&amp;mask);</span><br><span class="line">    <span class="keyword">if</span> ((err = pthread_sigmask(SIG_BLOCK, &amp;mask, <span class="literal">NULL</span>)) != <span class="number">0</span>) &#123;</span><br><span class="line">    	syslog(LOG_ERR, <span class="string">"SIG_BLOCK error"</span>);</span><br><span class="line">    	<span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    err = pthread_create(&amp;tid, <span class="literal">NULL</span>, thr_fn, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (err != <span class="number">0</span>) &#123;</span><br><span class="line">    	syslog(LOG_ERR, <span class="string">"can't create thread"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* do daemon's work */</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> 我们将SIGHUP的处理函数恢复的到默认之后（否则进程忽略这个信号，sigwait永远不会见到它），阻塞所有信号，然后创建一个线程处理信号。该线程的唯一工作是等待SIGHUP和SIGTERM。当收到SIGHUP是就重新读取配置文件。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/20/进程控制/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1887,178 +2045,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/13/套接字选项/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/13/套接字选项/" itemprop="url">
-                  套接字选项
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/13/套接字选项/" class="leancloud_visitors" data-flag-title="套接字选项">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="u4FEE_u6539_u5957_u63A5_u5B57_u9009_u9879"><a href="#u4FEE_u6539_u5957_u63A5_u5B57_u9009_u9879" class="headerlink" title="修改套接字选项"></a>修改套接字选项</h1><p>有几种方法来修改和获取套接字的选项：</p>
-<ul>
-<li>getsockopt &amp; setsockopt</li>
-<li>fcntl</li>
-<li>ioctl</li>
-</ul>
-<h3 id="getsockopt__26amp_3B_setsockopt"><a href="#getsockopt__26amp_3B_setsockopt" class="headerlink" title="getsockopt &amp; setsockopt"></a>getsockopt &amp; setsockopt</h3><p>这两个函数仅仅用于套接字。函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getsockopt</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> level, <span class="keyword">int</span> optname, <span class="keyword">void</span> *optval, socklen_t *optlen)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setsockopt</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> level, <span class="keyword">int</span> optname, <span class="keyword">const</span> <span class="keyword">void</span> *optval, socklen_t optlen)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>sockfd必须指向一个已经打开的套接字，level指向系统中解释选项的代码或为通用套接字代码，或为某个特定于协议的代码（如TCP、IPv4、IPv6或SCTP）。</p>
-<p>optval指向某个变量，变量的大小由最后一个参数optlen指定，setsockopt从optval中取得待设置的新值，而getsockopt把获取到的值存入对应的地址中。</p>
-<p>套接字选项粗分为两大基本类型：</p>
-<ul>
-<li>启用或禁止某个特性的标志选项(flag = 0禁止特性，flag = 1开启特性)</li>
-<li>取得并返回我们可以设置或检查的特定值选项，即值选项。</li>
-</ul>
-<p>套接字选项可以参见UNP的P151</p>
-<h1 id="u901A_u7528_u5957_u63A5_u5B57_u9009_u9879_uFF08_u90E8_u5206_uFF09"><a href="#u901A_u7528_u5957_u63A5_u5B57_u9009_u9879_uFF08_u90E8_u5206_uFF09" class="headerlink" title="通用套接字选项（部分）"></a>通用套接字选项（部分）</h1><p>这里仅仅列出部分的通用套接字选项，其实也就是挑了一些自己看得懂的选项记录下。</p>
-<h3 id="SO_BROADCAST"><a href="#SO_BROADCAST" class="headerlink" title="SO_BROADCAST"></a>SO_BROADCAST</h3><p>开启或禁止进程发送广播消息的能力。只有数据报支持广播，并且还是在支持广播消息的网络上（以太网、令牌网络等）。</p>
-<h3 id="SO_DEBUG"><a href="#SO_DEBUG" class="headerlink" title="SO_DEBUG"></a>SO_DEBUG</h3><p>仅由TCP支持，当给一个TCP套接字开启本选项时，内核将为TCP在该套接字发送和接收的所有分组保留详细的跟踪信息，这些信息保存在内核的某个环形缓冲区中，并可使用trpt程序进行检查。</p>
-<h3 id="SO_ERROR"><a href="#SO_ERROR" class="headerlink" title="SO_ERROR"></a>SO_ERROR</h3><p>当一个套接字上发生错误时，内核将套接字的名为so_error的变量设置为标准的Unix Exxx值中的一个，它被成为该套接字的待处理错误(pending error)，内核以以下方式通知进程这个错误：</p>
-<ol>
-<li>如果进程阻塞在套接字的select调用上，那么无论是检查可读条件还是可读可写条件，select均返回并设置其中一个或所有的条件。</li>
-<li>如果进程使用信号驱动I/O模型，那么进程或进程组就会接收到内核产生的SIGIO信息。</li>
-</ol>
-<p>进程在被内核通知之后，可以通过访问SO_ERROR套接字选项获得so_error的值，由getsockopt返回的整数即待处理错误，随后so_error由内核复位成0。</p>
-<p>这个套接字选项可以获取，但是不能设置。</p>
-<h3 id="SO_KEEPALIVE"><a href="#SO_KEEPALIVE" class="headerlink" title="SO_KEEPALIVE"></a>SO_KEEPALIVE</h3><p>给一个套接字设置保持存活(keep-alive)选项后，如果2小时内在该套接字的任意一个方向上没有数据交换，那么TCP就会自动给对端发送一个保持存活的探测分节(keep-alive probe)，这是一个对端必须响应的TCP分节，它<br>会导致以下三种情况之一：</p>
-<ol>
-<li>对端以期望的ACK响应，一切正常</li>
-<li>对端以RST响应，对端已经崩溃并重启，套接字的待处理错误被置为ECONNRESET，套接字本身被关闭。</li>
-<li>对端对保持存活的探测分节没有响应，TCP间隔一段时间再次发送探测分节，多次之后若还是没有响应，则放弃套接字的待处理错误被置为ETIMEOUT，如果收到一个ICMP错误作为某个探测分节的响应，就返回相应的错误，套接字本身被关闭。</li>
-</ol>
-<h3 id="SO_LINGER"><a href="#SO_LINGER" class="headerlink" title="SO_LINGER"></a>SO_LINGER</h3><p>指定close函数对面向连接的协议(TCP和SCTP)如何操作。默认的行为是立即返回，如果这时候发送缓冲区有数据残留，系统会尝试把数据发送给对方。选项要求用户进程和内核间传递如下结构：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> linger &#123;</span><br><span class="line">	<span class="keyword">int</span> l_onoff;</span><br><span class="line">	<span class="keyword">int</span> l_linger;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>如果l_onoff = 0，l_linger被忽略，选项关闭</li>
-<li>l_onoff非0，<ul>
-<li>l_linger = 0，那么TCP丢弃发送缓冲区内的任何数据，并发送一个RST给对端，不会再有四次挥手。</li>
-<li>l_linger不为0，进程被阻塞，知道所有发送缓冲区的数据都发送完毕并被对方确认，或者是超过了l_linger指定的时间，如果超时，close返回EWOULDBLOCK错误。</li>
-</ul>
-</li>
-</ol>
-<p>假设客户在发送玩数据后调用了close函数，close可能在服务器读套接字接收缓冲区中的剩余数据之前就返回，在应用程序读数据之前服务器可能就会崩溃，而客户进程永远不会知道。<br>如果设置了SO_LINGER套接字，那么在调用close函数后，应用进程阻塞一段时间，等待数据全部发送并被对方确认（如图所示）。但是这里还有一个问题，延滞的时间可能不够，close仍然会返回EWOULDBLOCK错误，而且close的成功返回只是告诉我们先前发送的数据已经由对方确认，并不能告诉我们应用进程是否读取了数据。</p>
-<img src="/2016/09/13/套接字选项/so_linger.png" alt="so_linger.png" title="">
-<p>让客户进程知道服务器已经读取数据的一个方法是改用shutdown（设置SHUT_WR），改用之后的流程如下图：</p>
-<img src="/2016/09/13/套接字选项/shutdown_linger.png" alt="shutdown_linger.png" title="">
-<p>另外一个方法是应用程序自己做确认。客户在向服务器发送完数据后，调用read来读取一个字节</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">char</span> ack;</span><br><span class="line"></span><br><span class="line">Write(sockfd, data, nbytes);</span><br><span class="line">n = read(sockfd, &amp;ack, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<p>服务器读取来自客户端的数据后发回一个字节的ACK。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nbytes = Read(sockfd, buff, <span class="keyword">sizeof</span>(buff));</span><br><span class="line"></span><br><span class="line">Write(sockfd, <span class="string">""</span>, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-<h3 id="SO_RCVBUF__26amp_3B_SO_SNDBUF"><a href="#SO_RCVBUF__26amp_3B_SO_SNDBUF" class="headerlink" title="SO_RCVBUF &amp; SO_SNDBUF"></a>SO_RCVBUF &amp; SO_SNDBUF</h3><p>每一个套接字有一个发送和接收缓冲区，可以利用SO_RCVBUF和SO_SNDBUF选项来修改默认的缓冲区大小。需要注意的是，由于TCP的窗口规模是在建立连接时用SYN分节与对端呼唤a的都的。对于客户端，意味着<br>SO_RCVBUF必须在connect调用之前设置；对于服务端，该选项必须在调用Listen之前设置。</p>
-<h3 id="SO_RCVLOWAT__26amp_3B_SO_SNDLOWAT"><a href="#SO_RCVLOWAT__26amp_3B_SO_SNDLOWAT" class="headerlink" title="SO_RCVLOWAT &amp; SO_SNDLOWAT"></a>SO_RCVLOWAT &amp; SO_SNDLOWAT</h3><p>每一个套接字还有一个接收和发送低水位标志，由select使用，用SO_RCVLOWAT和SO_SNDLOWAT可以修改低水位标志的值。</p>
-<p>接收低水位标志是让select返回可读时套接字接收缓冲区所需要的最少的数据量。<br>发送低水位标志是让select返回可写是套接字发送缓冲区可存入的最少数据量。</p>
-<p>两个低水位的默认值都为1</p>
-<h3 id="SO_RCVTIMEO__26amp_3B_SO_SNDTIMEO"><a href="#SO_RCVTIMEO__26amp_3B_SO_SNDTIMEO" class="headerlink" title="SO_RCVTIMEO &amp; SO_SNDTIMEO"></a>SO_RCVTIMEO &amp; SO_SNDTIMEO</h3><p>这两个选项允许我们给套接字的接收和发送设置一个超时值。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2104,7 +2090,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-count">33</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -2112,7 +2098,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-count">14</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -2121,7 +2107,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-count">42</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
