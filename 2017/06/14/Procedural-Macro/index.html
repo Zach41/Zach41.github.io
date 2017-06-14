@@ -1,0 +1,755 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Procedural-Macro," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Procedural MacrosRust提供了一个derive的机制可以很方便地生成一些代码，在Rust 1.15以前定制derive的功能只在nightly里才有，Rust 1.15把这一个功能稳定了，也就是说我们可以在stable的版本里面定制derive了。
+Rust book里面有一个章节Procedural Macros简单介绍了如何编写一个derive，最后的效果如下所示：
+1234">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Procedural Macro">
+<meta property="og:url" content="http://yoursite.com/2017/06/14/Procedural-Macro/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="Procedural MacrosRust提供了一个derive的机制可以很方便地生成一些代码，在Rust 1.15以前定制derive的功能只在nightly里才有，Rust 1.15把这一个功能稳定了，也就是说我们可以在stable的版本里面定制derive了。
+Rust book里面有一个章节Procedural Macros简单介绍了如何编写一个derive，最后的效果如下所示：
+1234">
+<meta property="og:updated_time" content="2017-06-14T07:01:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Procedural Macro">
+<meta name="twitter:description" content="Procedural MacrosRust提供了一个derive的机制可以很方便地生成一些代码，在Rust 1.15以前定制derive的功能只在nightly里才有，Rust 1.15把这一个功能稳定了，也就是说我们可以在stable的版本里面定制derive了。
+Rust book里面有一个章节Procedural Macros简单介绍了如何编写一个derive，最后的效果如下所示：
+1234">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title> Procedural Macro | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/14/Procedural-Macro/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Procedural Macro
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/06/14/Procedural-Macro/" class="leancloud_visitors" data-flag-title="Procedural Macro">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Procedural_Macros"><a href="#Procedural_Macros" class="headerlink" title="Procedural Macros"></a>Procedural Macros</h1><p>Rust提供了一个<code>derive</code>的机制可以很方便地生成一些代码，在Rust 1.15以前定制<code>derive</code>的功能只在nightly里才有，Rust 1.15把这一个功能稳定了，也就是说我们可以在stable的版本里面定制<code>derive</code>了。</p>
+<p>Rust book里面有一个章节<a href="https://doc.rust-lang.org/book/procedural-macros.html" target="_blank" rel="external">Procedural Macros</a>简单介绍了如何编写一个<code>derive</code>，最后的效果如下所示：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#[macro_use]</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> hello_world_derive;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> <span class="title">HelloWorld</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">hello_world</span></span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[derive(HelloWorld)]</span></span><br><span class="line"><span class="keyword">struct</span> Test1;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[derive(HelloWorld)]</span></span><br><span class="line"><span class="keyword">struct</span> Test2;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="comment">// println!("Hello, world!");</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> t1 = Test1;</span><br><span class="line">    <span class="keyword">let</span> t2 = Test2;</span><br><span class="line"></span><br><span class="line">    t1.hello_world(); <span class="comment">// print "Hello World from Test1"</span></span><br><span class="line">    t2.hello_world(); <span class="comment">// print "Hello World from Test2"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="hello_world_derive"><a href="#hello_world_derive" class="headerlink" title="hello_world_derive"></a>hello_world_derive</h2><p>接下来就解析一下具体的细节。</p>
+<p>我们需要新建一个crate，这个crate里面包含自动生成代码的细节，我们将其命名为<code>hello_world_derive</code>。在现阶段，必须把这些实现放在另外一个crate中，不过在将来可能就不需要这么麻烦了。</p>
+<p>新建的crate的Cargo.toml文件如下：</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">[package]</span></span><br><span class="line"><span class="setting">name = <span class="value"><span class="string">"hello_world_derive"</span></span></span></span><br><span class="line"><span class="setting">version = <span class="value"><span class="string">"0.1.0"</span></span></span></span><br><span class="line"><span class="setting">authors = <span class="value">[<span class="string">"Zach &lt;zach_41@163.com&gt;"</span>]</span></span></span><br><span class="line"><span class="title"></span><br><span class="line">[dependencies]</span></span><br><span class="line"><span class="setting">quote = <span class="value"><span class="string">"*"</span></span></span></span><br><span class="line"><span class="setting">syn = <span class="value"><span class="string">"*"</span></span></span></span><br><span class="line"><span class="title"></span><br><span class="line">[lib]</span></span><br><span class="line"><span class="setting">proc-macro = <span class="value"><span class="keyword">true</span></span></span></span><br></pre></td></tr></table></figure>
+<p><code>proc-macro</code> 值为<code>true</code>表示这是一个Procedural Macro的crate。</p>
+<p>lib.rs里面的代码如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> proc_macro;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> syn;</span><br><span class="line"><span class="preprocessor">#[macro_use]</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> quote;</span><br><span class="line"></span><br><span class="line"><span class="keyword">use</span> proc_macro::TokenStream;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">impl_hello_world</span></span>(ast: &amp;syn::MacroInput) -&gt; quote::Tokens &#123;</span><br><span class="line">    <span class="keyword">let</span> name = &amp;ast.ident;</span><br><span class="line"></span><br><span class="line">    quote! &#123;</span><br><span class="line">        <span class="keyword">impl</span> HelloWorld <span class="keyword">for</span> #name &#123;</span><br><span class="line">            <span class="function"><span class="keyword">fn</span> <span class="title">hello_world</span></span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">                <span class="built_in">println!</span>(<span class="string">"Hello World from &#123;&#125;!"</span>, <span class="built_in">stringify!</span>(#name));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[proc_macro_derive(HelloWorld)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">hello_world</span></span>(input: TokenStream) -&gt; TokenStream &#123;</span><br><span class="line">    <span class="keyword">let</span> input = input.to_string();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> ast = syn::parse_macro_input(&amp;input).unwrap();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> gen = impl_hello_world(&amp;ast);</span><br><span class="line"></span><br><span class="line">    gen.parse().unwrap()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先看<code>hello_world</code>函数，其输入是一个<code>TokenStream</code>，现阶段我们只能调用<code>to_string</code>，将它转换成字符串，然后我们调用<code>syn</code>模块里面的parse函数，得到一个抽象的语法树AST(类型为<code>MacroInput</code>)。</p>
+<p>在<code>implies_hello_world</code>中我们调用分析得到的AST，并利用<code>quote</code>模块里的<code>quote</code>宏来生成需要的代码，这样就完成了自动生成了。</p>
+<p>这里还有一个更复杂的例子<a href="https://github.com/nrc/derive-new" target="_blank" rel="external">derive_new</a>，学习它对熟悉<code>derive</code>机制非常有帮助。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Procedural-Macro/" rel="tag"># Procedural-Macro</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/01/Slice和Iterator/" rel="next" title="Slice和Iterator">
+                <i class="fa fa-chevron-left"></i> Slice和Iterator
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/14/Trait-Object/" rel="prev" title="Trait Object">
+                Trait Object <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Procedural_Macros"><span class="nav-number">1.</span> <span class="nav-text">Procedural Macros</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#hello_world_derive"><span class="nav-number">1.1.</span> <span class="nav-text">hello_world_derive</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>

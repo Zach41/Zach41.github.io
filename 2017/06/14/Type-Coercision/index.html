@@ -1,0 +1,776 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="类型转换," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Trait Object静态分派和动态分派Rust支持静态分派(static dispatch)和动态分派(dynamic dispatch)。
+静态分配是在编译阶段就确定好了应该调用哪个函数，它是通过泛型实现的多态。一个例子如下：
+1234567891011121314151617trait Birt &amp;#123;    fn fly(&amp;amp;self);&amp;#125;struct Duck;s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Type Conversions">
+<meta property="og:url" content="http://yoursite.com/2017/06/14/Type-Coercision/index.html">
+<meta property="og:site_name" content="Zach的博客">
+<meta property="og:description" content="Trait Object静态分派和动态分派Rust支持静态分派(static dispatch)和动态分派(dynamic dispatch)。
+静态分配是在编译阶段就确定好了应该调用哪个函数，它是通过泛型实现的多态。一个例子如下：
+1234567891011121314151617trait Birt &amp;#123;    fn fly(&amp;amp;self);&amp;#125;struct Duck;s">
+<meta property="og:updated_time" content="2017-06-14T07:05:51.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Type Conversions">
+<meta name="twitter:description" content="Trait Object静态分派和动态分派Rust支持静态分派(static dispatch)和动态分派(dynamic dispatch)。
+静态分配是在编译阶段就确定好了应该调用哪个函数，它是通过泛型实现的多态。一个例子如下：
+1234567891011121314151617trait Birt &amp;#123;    fn fly(&amp;amp;self);&amp;#125;struct Duck;s">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
+    }
+  };
+</script>
+
+
+
+
+
+
+
+  <title> Type Conversions | Zach的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Zach的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">这个人很懒，都不知道说些什么 :(</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/14/Type-Coercision/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Type Conversions
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/06/14/Type-Coercision/" class="leancloud_visitors" data-flag-title="Type Conversions">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Trait_Object"><a href="#Trait_Object" class="headerlink" title="Trait Object"></a>Trait Object</h1><h2 id="u9759_u6001_u5206_u6D3E_u548C_u52A8_u6001_u5206_u6D3E"><a href="#u9759_u6001_u5206_u6D3E_u548C_u52A8_u6001_u5206_u6D3E" class="headerlink" title="静态分派和动态分派"></a>静态分派和动态分派</h2><p>Rust支持静态分派(static dispatch)和动态分派(dynamic dispatch)。</p>
+<p>静态分配是在编译阶段就确定好了应该调用哪个函数，它是通过泛型实现的多态。一个例子如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Birt</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">fly</span></span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">struct</span> Duck;</span><br><span class="line"><span class="keyword">struct</span> Swan;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Bird <span class="keyword">for</span> Duck &#123;</span><br><span class="line">  	<span class="function"><span class="keyword">fn</span> <span class="title">fly</span></span>(&amp;<span class="keyword">self</span>) &#123; <span class="built_in">println!</span>(<span class="string">"Duck fly"</span>);&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Bird <span class="keyword">for</span> Swan &#123;</span><br><span class="line">  	<span class="function"><span class="keyword">fn</span> <span class="title">fly</span></span>(&amp;<span class="keyword">self</span>) &#123; <span class="built_in">println!</span>(<span class="string">"Swan fly"</span>);&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">test</span></span>&lt;T: Bird&gt;(arg: T) &#123;</span><br><span class="line">  	arg.fly()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述例子就是利用泛型实现了多态，在编译阶段，编译器会根据实际调用的参数不同，直接生成不同的函数版本：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 伪代码</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">test_Duck</span></span>(arg: Duck) &#123;</span><br><span class="line">  arg.fly();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">test_Swan</span></span>(arg: Swan) &#123;</span><br><span class="line">  arg.fly();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>动态分派就是调用哪个函数必须在运行时才能决定。Rust中动态分派是靠Traint Object实现的，一个Trait Object就是执行Trait的指针，如果Bird是一个Trait，那么&amp;Bird，Box<bird>都是Trait Object。</bird></p>
+<p>一个指向Trait的指针是一个胖指针，它不仅包含所指向的对象的元素，也包含一个虚函数表，用以在运行时决定这个Trait Object对应的函数实现调用。Rust中一个Trait Object的内部表示如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> TraitObject &#123;</span><br><span class="line">  	<span class="keyword">pub</span> data: *<span class="keyword">mut</span> (),</span><br><span class="line">    <span class="keyword">pub</span> vtable: *<span class="keyword">mut</span> (),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Object_Safe"><a href="#Object_Safe" class="headerlink" title="Object Safe"></a>Object Safe</h2><p>Trait Object的构造受到很多约束，在约束不能满足的时候就会产生编译错误。</p>
+<ul>
+<li>trait有Self:Sized约束时，不能构造Trait Object。</li>
+</ul>
+<p>如：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Foo</span> <span class="keyword">where</span> <span class="keyword">Self</span>: <span class="built_in">Sized</span> &#123;</span><br><span class="line">  	<span class="function"><span class="keyword">fn</span> <span class="title">foo</span></span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Foo <span class="keyword">for</span> <span class="keyword">i32</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">fn</span> <span class="title">foo</span></span>(&amp;<span class="keyword">self</span>) &#123;..&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">  	<span class="keyword">let</span> x = <span class="number">1_i32</span>;</span><br><span class="line">    x.foo();</span><br><span class="line">    <span class="keyword">let</span> p = &amp;x <span class="keyword">as</span> &amp;Foo;	<span class="comment">// error</span></span><br><span class="line">    p.foo();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述代码会产生编译错误。</p>
+<p>如果Trait没有加上Self: Sized约束，而Trait中某一个某一个方法加上了Self: Sized约束，那么这个方法不会出现在Trait Object中。示例如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Foo</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">foo1</span></span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">foo2</span></span>(&amp;<span class="keyword">self</span>) <span class="keyword">where</span> <span class="keyword">Self</span>:<span class="built_in">Sized</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">impl</span> Foo <span class="keyword">for</span> <span class="keyword">i32</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">foo1</span></span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">"Foo1"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">foo2</span></span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">"Foo2"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> x = <span class="number">1i32</span>;</span><br><span class="line">    x.foo2();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> p = &amp;x <span class="keyword">as</span> &amp;Foo;</span><br><span class="line">    p.foo2();	<span class="comment">// error</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当函数中有Self类型作为参数或者返回类型时(不包括self这个参数)，不能构造Trait Object</li>
+</ul>
+<p>有这样的一个例子：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title">Clone</span> &#123;</span><br><span class="line">  	<span class="function"><span class="keyword">fn</span> <span class="title">clone</span></span>(&amp;<span class="keyword">self</span>) -&gt; <span class="keyword">Self</span>;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">clone_from</span></span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, source: &amp;<span class="keyword">Self</span>) &#123;...&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 伪代码</span></span><br><span class="line"><span class="keyword">let</span> p : &amp;<span class="built_in">Clone</span> = xxx;</span><br><span class="line"><span class="keyword">let</span> o = p.clone();</span><br></pre></td></tr></table></figure>
+<p>由于p时一个trait object，编译器只知道它是一个胖指针，包含了具体对象的指针以及指向虚函数表的指针。p指向具体的对象，它的类型是什么已经不知道了，编译器知道的只是这个对象实现了Clone这个Trait，而clone方法却要求返回一个与p指向的对象一样的类型的值，这个是无法完成的任务，所以这个Clone不是object safe的。</p>
+<p>那么如果我们需要让一个Trait满足Object safe同时又要能够构造Trait Object该怎么办呢，还记得上面提到的Self: Sized约束吧，利用它就可以了。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Double</span> &#123;</span><br><span class="line">  	<span class="function"><span class="keyword">fn</span> <span class="title">new</span></span>() -&gt; <span class="keyword">Self</span> <span class="keyword">where</span> <span class="keyword">Self</span>: <span class="built_in">Sized</span>;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">double</span></span>(*<span class="keyword">mut</span> <span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样之后我们就可以狗仔一个trait object了，当然这个trait object的虚函数表里不存在new这个函数。</p>
+<ul>
+<li>当函数有泛型参数时，不能构造trait object</li>
+</ul>
+<p>假如有这样的trait</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">SomeTrait</span> &#123;</span><br><span class="line">  	<span class="function"><span class="keyword">fn</span> <span class="title">generic_fn</span></span>&lt;A&gt;(&amp;<span class="keyword">self</span>, value: A);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们使用trait object来调用这个函数：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">func</span></span>(x: &amp;SomeTrait) &#123;</span><br><span class="line">  	x.generic_fn(<span class="string">"foo"</span>);</span><br><span class="line">    x.generic_fn(<span class="number">1u8</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样会有一个问题，x是一个trait object，调用它的方法时是通过vtable虚函数表来进行查找并调用的，现在要调用的函数成了泛型函数，而泛型是在编译阶段自动展开的，generic_fn函数实际上有许多不同的版本，而把这些版本都塞进去是很困难的，Rust直接禁止使用trait object来调用泛型函数。</p>
+<ul>
+<li>如果有静态方法，那么这个Trait不适Object safe的。</li>
+</ul>
+<p>要构造这样的Trait Object，解决方法依然是利用Self: Sized约束。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/类型转换/" rel="tag"># 类型转换</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/14/Trait-Object/" rel="next" title="Trait Object">
+                <i class="fa fa-chevron-left"></i> Trait Object
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.JPG"
+               alt="Zach" />
+          <p class="site-author-name" itemprop="name">Zach</p>
+          <p class="site-description motion-element" itemprop="description"></p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">32</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">41</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Trait_Object"><span class="nav-number">1.</span> <span class="nav-text">Trait Object</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#u9759_u6001_u5206_u6D3E_u548C_u52A8_u6001_u5206_u6D3E"><span class="nav-number">1.1.</span> <span class="nav-text">静态分派和动态分派</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Object_Safe"><span class="nav-number">1.2.</span> <span class="nav-text">Object Safe</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach</span>
+</div>
+
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("ntwSG1Uc9Pv9VSd5ODUsFYkK-gzGzoHsz", "HoWAvsNTJHhdUmXFuqT6j4vp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>
