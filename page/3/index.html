@@ -389,6 +389,168 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/19/系统服务——daemon/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/09/19/系统服务——daemon/" itemprop="url">
+                  系统服务——daemon
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/19/系统服务——daemon/" class="leancloud_visitors" data-flag-title="系统服务——daemon">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="daemon"><a href="#daemon" class="headerlink" title="daemon"></a>daemon</h1><h3 id="u4EC0_u4E48_u662Fdaemon"><a href="#u4EC0_u4E48_u662Fdaemon" class="headerlink" title="什么是daemon"></a>什么是daemon</h3><p>简单来说，系统为了某些功能必须提供一些服务，这个服务我们称之为<code>service</code>，但是service的提供需要进程的运行，所以实现这个service的程序我们称之为<code>daemon</code>。我们不必<br>区分daemon与service，或者说可以将他们视为等同的。因为没有daemon在后台运行就不会有这个serivce。daemon没有控制终端，所以当有事发生时，它们需要有消息输出的方法可用。<br><code>syslog</code>函数是输出这些消息的标准方法，它把这些消息发送给<code>syslogd</code>守护进程。</p>
+<p>syslogd的函数原型为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">syslog</span><span class="params">(<span class="keyword">int</span> priority, <span class="keyword">const</span> <span class="keyword">char</span> *message, ...)</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>priority</code>由level和facility组成，具体可以查看UNP P288。</p>
+<h3 id="daemon_u7684_u4E3B_u8981_u5206_u7C7B"><a href="#daemon_u7684_u4E3B_u8981_u5206_u7C7B" class="headerlink" title="daemon的主要分类"></a>daemon的主要分类</h3><p>如果按照启动与管理方式分类：</p>
+<ul>
+<li>stand alone：这种类型的daemon不必通过其他机制来管理，可以自行启动，一旦启动就常驻内存。其最大的优点是由于一直在内存内持续的提供服务，因此对于客户的请求响应较快。常见的<br>stand alone的daemon有ftp、httpd等。</li>
+<li>super daemon：一个特殊的daemon来统一管理其他的daemon。这一种服务的启动方式通过同一个daemon来负责唤起服务。这个特殊的daemon被称为super daemon。早期的super daemon是inetd，现在<br>Linux下是xinetd。当客户没有请求时，对应的服务未启动，只有当客户有对应的请求来到时，super daemon才会唤醒相应的服务，当请求完成之后，被唤醒的这个服务也会关闭并释放资源。该机制的优点在于：１）super daemon<br>可以具有安全管控机制；２）服务在请求结束后就关闭，不会一直占用资源。缺点在于对于请求的响应较慢。</li>
+</ul>
+<p>如果按照工作形态分类：</p>
+<ul>
+<li>signal-control：这种daemon通过信号来管理，只要有任何客户端的请求进来，它就会立即启动取处理。</li>
+<li>interval-control：这种daemon每隔一段时间就主动取执行某项工作。</li>
+</ul>
+<h3 id="u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C"><a href="#u5C06_u4E00_u4E2A_u7A0B_u5E8F_u4F5C_u4E3Adaemon_u8FD0_u884C" class="headerlink" title="将一个程序作为daemon运行"></a>将一个程序作为daemon运行</h3><p>Linux提供了<code>daemon</code>函数将一个普通进程转变为守护进程运行。它的原理和这里给出的<code>daemon_init</code>函数大同小异。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">daemon_init</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *pname, <span class="keyword">int</span> facility)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pid_t</span> pid;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid &gt; <span class="number">0</span>)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* child continues */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* become session leader */</span></span><br><span class="line">    <span class="keyword">if</span> (setsid() &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 必须忽略SIGHUP，否则当会话头进程终止时，会话中的所有进程都收到SIGHUP信号 */</span></span><br><span class="line">    Signal(SIGHUP, SIG_IGN);</span><br><span class="line">    <span class="comment">/* 再次Fork，使得进程不再是会话头 */</span></span><br><span class="line">    <span class="keyword">if</span> ((pid = Fork()) &lt; <span class="number">0</span>)</span><br><span class="line">	<span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pid)</span><br><span class="line">	_exit(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    daemon_proc = <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    chdir(<span class="string">"/"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXFD; i++)</span><br><span class="line">	close(i);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* redirec stdin, stdout and stderr to '/dev/null' */</span></span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDONLY);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line">    open(<span class="string">"/dev/null"</span>, O_RDWR);</span><br><span class="line"></span><br><span class="line">    openlog(pname, LOG_PID, facility);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>首先是fork，在fork结束之后，父进程终止，子进程自动在后台运行。另外，由于子进程继承了父进程的进程组ID，这保证了子进程不是一个进程组的头进程，这为下面的setsid做了准备。</li>
+<li>setsid，其用于创建一个新的会话，当前进程变为新的会话的会话头进程以及新进程组的进程组头进程，从而不再有控制终端。</li>
+<li>忽略SIGHUP信号并再次fork，再次fork保证本守护进程不会是会话头进程，那么即使将来打开了一个终端设备，也不会自动获得控制终端。因为当没有控制终端的会话头进程打开一个终端设备时，该终端会自动成为<br>这个会话头进程的控制终端。忽略SIGHUP信号是因为当会话头进程终止时，其会话中的所有进程（再次fork产生的子进程）都收到SIGHUP信号。</li>
+<li>将stdin、stdout以及stderr重定向到/dev/null，打开这些描述符的理由在于，守护进程调用的那些假设能从这三个描述符读写的库函数不会因为这些描述符未打开而失败。</li>
+<li>调用syslog处理函数。</li>
+</ol>
+<p>既然守护进程在没有控制终端的环境下运行，那么它绝对不会收到来自内核的SIGHUP信号，许多守护进程因此把这个信号作为来自系统管理员的一个通知，表示其配置文件已经发生变化，守护进程应该重新读入配置文件。</p>
+<h1 id="Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F"><a href="#Linux_u4E0Bdaemon_u7684_u542F_u52A8_u811A_u672C_u548C_u542F_u52A8_u65B9_u5F0F" class="headerlink" title="Linux下daemon的启动脚本和启动方式"></a>Linux下daemon的启动脚本和启动方式</h1><h3 id="u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E"><a href="#u914D_u7F6E_u6587_u4EF6_u4F4D_u7F6E" class="headerlink" title="配置文件位置"></a>配置文件位置</h3><p>通常daemon的启动脚本放在/etc/init.d/目录下，启动脚本可以进程环境检测、配置文件分析、PID文件放置以及相关重要交换文件的锁操作。</p>
+<p>super daemon的配置文件放置在/etc/xinetd.d/目录和/etc/xinetd.conf中。</p>
+<p>在/etc/目录下还有各自服务的配置文件</p>
+<p>/var/lib/目录下是一些会产生数据的服务放置产生的数据库的位置，数据库管理系统MySQL的数据库默认写入/var/lib/mysql。</p>
+<p>/var/run/目录下存放各服务程序的PID记录。</p>
+<p>对于stand alone的daemon，我们即可执行/etc/init.d/目录下的脚本来启动它，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ /etc/init.d/mysql start</span><br></pre></td></tr></table></figure>
+<p>也可以利用service命令（实际上它也是一个stand alone的服务）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service mysql start</span><br></pre></td></tr></table></figure>
+<h3 id="super_daemon_u914D_u7F6E_u6587_u4EF6"><a href="#super_daemon_u914D_u7F6E_u6587_u4EF6" class="headerlink" title="super daemon配置文件"></a>super daemon配置文件</h3><p>Linux下super daemon由xinetd这个进程实现，它不仅可以启动其他daemon，还可以进行安全性或者其他管理机制的控制。xinetd的默认配置存放在/etc/xinetd.conf中，由xinetd启动的服务程序的配置放置在/etc/xinetd.d目录下。<br>如果一个服务的配置文件没有xinetd.conf中指定的参数，那么该服务对应的参数就以xinetd.conf中的为准。具体的参数说明可以参加《鸟哥——基础篇》P559。一个简单的daytime服务配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service mydaytime&#10;&#123;&#10;        disable         = no&#10;        socket_type     = stream&#10;        wait            = no&#10;        user            = root&#10;        server          = /home/zach41/Desktop/unp/unpv13e/inetd/daytimetcpsrv3&#10;        log_on_failure  = USERID&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>这之后我们还需要修改/etc/services文件，分配一个端口来提供daytime服务。具体就是添加如下一行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mydaytime    9999/tcp</span><br></pre></td></tr></table></figure>
+<p>这样配置之后，我们重启xinetd服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  ~ service xinetd restart&#10;&#10140;  ~ sudo netstat -tnlp | grep 9999&#10;[sudo] password for zach41: &#10;tcp        0      0 0.0.0.0:9999            0.0.0.0:*               LISTEN      15914/xinetd</span><br></pre></td></tr></table></figure>
+<p>可以看到xinetd进程在监听9999端口。</p>
+<p>我们运行一个daytime客户端程序</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#10140;  names git:(master) &#10007; ./daytimetcpcli2 0.0.0.0 9999&#10;trying 0.0.0.0:9999&#10;Mon Sep 19 18:43:04 2016</span><br></pre></td></tr></table></figure>
+<h3 id="daytime_daemon_u7A0B_u5E8F"><a href="#daytime_daemon_u7A0B_u5E8F" class="headerlink" title="daytime daemon程序"></a>daytime daemon程序</h3><p>最后这里给出daytimeserver的代码，这是由xinetd作为守护进程启动的时间获取服务器程序。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span>	<span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span></span><br><span class="line"><span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">	<span class="keyword">socklen_t</span>		len;</span><br><span class="line">	<span class="keyword">struct</span> sockaddr	*cliaddr;</span><br><span class="line">	<span class="keyword">char</span>			buff[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span>			ticks;</span><br><span class="line"></span><br><span class="line">	daemon_inetd(argv[<span class="number">0</span>], <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	cliaddr = Malloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage));</span><br><span class="line">	len = <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sockaddr_storage);</span><br><span class="line">	Getpeername(<span class="number">0</span>, cliaddr, &amp;len);</span><br><span class="line">	err_msg(<span class="string">"connection from %s"</span>, Sock_ntop(cliaddr, len));</span><br><span class="line"></span><br><span class="line">    ticks = time(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="built_in">snprintf</span>(buff, <span class="keyword">sizeof</span>(buff), <span class="string">"%.24s\r\n"</span>, ctime(&amp;ticks));</span><br><span class="line">    Write(<span class="number">0</span>, buff, <span class="built_in">strlen</span>(buff));</span><br><span class="line"></span><br><span class="line">	Close(<span class="number">0</span>);	<span class="comment">/* close TCP connection */</span></span><br><span class="line">	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到所有套接字的创建代码(tcp_listen和accept的调用)都不见了，这些步骤都有xinetd执行，我们使用描述符0指代已由xinetd接受的TCP连接（套接字描述符被复制到描述符0, 1, 2）。daemon_init只是负责设置daemon_proc<br>标志以及调用openlog，从而发送日志信息给syslogd守护进程。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/13/套接字选项/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -870,6 +1032,152 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/TCP连接建立和终止/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/09/09/TCP连接建立和终止/" itemprop="url">
+                  TCP连接建立和终止
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/09/09/TCP连接建立和终止/" class="leancloud_visitors" data-flag-title="TCP连接建立和终止">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62" class="headerlink" title="TCP连接的建立和终止"></a>TCP连接的建立和终止</h1><h3 id="TCP_u8FDE_u63A5_u5EFA_u7ACB"><a href="#TCP_u8FDE_u63A5_u5EFA_u7ACB" class="headerlink" title="TCP连接建立"></a>TCP连接建立</h3><p>建立一个TCP连接的过程图示如下（图片均来源于网络…）：</p>
+<img src="/2016/09/09/TCP连接建立和终止/shakehand3.jpg" alt="shakehand3.jpg" title="">
+<ol>
+<li>服务器在连接建立之前必须准备好接收客户发来的连接，这一般通过创建套接字，绑定服务器地址、监听套接字来完成，即<code>socket</code>，<code>bind</code>，<code>listen</code>三个函数。这一个过程被成为被动打开。</li>
+<li>客户通过<code>connect</code>函数发起主动打开，客户会发送一个SYN分节，它告诉服务器客户将在连接中发送的数据的初始序列号，通常该分节不带数据，其所在IP数据只含有一个IP首部、一个TCP首部以及可能的TCP选项。</li>
+<li>服务器收到客户发来的SYN分节后，服务器必须确认该分节，同时服务器发送一个自己的SYN分节，它含有服务器将在该连接中发送的数据的初始序列号。</li>
+<li>客户收到服务器发回的消息后，确认服务器的分节，连接建立。</li>
+</ol>
+<p>从图中可以看到ACK是SYN分节的序列号加１，类似的，FIN分节的ACK也是FIN分节的序列号加１。</p>
+<h3 id="TCP_u8FDE_u63A5_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7EC8_u6B62" class="headerlink" title="TCP连接终止"></a>TCP连接终止</h3><p>TCP终止一个连接需要４个分节。</p>
+<p>终止一个连接的图示如下：</p>
+<img src="/2016/09/09/TCP连接建立和终止/shakehand4.jpg" alt="shakehand4.jpg" title="">
+<ol>
+<li>某个应用首先调用close，该端主动关闭，发送一个FIN分节</li>
+<li>接收到FIN分节的对端执行被动关闭，这个FIN由TCP确认，FIN分节的接收也作为一个文件结束符（EOF）传递给接收端应用进程。</li>
+<li>一段时间之后，接收到这个文件结束符的引用进程将调用close关闭它的套接字，这会导致它也发送一个FIN分节。</li>
+<li>接收这个最终FIN的对端发送一个ACK确认这个FIN分节。</li>
+</ol>
+<h3 id="u8FDE_u63A5_u548C_u7EC8_u6B62"><a href="#u8FDE_u63A5_u548C_u7EC8_u6B62" class="headerlink" title="连接和终止"></a>连接和终止</h3><p>一个完整的连接和终止的过程示意：</p>
+<img src="/2016/09/09/TCP连接建立和终止/full_process.jpg" alt="full_process.jpg" title="">
+<p>一个完整的TCP状态转换图：</p>
+<img src="/2016/09/09/TCP连接建立和终止/state.jpg" alt="state.jpg" title="">
+<h4 id="TIME_WAIT"><a href="#TIME_WAIT" class="headerlink" title="TIME_WAIT"></a>TIME_WAIT</h4><p>TCP终止中，执行了主动关闭的那端在接收到对端发来的FIN分节和发送对应的ACK之后就进入了TIME_WAIT状态，该状态的持续时间是2个MSL（maximum segment lifetime）。它的存在有两个理由：</p>
+<ol>
+<li>可靠地实现TCP全双工连接的终止</li>
+<li>允许老的重复分节在网络中消逝</li>
+</ol>
+<p>对于第一个理由，如果最后的ACK丢失了，那么服务器需要重发FIN，因此客户必须维护状态信息，以允许它发送最终的那个ACK，如果客户不维护状态信息，那么客户在收到服务器重传的FIN后将直接相应RST，这个分节将会被服务器解释为一个错误。</p>
+<p>对于第二个理由，假设在一个连接被终止了马上又发起来一个相同IP和端口上的连接，后一个连接成为前一个连接的化身，TCP必须防止老的连接的分组在老连接结束之后再现，以防止其被误解为新的连接的分组。TCP不会让处于TIME_WAIT状态的连接发起新的化身，既然TIME_WAIT的时间是MSL的2倍，这就足以让某个方向上的分组最多存活MSL时间即被丢弃，另外一个方向上的应答最多存活MSL时间也被丢弃。通过这种方式，老的重复分组在网络中都已经消逝。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/IO模型/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -998,152 +1306,6 @@
 <li>SHUT_RDWR：连接的读半部和写半部都关闭，这和调用两次shutdown等效。</li>
 </ul>
 <h1 id="u4E00_u4E2AI/O_u590D_u7528_u7684_u4F8B_u5B50"><a href="#u4E00_u4E2AI/O_u590D_u7528_u7684_u4F8B_u5B50" class="headerlink" title="一个I/O复用的例子"></a>一个I/O复用的例子</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">select_strcli</span><span class="params">(FILE *fp, <span class="keyword">int</span> sockfd)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> maxfdp1, stdineof, n;</span><br><span class="line">    fd_set rset;</span><br><span class="line">    <span class="keyword">char</span> buf[MAXLINE];</span><br><span class="line"></span><br><span class="line">    stdineof = <span class="number">0</span>;</span><br><span class="line">    FD_ZERO(&amp;rset);</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		<span class="comment">/* 每次select返回后，任何未就绪的描述符清0，所以每次都要置位*/</span></span><br><span class="line">		<span class="keyword">if</span> (stdineof == <span class="number">0</span>)</span><br><span class="line">			FD_SET(fileno(fp), &amp;rset);</span><br><span class="line">		FD_SET(sockfd, &amp;rset);</span><br><span class="line">		maxfdp1 = max(fileno(fp), sockfd) + <span class="number">1</span>;</span><br><span class="line">	</span><br><span class="line">		n = select(maxfdp1, &amp;rset, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">		<span class="keyword">if</span> (n &lt; <span class="number">0</span>)</span><br><span class="line">			err_sys(<span class="string">"select error"</span>);</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">if</span> (FD_ISSET(sockfd, &amp;rset)) &#123;</span><br><span class="line">			<span class="keyword">if</span> ((n = Read(sockfd, buf, MAXLINE)) == <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="keyword">if</span> (stdineof == <span class="number">1</span>)</span><br><span class="line">				<span class="keyword">return</span>;	<span class="comment">/* terminated normally */</span></span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				err_quit(<span class="string">"str_cli: server terminated prematurelly"</span>);</span><br><span class="line">				&#125;</span><br><span class="line">			Write(fileno(<span class="built_in">stdout</span>), buf, n);</span><br><span class="line">		&#125;</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">if</span> (FD_ISSET(fileno(fp), &amp;rset)) &#123;</span><br><span class="line">			<span class="keyword">if</span> ((n = Read(fileno(fp), buf, MAXLINE)) == <span class="number">0</span>) &#123;</span><br><span class="line">			stdineof = <span class="number">1</span>;</span><br><span class="line">			Shutdown(sockfd, SHUT_WR); <span class="comment">/* send FIN, still can read */</span></span><br><span class="line">			FD_CLR(fileno(fp), &amp;rset);</span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			Writen(sockfd, buf, n);</span><br><span class="line">		&#125;	</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/09/TCP连接建立和终止/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/09/TCP连接建立和终止/" itemprop="url">
-                  TCP连接建立和终止
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/09/TCP连接建立和终止/" class="leancloud_visitors" data-flag-title="TCP连接建立和终止">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7684_u5EFA_u7ACB_u548C_u7EC8_u6B62" class="headerlink" title="TCP连接的建立和终止"></a>TCP连接的建立和终止</h1><h3 id="TCP_u8FDE_u63A5_u5EFA_u7ACB"><a href="#TCP_u8FDE_u63A5_u5EFA_u7ACB" class="headerlink" title="TCP连接建立"></a>TCP连接建立</h3><p>建立一个TCP连接的过程图示如下（图片均来源于网络…）：</p>
-<img src="/2016/09/09/TCP连接建立和终止/shakehand3.jpg" alt="shakehand3.jpg" title="">
-<ol>
-<li>服务器在连接建立之前必须准备好接收客户发来的连接，这一般通过创建套接字，绑定服务器地址、监听套接字来完成，即<code>socket</code>，<code>bind</code>，<code>listen</code>三个函数。这一个过程被成为被动打开。</li>
-<li>客户通过<code>connect</code>函数发起主动打开，客户会发送一个SYN分节，它告诉服务器客户将在连接中发送的数据的初始序列号，通常该分节不带数据，其所在IP数据只含有一个IP首部、一个TCP首部以及可能的TCP选项。</li>
-<li>服务器收到客户发来的SYN分节后，服务器必须确认该分节，同时服务器发送一个自己的SYN分节，它含有服务器将在该连接中发送的数据的初始序列号。</li>
-<li>客户收到服务器发回的消息后，确认服务器的分节，连接建立。</li>
-</ol>
-<p>从图中可以看到ACK是SYN分节的序列号加１，类似的，FIN分节的ACK也是FIN分节的序列号加１。</p>
-<h3 id="TCP_u8FDE_u63A5_u7EC8_u6B62"><a href="#TCP_u8FDE_u63A5_u7EC8_u6B62" class="headerlink" title="TCP连接终止"></a>TCP连接终止</h3><p>TCP终止一个连接需要４个分节。</p>
-<p>终止一个连接的图示如下：</p>
-<img src="/2016/09/09/TCP连接建立和终止/shakehand4.jpg" alt="shakehand4.jpg" title="">
-<ol>
-<li>某个应用首先调用close，该端主动关闭，发送一个FIN分节</li>
-<li>接收到FIN分节的对端执行被动关闭，这个FIN由TCP确认，FIN分节的接收也作为一个文件结束符（EOF）传递给接收端应用进程。</li>
-<li>一段时间之后，接收到这个文件结束符的引用进程将调用close关闭它的套接字，这会导致它也发送一个FIN分节。</li>
-<li>接收这个最终FIN的对端发送一个ACK确认这个FIN分节。</li>
-</ol>
-<h3 id="u8FDE_u63A5_u548C_u7EC8_u6B62"><a href="#u8FDE_u63A5_u548C_u7EC8_u6B62" class="headerlink" title="连接和终止"></a>连接和终止</h3><p>一个完整的连接和终止的过程示意：</p>
-<img src="/2016/09/09/TCP连接建立和终止/full_process.jpg" alt="full_process.jpg" title="">
-<p>一个完整的TCP状态转换图：</p>
-<img src="/2016/09/09/TCP连接建立和终止/state.jpg" alt="state.jpg" title="">
-<h4 id="TIME_WAIT"><a href="#TIME_WAIT" class="headerlink" title="TIME_WAIT"></a>TIME_WAIT</h4><p>TCP终止中，执行了主动关闭的那端在接收到对端发来的FIN分节和发送对应的ACK之后就进入了TIME_WAIT状态，该状态的持续时间是2个MSL（maximum segment lifetime）。它的存在有两个理由：</p>
-<ol>
-<li>可靠地实现TCP全双工连接的终止</li>
-<li>允许老的重复分节在网络中消逝</li>
-</ol>
-<p>对于第一个理由，如果最后的ACK丢失了，那么服务器需要重发FIN，因此客户必须维护状态信息，以允许它发送最终的那个ACK，如果客户不维护状态信息，那么客户在收到服务器重传的FIN后将直接相应RST，这个分节将会被服务器解释为一个错误。</p>
-<p>对于第二个理由，假设在一个连接被终止了马上又发起来一个相同IP和端口上的连接，后一个连接成为前一个连接的化身，TCP必须防止老的连接的分组在老连接结束之后再现，以防止其被误解为新的连接的分组。TCP不会让处于TIME_WAIT状态的连接发起新的化身，既然TIME_WAIT的时间是MSL的2倍，这就足以让某个方向上的分组最多存活MSL时间即被丢弃，另外一个方向上的应答最多存活MSL时间也被丢弃。通过这种方式，老的重复分组在网络中都已经消逝。</p>
 
           
         
@@ -1608,165 +1770,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/30/Unix套接字编程基础/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/30/Unix套接字编程基础/" itemprop="url">
-                  Unix套接字编程基础
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/08/30/Unix套接字编程基础/" class="leancloud_visitors" data-flag-title="Unix套接字编程基础">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="u6570_u636E_u7ED3_u6784"><a href="#u6570_u636E_u7ED3_u6784" class="headerlink" title="数据结构"></a>数据结构</h1><p>这里仅讨论IPv4相关的数据，IPv6与之类似，可以查阅相关的资料。</p>
-<p>网络套接字的地址结构：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> in_addr &#123;</span><br><span class="line">	<span class="keyword">in_addr_t</span> s_addr;        <span class="comment">// 32位IPv4地址</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> sockaddr_in &#123;</span><br><span class="line">	<span class="keyword">uint8_t</span>     sin_len;        <span class="comment">// 结构的长度</span></span><br><span class="line">	<span class="keyword">sa_family_t</span> sin_family;     <span class="comment">// AF_INET，地址族</span></span><br><span class="line">	<span class="keyword">in_port_t</span>   sin_port;       <span class="comment">// 端口号</span></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">char</span>        sin_zero[<span class="number">8</span>];    <span class="comment">// unused</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>网络协议规定必须指定一个网络字节序（大端还是小端），作为网络编程人员必须清楚不同字节之间的差异。比如，在每一个TCP分节中都有16位的端口号和32位的IPv4地址，发送协议栈和接收协议栈必须就这些多字节字段各个字节的传送顺序达成一致。网络协议使用大端字节序来传送这些多字节数据。</p>
-<p>举例来说，如果有一个32位的IPv4地址，首先要转换字节序再使用。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">uint32_t</span> ip_addr = htonl(ori_ip_addr);</span><br></pre></td></tr></table></figure>
-<p>共有4个转换函数：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">uint16_t</span> htons(<span class="keyword">uint16_t</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> htonl(<span class="keyword">uint32_t</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint16_t</span> ntohs(<span class="keyword">uint16_t</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> ntohl(<span class="keyword">uint32_t</span>);</span><br></pre></td></tr></table></figure>
-<p><code>h</code>表示host，<code>n</code>表示network，<code>s</code>表示short，<code>l</code>表示long</p>
-<p>通常来说我们习惯用点分十进制来表示IP地址，如<code>192.168.1.1</code>，因为这样易读易懂，但是在网络上传输时应该使用的32位的二进制来表示IP地址，于是就要进行转换，以下两个函数提供转换功能：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">inet_pton</span><span class="params">(<span class="keyword">int</span> family, <span class="keyword">const</span> <span class="keyword">char</span> *strptr, <span class="keyword">void</span> *addrptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span> *<span class="title">inet_ntop</span><span class="params">(<span class="keyword">int</span> family, <span class="keyword">const</span> <span class="keyword">char</span> *addrptr, <span class="keyword">char</span> *strptr, size_t len)</span></span>;</span><br></pre></td></tr></table></figure>
-<p><code>family</code>即可以是<code>AF_INET</code>，也可以是<code>AF_INET6</code>。如果是不被支持的地址族作为family参数，返回一个错误，<code>errno</code>被设置为<code>EAFNOSUPPORT</code>。</p>
-<p>这里<code>n</code>表示numeric，<code>p</code>表示presentation。</p>
-<h1 id="u57FA_u672CTCP_u5957_u63A5_u5B57_u7F16_u7A0B"><a href="#u57FA_u672CTCP_u5957_u63A5_u5B57_u7F16_u7A0B" class="headerlink" title="基本TCP套接字编程"></a>基本TCP套接字编程</h1><h3 id="sock_u51FD_u6570"><a href="#sock_u51FD_u6570" class="headerlink" title="sock函数"></a>sock函数</h3><p>首先需要创建一个套接字，创建套接字的函数如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">socket</span><span class="params">(<span class="keyword">int</span> family, <span class="keyword">int</span> type, <span class="keyword">int</span> protocol)</span></span>;</span><br></pre></td></tr></table></figure>
-<p><code>family</code>指定协议族，<code>type</code>指定套接字类型，<code>protocol</code>指定某个协议类型常值，当设置为0时，程序会选择和给定的family和type组合的系统默认值。</p>
-<h3 id="connect_u51FD_u6570"><a href="#connect_u51FD_u6570" class="headerlink" title="connect函数"></a>connect函数</h3><p>TCP客户端用connect函数来与TCP服务器建立连接。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">const</span> <span class="keyword">struct</span> sockaddr *servaddr, socklen_t addrlen)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>客户不必在使用connect前调用bind函数，因为需要的话内核会分配一个临时的端口给客户进程。</p>
-<p>出错返回的错误情况：</p>
-<ol>
-<li>TCP客户等待一段时间后没有收到服务器返回的TCP分节，返回ETIMEDOUT错误。</li>
-<li>对客户的SYN响应是RST（复位），表明服务器上并没有进程在等待与之连接，这是一种硬错误，客户收到后马上返回ECONNREFUSED。</li>
-<li>客户发出的SYN在某个路由上引发了一个”destination unreachable”的ICMP错误，则认为是一种软错误。客户机内核保存该消息，并持续发送SYN包，如果等待一段时间后未收到响应，就把保存的信息（ICMP错误）作为EHOSTUNREACH或ENETUNREACH错误返回给进程。</li>
-</ol>
-<h3 id="bind_u51FD_u6570"><a href="#bind_u51FD_u6570" class="headerlink" title="bind函数"></a>bind函数</h3><p>绑定一个本地协议地址给一个套接字，对于网际协议，协议地址是32位的IPv4地址或128位的IPv6地址与16位的TCP或者UDP端口号的组合。</p>
-<p>函数原型：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bind</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">const</span> <span class="keyword">struct</span> sockaddr *myaddr, socklen_t addrlen)</span></span>;</span><br></pre></td></tr></table></figure>
-<h3 id="listen_u51FD_u6570"><a href="#listen_u51FD_u6570" class="headerlink" title="listen函数"></a>listen函数</h3><p><code>listen</code>仅由TCP服务器调用，它把一个未连接的套接字转换成一个被动套接字，以接收客户的请求。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">listen</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">int</span> backlog)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>内核为任何一个给定的监听套接字维护两个队列：</p>
-<ol>
-<li>未完成连接队列：客户已经发送一个SYN分节给服务器，而服务器正在等待完成对应的三次握手过程。</li>
-<li>已完成连接队列：每个已完成TCP三次握手的客户对应启动一项。</li>
-</ol>
-<p><code>backlog</code>指定两个队列总和的最大值。</p>
-<p>要注意的是，在三次握手完成之后，但在服务器调用accept之前到达的数据应由服务器TCP排队。</p>
-<h3 id="accept_u51FD_u6570"><a href="#accept_u51FD_u6570" class="headerlink" title="accept函数"></a>accept函数</h3><p><code>accept</code>函数用于TCP服务器调用，将从已完成队列返回队头的连接。如果已完成连接队列为空，那么服务器进程将被睡眠，直到下一个连接完成。</p>
-<p>函数原型：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">accept</span><span class="params">(<span class="keyword">int</span> sockfd, <span class="keyword">struct</span> sockaddr *cliaddr, socklen_t, *addrlen)</span></span>;</span><br></pre></td></tr></table></figure>
-<h1 id="u4E00_u4E2A_u5E76_u53D1_u7684_u670D_u52A1_u5668_u7684_u4F8B_u5B50"><a href="#u4E00_u4E2A_u5E76_u53D1_u7684_u670D_u52A1_u5668_u7684_u4F8B_u5B50" class="headerlink" title="一个并发的服务器的例子"></a>一个并发的服务器的例子</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">"unp.h"</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;time.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> listenfd, connfd;</span><br><span class="line">	<span class="keyword">socklen_t</span> len;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">struct</span> sockaddr_in servaddr, cliaddr;</span><br><span class="line">	<span class="keyword">char</span> buf[MAXLINE];</span><br><span class="line">	<span class="keyword">time_t</span> ticks;</span><br><span class="line">	<span class="keyword">pid_t</span> pid;</span><br><span class="line">	</span><br><span class="line">	listenfd = Socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">	<span class="built_in">memset</span>(servaddr, <span class="number">0</span>, <span class="keyword">sizeof</span>(servaddr));</span><br><span class="line">	servaddr.sin_family = AF_INET;</span><br><span class="line">	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);</span><br><span class="line">	servaddr.sin_port = htons(<span class="number">13</span>);</span><br><span class="line">	</span><br><span class="line">	Bind(listenfd, (SA* )&amp;servaddr, <span class="keyword">sizeof</span>(servaddr));</span><br><span class="line">	</span><br><span class="line">	Listen(listenfd, LISTENQ);</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		len = <span class="keyword">sizeof</span>(connfd);</span><br><span class="line">		connfd = Accept(listenfd, (SA *)&amp;cliaddr, &amp;len);</span><br><span class="line">		<span class="keyword">if</span> ((pid = fork()) == <span class="number">0</span>) &#123;</span><br><span class="line">			<span class="comment">// 子进程</span></span><br><span class="line">			Close(listenfd);</span><br><span class="line">			do_process(connfd);</span><br><span class="line">			Close(connfd);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		Close(connfd);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1812,7 +1815,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">34</span>
+              <span class="site-state-item-count">35</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1820,7 +1823,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -1829,7 +1832,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">43</span>
+                <span class="site-state-item-count">44</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
