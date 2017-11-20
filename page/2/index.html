@@ -257,6 +257,153 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/28/Rust FFI/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/11/28/Rust FFI/" itemprop="url">
+                  Rust FFI
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2016/11/28/Rust FFI/" class="leancloud_visitors" data-flag-title="Rust FFI">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="FFI"><a href="#FFI" class="headerlink" title="FFI"></a>FFI</h1><p><code>FFI</code>(Foreign Function Interface)，顾名思义，是Rust中用来调用其他语言的机制。值得注意的是，<code>FFI</code>在C和Rust之间实现了零抽象开销，也就是说在Rust调用C和C调用Rust时并没有运行时的花销。</p>
+<h3 id="u4E00_u4E2A_u4F8B_u5B50"><a href="#u4E00_u4E2A_u4F8B_u5B50" class="headerlink" title="一个例子"></a>一个例子</h3><p>比方说我们定义了一个函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">double_input</span><span class="params">(<span class="keyword">int</span> input)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> intput * <span class="number">2</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们需要在Rust中调用它，那么<code>main.rs</code>文件应该是这样的：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> libc;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[link(name = "extlib")]</span></span><br><span class="line"><span class="keyword">extern</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">double_input</span></span>(input: libc::c_int) -&gt; libc::c_int;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> input = <span class="number">4</span>;</span><br><span class="line">    <span class="keyword">let</span> output = <span class="keyword">unsafe</span> &#123; double_input(input) &#125;;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"&#123;&#125; * 2 = &#123;&#125;"</span>, input, output);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们来一步一步剖析这个程序：</p>
+<ul>
+<li><p><code>libc</code>这个库提供了许多类型定义，用以桥街Rust和C的类型。</p>
+</li>
+<li><p><code>#[link(name = &quot;extlib&quot;)]</code>这个<code>Attribute</code>告诉编译器这个函数可以连接<strong>libextlib</strong>这个库而得到，这里的链接是动态链接。注意<code>link</code>属性还有另外一种形式：<code>#[link(name = &quot;extlib&quot;, kind = &quot;static&quot;)]</code>，<code>kind</code>目前只有两个值：</p>
+<ul>
+<li>static</li>
+<li>framework（只在OSX中）</li>
+</ul>
+<p>如果不指定<code>kind</code>，那么默认为动态链接。</p>
+</li>
+<li><p><code>extern</code>代码块声明从C语言调用的函数接口。</p>
+</li>
+<li><p>因为编译器不知道C函数是如何实现，所以它假设内存安全问题会在你调用C函数时发生，所以我们必须用<code>unsafe</code>来包含调用C函数的语句。</p>
+</li>
+<li><p>需要注意的是，我们需要在项目中添加一个<code>build.rs</code>文件来告诉编译如何编译C文件并生成<strong>libextlib</strong>，具体可以参考这个例子<a href="https://github.com/alexcrichton/rust-ffi-examples/tree/master/rust-to-c" target="_blank" rel="external">rust-to-c</a></p>
+</li>
+</ul>
+<h3 id="u5B89_u5168_u62BD_u8C61"><a href="#u5B89_u5168_u62BD_u8C61" class="headerlink" title="安全抽象"></a>安全抽象</h3><p>如果我们把一个C函数绑定到Rust，不仅绑定的抽象开销为零，我们也可以让C函数变得更加安全。我们拿下面的例子来说明：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Gets the data for a file in the tarball at the given index, returning NULL if</span></span><br><span class="line"><span class="comment">// it does not exist. The `size` pointer is filled in with the size of the file</span></span><br><span class="line"><span class="comment">// if successful.</span></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span> *<span class="title">tarball_file_data</span><span class="params">(tarball_t *tarball, <span class="keyword">unsigned</span> index, size_t *size)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>假设我们调用这个函数，那么函数返回一个指针，而在之后某一个时刻，我们销毁了<code>tarball</code>所在内存，那么这时候这个指针就变成了野指针（dangling pointer），后续如果使用了这个指针，很可能程序就会崩溃。</p>
+<p>如果我们把这个函数绑定到Rust：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> Tarball &#123; raw: *<span class="keyword">mut</span> tarball_t &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Tarball &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">file</span></span>(&amp;<span class="keyword">self</span>, index: <span class="keyword">u32</span>) -&gt; <span class="built_in">Option</span>&lt;&amp;[<span class="keyword">u8</span>]&gt; &#123;</span><br><span class="line">        <span class="keyword">unsafe</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> <span class="keyword">mut</span> size = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">let</span> data = tarball_file_data(<span class="keyword">self</span>.raw, index <span class="keyword">as</span> libc::c_uint,</span><br><span class="line">                                         &amp;<span class="keyword">mut</span> size);</span><br><span class="line">            <span class="keyword">if</span> data.is_null() &#123;</span><br><span class="line">                <span class="built_in">None</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="built_in">Some</span>(slice::from_raw_parts(data <span class="keyword">as</span> *<span class="keyword">const</span> <span class="keyword">u8</span>, size <span class="keyword">as</span> usize))</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>data</code>的声明周期默认和一个<code>Tarball</code>对象绑定在一起，如果<code>Tarball</code>已经被销毁，那么<code>data</code>由于Rust的限制也不能被使用，程序编译都不会通过，从而保证了安全。</p>
+<h3 id="FFI_u548Cpanics"><a href="#FFI_u548Cpanics" class="headerlink" title="FFI和panics"></a>FFI和panics</h3><p>需要注意的一点是，如果其他语言函数和<code>panic!</code>在同一个线程中被调用，那么结果是未定义的。如果编写的程序可能<code>panic</code>，我们就得让<code>panic</code>在另一个线程中被调用：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::thread;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">extern</span> <span class="function"><span class="keyword">fn</span> <span class="title">oh_no</span></span>() -&gt; <span class="keyword">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> h = thread::spawn(|| &#123;</span><br><span class="line">        <span class="built_in">panic!</span>(<span class="string">"Oops!"</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">match</span> h.join() &#123;</span><br><span class="line">        <span class="built_in">Ok</span>(_) =&gt; <span class="number">1</span>,</span><br><span class="line">        <span class="built_in">Err</span>(_) =&gt; <span class="number">0</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/09/Emacs Rust环境配置/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1980,160 +2127,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/09/22/互斥锁和条件变量/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/09/22/互斥锁和条件变量/" itemprop="url">
-                  互斥锁和条件变量
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/09/22/互斥锁和条件变量/" class="leancloud_visitors" data-flag-title="互斥锁和条件变量">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="u5E76_u53D1_u7F16_u7A0B_u7684_u95EE_u9898"><a href="#u5E76_u53D1_u7F16_u7A0B_u7684_u95EE_u9898" class="headerlink" title="并发编程的问题"></a>并发编程的问题</h1><p>考虑这样一个问题，有两个线程，A和B，他们对同一个全局变量执行递减操作。假设C编译器将递减运算转换成3条机器指令：从内存装载到寄存器、递减寄存器、从寄存器存储到内存。可能会出现以下情形：</p>
-<ol>
-<li>线程A运行，把变量的值装载到一个寄存器中</li>
-<li>系统把运行线程从A切换到B运行。A的寄存器被保存，B的寄存器则恢复。</li>
-<li>线程B执行递减的全部操作，把新值存放到变量的变量中</li>
-<li>线程A被恢复执行，A的寄存器被恢复，于是A从原来离开的地方开始执行，此时寄存器中保留的变量值是线程B执行递减前的值，这时候就出错了。</li>
-</ol>
-<p>可以看到这种并发的错误是因为递减操作不是原子操作而造成的，线程的切换会中断某些步骤，从而出现不预期的错误。</p>
-<h1 id="u7B80_u5355_u5B9E_u4F8B"><a href="#u7B80_u5355_u5B9E_u4F8B" class="headerlink" title="简单实例"></a>简单实例</h1><p>我们通过一个简单的例子来说明如何利用互斥锁来解决并发。程序如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NLOOP    <span class="number">10</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXP     <span class="number">5</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> counter;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> tids[MAXP];</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">int</span> *iptr = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (iptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	    perror(<span class="string">"malloc error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	*iptr = i;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_create(&amp;tids[i], <span class="literal">NULL</span>, doit, iptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread create error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_join(tids[i], <span class="literal">NULL</span>)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread join error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    <span class="keyword">int</span> idx = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">    <span class="built_in">free</span>(arg);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;NLOOP; i++) &#123;</span><br><span class="line">		val = counter;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"%d: %d\n"</span>, idx, val+<span class="number">1</span>);</span><br><span class="line">		counter = val+<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>部分结果如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">...&#10;&#10;2: 1&#10;2: 2&#10;2: 3&#10;2: 4&#10;2: 5&#10;3: 5&#10;3: 6&#10;1: 1&#10;1: 2&#10;0: 1&#10;0: 2&#10;0: 3&#10;0: 4&#10;0: 5&#10;0: 6&#10;0: 7&#10;0: 8&#10;0: 9&#10;0: 10&#10;&#10;...</span><br></pre></td></tr></table></figure>
-<p>可以看到当线程切换时，counter的值明显是错误的。</p>
-<p>解决这种多个线程共享一个变量的问题是使用互斥锁（mutex，mutual exclusion）保护这个共享变量。互斥锁的作用是在线程访问该变量前必须持有互斥锁，否则线程将进入睡眠知道互斥锁可用。对于能够函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值*/</span></span><br></pre></td></tr></table></figure>
-<p>修改之后的程序如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NLOOP    <span class="number">10</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXP     <span class="number">5</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> counter;</span><br><span class="line"><span class="keyword">pthread_mutex_t</span> counter_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> tids[MAXP];</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">int</span> *iptr = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (iptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	    perror(<span class="string">"malloc error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	*iptr = i;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_create(&amp;tids[i], <span class="literal">NULL</span>, doit, iptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread create error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_join(tids[i], <span class="literal">NULL</span>)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread join error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    <span class="keyword">int</span> idx = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">    <span class="built_in">free</span>(arg);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;NLOOP; i++) &#123;</span><br><span class="line">	Pthread_mutex_lock(&amp;counter_mutex);</span><br><span class="line">	val = counter;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d: %d\n"</span>, idx, val+<span class="number">1</span>);</span><br><span class="line">	counter = val+<span class="number">1</span>;</span><br><span class="line">	Pthread_mutex_unlock(&amp;counter_mutex);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_lock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex lock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_unlock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex unlock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>运行结果如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0: 1&#10;4: 2&#10;4: 3&#10;4: 4&#10;4: 5&#10;4: 6&#10;4: 7&#10;4: 8&#10;4: 9&#10;0: 10&#10;4: 11&#10;4: 12&#10;0: 13&#10;2: 14&#10;3: 15&#10;3: 16&#10;3: 17&#10;3: 18&#10;1: 19&#10;1: 20&#10;1: 21&#10;1: 22&#10;1: 23&#10;1: 24&#10;1: 25&#10;1: 26&#10;1: 27&#10;1: 28&#10;0: 29&#10;0: 30&#10;0: 31&#10;0: 32&#10;0: 33&#10;0: 34&#10;0: 35&#10;3: 36&#10;3: 37&#10;3: 38&#10;3: 39&#10;3: 40&#10;3: 41&#10;2: 42&#10;2: 43&#10;2: 44&#10;2: 45&#10;2: 46&#10;2: 47&#10;2: 48&#10;2: 49&#10;2: 50</span><br></pre></td></tr></table></figure>
-<p>结果是正确的。</p>
-<h1 id="u6761_u4EF6_u53D8_u91CF"><a href="#u6761_u4EF6_u53D8_u91CF" class="headerlink" title="条件变量"></a>条件变量</h1><p>互斥锁适合于防止同时访问某个共享变量，但是有的时候我们需要另外某种在等待某个条件发生期间让我们的进入睡眠的东西，这个就是条件变量。这里有一个例子，pthread函数库并没有等待任意一个线程终止的接口，那么如何实现呢？我们可以利用条件变量来实现这一功能。关于条件变量的函数接口如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_wait</span><span class="params">(pthread_cond_t *cptr, pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_signal</span><span class="params">(pthread_cond_t *cptr)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值*/</span></span><br></pre></td></tr></table></figure>
-<p>先看完整的代码：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> NLOOP    <span class="number">10</span></span></span><br><span class="line"><span class="preprocessor">#<span class="keyword">define</span> MAXP     <span class="number">5</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> counter;</span><br><span class="line"><span class="keyword">int</span> t_done;</span><br><span class="line"><span class="keyword">int</span> flag[MAXP];</span><br><span class="line"><span class="keyword">int</span> nleft;</span><br><span class="line"></span><br><span class="line"><span class="keyword">pthread_mutex_t</span> counter_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"><span class="keyword">pthread_mutex_t</span> tdone_mutex   = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"><span class="keyword">pthread_cond_t</span>  tdone_cond    = PTHREAD_COND_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_wait</span><span class="params">(pthread_cond_t *cptr, pthread_mutex_t *mptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_signal</span><span class="params">(pthread_cond_t *cptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_join</span><span class="params">(pthread_t tid, <span class="keyword">void</span> **status)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> tids[MAXP];</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">memset</span>(flag, <span class="number">0</span>, <span class="keyword">sizeof</span>(flag));</span><br><span class="line">    nleft = MAXP;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	<span class="keyword">int</span> *iptr = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (iptr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">	    perror(<span class="string">"malloc error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	*iptr = i;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> ((error = pthread_create(&amp;tids[i], <span class="literal">NULL</span>, doit, iptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	    errno = error;</span><br><span class="line">	    perror(<span class="string">"pthread create error"</span>);</span><br><span class="line">	    <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (nleft &gt; <span class="number">0</span>) &#123;</span><br><span class="line">	Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line">	<span class="keyword">while</span> (t_done == <span class="number">0</span>)</span><br><span class="line">	    Pthread_cond_wait(&amp;tdone_cond, &amp;tdone_mutex);</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;MAXP; i++) &#123;</span><br><span class="line">	    <span class="keyword">if</span> (flag[i] ==  <span class="number">1</span>) &#123;	<span class="comment">/* thread i already done */</span></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"thread %d done\n"</span>, i);</span><br><span class="line">		Pthread_join(tids[i], <span class="literal">NULL</span>);</span><br><span class="line">		flag[i] = -<span class="number">1</span>;</span><br><span class="line">		nleft--;</span><br><span class="line">	    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">	Pthread_mutex_unlock(&amp;tdone_mutex);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">doit</span><span class="params">(<span class="keyword">void</span> *arg)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> val;</span><br><span class="line">    <span class="keyword">int</span> idx = *((<span class="keyword">int</span> *)arg);</span><br><span class="line">    <span class="built_in">free</span>(arg);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;NLOOP; i++) &#123;</span><br><span class="line">	Pthread_mutex_lock(&amp;counter_mutex);</span><br><span class="line">	val = counter;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%d: %d\n"</span>, idx, val+<span class="number">1</span>);</span><br><span class="line">	counter = val+<span class="number">1</span>;</span><br><span class="line">	Pthread_mutex_unlock(&amp;counter_mutex);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line">    flag[idx] = <span class="number">1</span>;</span><br><span class="line">    t_done++;</span><br><span class="line">    Pthread_cond_signal(&amp;tdone_cond);</span><br><span class="line">    Pthread_mutex_unlock(&amp;tdone_mutex);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_lock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_lock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex lock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_mutex_unlock</span><span class="params">(pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_mutex_unlock(mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread mutex unlock error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_wait</span><span class="params">(pthread_cond_t *cptr, pthread_mutex_t *mptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>((error = pthread_cond_wait(cptr, mptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread condition wait error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_cond_signal</span><span class="params">(pthread_cond_t *cptr)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_cond_signal(cptr)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread condition signal error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Pthread_join</span><span class="params">(pthread_t tid, <span class="keyword">void</span> **status)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> error;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> ((error = pthread_join(tid, status)) != <span class="number">0</span>) &#123;</span><br><span class="line">	errno = error;</span><br><span class="line">	perror(<span class="string">"pthread join error"</span>);</span><br><span class="line">	<span class="built_in">exit</span>(-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol>
-<li>首先我们新建一个全局变量<code>t_done</code>表示当前终止的线程数量。</li>
-<li>创建一个<code>tdone_cond</code>条件变量和与之相关联的互斥锁，通过持有该互斥锁期间递增该计数器并发送信号到该条件变量，一个线程通知朱循环自身即将终止。</li>
-<li>主循环在持有条件变量相关联的互斥锁期间检查<code>t_done</code>，如果发现无事可做，那么主线程调用pthread_cond_wait等待信号，该函数把调用线程投入睡眠并释放调用线程持有的互斥锁，当调用线程后来从pthread_cond_wait返回时，<br>线程再次只有该互斥锁。</li>
-<li>我们用一个flag标志来记录线程的状态，1表示线程已经终止，但未被另外一个线程调用pthread_join，-1表示已经被调用了pthread_join。</li>
-</ol>
-<p>每一个条件变量都需要关联一个互斥锁，因为<code>条件</code>通常是线程之间共享的某个变量的值。允许不同线程设置和测试该变量要求有一个与该变量相关联的互斥锁。举个栗子，如果之前的代码我们没有互斥锁，那么主循环的就是如下的形式：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (t_done == <span class="number">0</span>)</span><br><span class="line">	Pthread_cond_wait(&amp;tdone_cond, &amp;tdone_mutex);</span><br></pre></td></tr></table></figure>
-<p>有这样的可能：主线程外的一个线程在主循环测试t_done == 0之后但是在调用pthread_cond_wait之前调用递增了t_done，那么这个信号就会永远的地丢失了（pthread_cond_wait一定要在pthread_cond_signal前调用）。同样的理由要求<br>pthread_cond_wait被调用时，其所关联的互斥锁是必须上锁的，该函数作为单个原子操作解锁该互斥锁并把调用线程投入睡眠也是出于这个理由。如果函数不先解锁，到返回是再给它上锁，调用线程不得不实现解锁事后上锁，测试t_done的循环就变成了</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line"><span class="keyword">while</span> (t_done == <span class="number">0</span>) &#123;</span><br><span class="line">	Pthread_mutex_unlock(&amp;tdone_mutex);</span><br><span class="line">	Pthread_cond_wait(&amp;tdone_cond, &amp;tdone_mutex);</span><br><span class="line">	Pthread_mutex_lock(&amp;tdone_mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>然而会有这种情况：在Pthread_mutext_unlock与Pthread_cond_wait之间有另外的一个线程递增了t_done，那么这个信号也就永远消失了。</p>
-<p>最后要说明的是，pthread_cond_signal通常唤醒等待相应条件上的单个线程，有时候一个线程需要唤醒多个等待条件的线程，这时候可以调用pthread_cond_broadcast，函数原型如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="preprocessor">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_broadcast</span><span class="params">(pthread_cond_t *cptr)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pthread_cond_timedwait</span><span class="params">(pthread_cond_t *cptr, pthread_mutext_t *mptr, <span class="keyword">const</span> <span class="keyword">struct</span> timespec *abstime)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 成功返回0，否则返回正的Exxx值 */</span></span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2179,7 +2172,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-count">37</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -2196,7 +2189,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">45</span>
+                <span class="site-state-item-count">46</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

@@ -257,6 +257,169 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/20/Rust-Object-Safe/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="Zach">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="/images/avatar.JPG">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="Zach的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/11/20/Rust-Object-Safe/" itemprop="url">
+                  Rust-Object-Safe
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/11/20/Rust-Object-Safe/" class="leancloud_visitors" data-flag-title="Rust-Object-Safe">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               <span class="post-meta-item-text">阅读次数 </span>
+               <span class="leancloud-visitors-count"></span>
+              </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Rust中同时支持动态分派和静态分派。</p>
+<h3 id="u9759_u6001_u5206_u6D3E"><a href="#u9759_u6001_u5206_u6D3E" class="headerlink" title="静态分派"></a>静态分派</h3><p>所谓静态分派，是指编译器就知道调用哪一个函数来实现多态。举个例子来说，我们有一个Foo Trait，并为u8和String实现了这个Trait：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Foo</span> &#123;</span><br><span class="line">  method(&amp;<span class="keyword">self</span>) -&gt; Stirng;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Foo <span class="keyword">for</span> <span class="keyword">u8</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">method</span></span>(&amp;<span class="keyword">self</span>) -&gt; <span class="built_in">String</span> &#123; <span class="built_in">format!</span>(<span class="string">"u8: &#123;&#125;"</span>, *<span class="keyword">self</span>) &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Foo <span class="keyword">for</span> <span class="built_in">String</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">method</span></span>(&amp;<span class="keyword">self</span>) -&gt; <span class="built_in">String</span> &#123; <span class="built_in">format!</span>(<span class="string">"string: &#123;&#125;"</span>, *<span class="keyword">self</span>) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们定义如下的泛型函数</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">do_something</span></span>&lt;T: Foo&gt;(x: T) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"&#123;&#125;"</span>, x.method());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>并这样调用这一个泛型函数</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">  	<span class="keyword">let</span> x = <span class="number">5u8</span>;</span><br><span class="line">  	<span class="keyword">let</span> y = <span class="string">"Hello"</span>.to_string();</span><br><span class="line">    </span><br><span class="line">    do_something(x);</span><br><span class="line">    do_something(y);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于在编译阶段编译器已经知道了x和y的类型，那么编译器会在调用泛型函数的时候展开函数，即编译器会生成类似下面的代码：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">do_something_u8</span></span>(x: <span class="keyword">u8</span>) &#123;</span><br><span class="line">    x.method();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">do_something_string</span></span>(x: <span class="built_in">String</span>) &#123;</span><br><span class="line">    x.method();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> x = <span class="number">5u8</span>;</span><br><span class="line">    <span class="keyword">let</span> y = <span class="string">"Hello"</span>.to_string();</span><br><span class="line"></span><br><span class="line">    do_something_u8(x);</span><br><span class="line">    do_something_string(y);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样一来，泛型函数的调用就变成了特定类型展开结果的内联调用，这样的优点是显而易见的：内联函数易于优化，而且快！当然，内联函数过多，代码也会变成臃肿，同时”优化“也并不见得是真的优化。</p>
+<h3 id="u52A8_u6001_u5206_u6D3E"><a href="#u52A8_u6001_u5206_u6D3E" class="headerlink" title="动态分派"></a>动态分派</h3><p>由于静态分派有瑕疵，也就有了动态分派。动态分派是通过<code>Trait Object</code>实现的，<code>Trait Object</code>指的是类型直到运行时才能确定的对象，如&amp;Foo，Box\<foo\>等，其实也就是指向Trait的指针了。</foo\></p>
+<p>一个<code>Trait Object</code>其实是一个胖指针，它的内存结构为：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> TraitObject &#123;</span><br><span class="line">    <span class="keyword">pub</span> data: *<span class="keyword">mut</span> (),</span><br><span class="line">    <span class="keyword">pub</span> vtable: *<span class="keyword">mut</span> (),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到<code>Trait Object</code>是通过虚函数表来实现动态分派的，但是Rust的虚函数表和C++的虚函数表不同的是，在C++中，每一个对象实例中都存在一个vtable指针，而在Rust中，对象实例是没有vtable指针的，vtable阵阵存在于<code>Trait Object</code>中。</p>
+<p>一个vtable实际上就是包裹了函数指针的结构，还是以Foo这个Trait为例子，一个可能的实现如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> FooVtable &#123;</span><br><span class="line">  	desctructor: <span class="function"><span class="keyword">fn</span></span>(*<span class="keyword">mut</span> ()),</span><br><span class="line">    size: usize,</span><br><span class="line">    align: usize,</span><br><span class="line">    method: <span class="function"><span class="keyword">fn</span></span>(*<span class="keyword">const</span> ()) -&gt; <span class="built_in">String</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">call_method_on_u8</span></span>(x: *<span class="keyword">const</span>()) -&gt; <span class="built_in">String</span> &#123;</span><br><span class="line">  	<span class="keyword">let</span> byte: &amp;<span class="keyword">u8</span> = <span class="keyword">unsafe</span>&#123; &amp;*(x <span class="keyword">as</span> *<span class="keyword">const</span> <span class="keyword">u8</span>)&#125;;</span><br><span class="line">    byte.method()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">call_method_on_string</span></span>(x: *<span class="keyword">const</span>()) -&gt; <span class="built_in">String</span> &#123;</span><br><span class="line">  	<span class="keyword">let</span> string: &amp;<span class="built_in">String</span> = <span class="keyword">unsafe</span> &#123;&amp;*(x <span class="keyword">as</span> *<span class="keyword">const</span> <span class="built_in">String</span>)&#125;;</span><br><span class="line">	string.method()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> Foo_for_u8_vtable: FooVtable = FootVtable &#123;</span><br><span class="line">  	destructor:<span class="comment">/* a destructor*/</span>,</span><br><span class="line">    size: <span class="number">1</span>,</span><br><span class="line">    align: <span class="number">1</span>,</span><br><span class="line">    method: call_method_on_u8 <span class="keyword">as</span> <span class="function"><span class="keyword">fn</span></span>(*<span class="keyword">const</span>()) -&gt; <span class="built_in">String</span></span><br><span class="line">&#125;;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">static</span> Foo_for_string_vtable: FooVtable = FooVtable &#123;</span><br><span class="line">  	desctructor: <span class="comment">/* a desctructor*/</span>,</span><br><span class="line">    size: <span class="number">24</span>,</span><br><span class="line">    align: <span class="number">8</span>,</span><br><span class="line">    method: call_method_on_string <span class="keyword">as</span> <span class="function"><span class="keyword">fn</span></span>(*<span class="keyword">const</span>()) -&gt; <span class="built_in">String</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这样之后，编译器就可以把<code>let p = &amp;x as &amp;Foo</code>做如下的转换：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// let p = &amp;x as &amp;Foo</span></span><br><span class="line"><span class="keyword">let</span> p = TraitObject &#123;</span><br><span class="line">  	data: &amp;a,</span><br><span class="line">    vtable: &amp;Foo_for_u8_vtable</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>调用<code>Trait Object</code>对应的方法也就转换成了：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// p.method()</span></span><br><span class="line">p.vtable.method(p.data)</span><br></pre></td></tr></table></figure>
+<h3 id="Object_Safe"><a href="#Object_Safe" class="headerlink" title="Object Safe"></a>Object Safe</h3><p>并不是所有的Trait都可以有相应的<code>Trait Object</code>的，一个Trait如果想要构造出一个<code>Trait Object</code>，那么这个Trait必须时Object Safe的，那什么是Object Safe呢？它必须满足以下两个条件：</p>
+<ol>
+<li><p>trait没有<code>Self: Sized</code>约束</p>
+</li>
+<li><p>trait中所有的方法都是object safe的</p>
+<p>trait中所有的方法都是Object Safe的是指：</p>
+<ul>
+<li><p>不能有任何的类型参数，即方法不能是泛型的</p>
+</li>
+<li><p>方式中没有Self参数</p>
+<p>​</p>
+</li>
+</ul>
+<p>一个Trait 只是描述了一个类型的公共行为，它并不知道这个类型的具体实现的大小，也就是说实现这些公共行为的具体类型大小各异，并不受拘束，那么如果我们给一个Trait加上<code>Self: Sized</code>约束，这就是告诉我们，这个Trait所描述的具体类型大小在编译器就知道了，即它的大小是一个常量，而这与<code>Trait Object</code>是相违背的。所以如果我们像下面一样定义一个Trait，我们是没有办法构造出一个<code>Trait Object</code>的。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Foo</span> <span class="keyword">where</span> <span class="keyword">Self</span>: <span class="built_in">Sized</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">fn</span> <span class="title">foo</span></span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"> </span><br><span class="line"><span class="comment">// let p = &amp;x as &amp;Foo;	// error</span></span><br></pre></td></tr></table></figure>
+<p>有时候我们只是想让某些方法不出现在vtable中，而不是构造不出<code>Trait Object</code>，这个时候只要给对应的方法加上<code>Self: Sized</code>约束即可。即:</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Foo</span> &#123;</span><br><span class="line">  	<span class="function"><span class="keyword">fn</span> <span class="title">foo</span></span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">not_in_vtable</span></span>(&amp;<span class="keyword">self</span>) <span class="keyword">where</span> <span class="keyword">Self</span>: <span class="built_in">Sized</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">    </span><br><span class="line"><span class="keyword">let</span> p = &amp;x <span class="keyword">as</span> &amp;Foo;</span><br><span class="line">p.foo();	<span class="comment">// corrent</span></span><br><span class="line"><span class="comment">// p.not_in_vtable();	// error</span></span><br></pre></td></tr></table></figure>
+<p>一个trait方法如果有一个Self参数会发生什么呢？拿Clone举个例子，</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">trait</span> <span class="title">Clone</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">clone</span></span>(&amp;<span class="keyword">self</span>) -&gt; <span class="keyword">Self</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">clone_from</span></span>(&amp;<span class="keyword">mut</span> <span class="keyword">self</span>, source: &amp;<span class="keyword">Self</span>) &#123; ... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">    </span><br><span class="line"><span class="keyword">let</span> p = &amp;x <span class="keyword">as</span> &amp;<span class="built_in">Clone</span>;</span><br><span class="line"><span class="keyword">let</span> y = p.clone()；</span><br></pre></td></tr></table></figure>
+<p>首先由x得到了一个<code>Trait Object</code>，这个时候编译器已经不知道x原来的类型是什么了，只是只要由p可以调用一些列Clone所定义的方法，而接下来又要调用clone这个函数来复制x的一个实例，这就让编译器犯难了，即然它都不知道原先的类型是啥，又何谈复制？所以Rust就规定这种情况下，Trait不是Object Safe的，也就不能构造出<code>Trait Object</code>。</p>
+<p>如果一个trait方法没有self参数，即为一个静态方法，那么很显然静态方法是没有办法放进vtable中的，所以静态方法也不是object safe的</p>
+<p>如果trait方法中有类型参数，比如：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">trait</span> <span class="title">Foo</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">fn</span> <span class="title">foo</span></span>&lt;T&gt;(&amp;<span class="keyword">self</span>, t: T);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于泛型参数是在编译期自动展开的，如果要讲泛型函数放到vtable中，就必须把所有的foo版本都赛到虚函数表中，这个就太为难Rust编译器了，所以Rust规定，如果有类型参数，那么方法也不是Object Safe的。</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
   <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/07/20/Multiplicative Hashing/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1551,153 +1714,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/28/Rust FFI/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="Zach">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.JPG">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Zach的博客">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Zach的博客" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/11/28/Rust FFI/" itemprop="url">
-                  Rust FFI
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-             <span id="/2016/11/28/Rust FFI/" class="leancloud_visitors" data-flag-title="Rust FFI">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               <span class="post-meta-item-text">阅读次数 </span>
-               <span class="leancloud-visitors-count"></span>
-              </span>
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="FFI"><a href="#FFI" class="headerlink" title="FFI"></a>FFI</h1><p><code>FFI</code>(Foreign Function Interface)，顾名思义，是Rust中用来调用其他语言的机制。值得注意的是，<code>FFI</code>在C和Rust之间实现了零抽象开销，也就是说在Rust调用C和C调用Rust时并没有运行时的花销。</p>
-<h3 id="u4E00_u4E2A_u4F8B_u5B50"><a href="#u4E00_u4E2A_u4F8B_u5B50" class="headerlink" title="一个例子"></a>一个例子</h3><p>比方说我们定义了一个函数：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">double_input</span><span class="params">(<span class="keyword">int</span> input)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> intput * <span class="number">2</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果我们需要在Rust中调用它，那么<code>main.rs</code>文件应该是这样的：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> libc;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[link(name = "extlib")]</span></span><br><span class="line"><span class="keyword">extern</span> &#123;</span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">double_input</span></span>(input: libc::c_int) -&gt; libc::c_int;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> input = <span class="number">4</span>;</span><br><span class="line">    <span class="keyword">let</span> output = <span class="keyword">unsafe</span> &#123; double_input(input) &#125;;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"&#123;&#125; * 2 = &#123;&#125;"</span>, input, output);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我们来一步一步剖析这个程序：</p>
-<ul>
-<li><p><code>libc</code>这个库提供了许多类型定义，用以桥街Rust和C的类型。</p>
-</li>
-<li><p><code>#[link(name = &quot;extlib&quot;)]</code>这个<code>Attribute</code>告诉编译器这个函数可以连接<strong>libextlib</strong>这个库而得到，这里的链接是动态链接。注意<code>link</code>属性还有另外一种形式：<code>#[link(name = &quot;extlib&quot;, kind = &quot;static&quot;)]</code>，<code>kind</code>目前只有两个值：</p>
-<ul>
-<li>static</li>
-<li>framework（只在OSX中）</li>
-</ul>
-<p>如果不指定<code>kind</code>，那么默认为动态链接。</p>
-</li>
-<li><p><code>extern</code>代码块声明从C语言调用的函数接口。</p>
-</li>
-<li><p>因为编译器不知道C函数是如何实现，所以它假设内存安全问题会在你调用C函数时发生，所以我们必须用<code>unsafe</code>来包含调用C函数的语句。</p>
-</li>
-<li><p>需要注意的是，我们需要在项目中添加一个<code>build.rs</code>文件来告诉编译如何编译C文件并生成<strong>libextlib</strong>，具体可以参考这个例子<a href="https://github.com/alexcrichton/rust-ffi-examples/tree/master/rust-to-c" target="_blank" rel="external">rust-to-c</a></p>
-</li>
-</ul>
-<h3 id="u5B89_u5168_u62BD_u8C61"><a href="#u5B89_u5168_u62BD_u8C61" class="headerlink" title="安全抽象"></a>安全抽象</h3><p>如果我们把一个C函数绑定到Rust，不仅绑定的抽象开销为零，我们也可以让C函数变得更加安全。我们拿下面的例子来说明：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Gets the data for a file in the tarball at the given index, returning NULL if</span></span><br><span class="line"><span class="comment">// it does not exist. The `size` pointer is filled in with the size of the file</span></span><br><span class="line"><span class="comment">// if successful.</span></span><br><span class="line"><span class="function"><span class="keyword">const</span> <span class="keyword">char</span> *<span class="title">tarball_file_data</span><span class="params">(tarball_t *tarball, <span class="keyword">unsigned</span> index, size_t *size)</span></span>;</span><br></pre></td></tr></table></figure>
-<p>假设我们调用这个函数，那么函数返回一个指针，而在之后某一个时刻，我们销毁了<code>tarball</code>所在内存，那么这时候这个指针就变成了野指针（dangling pointer），后续如果使用了这个指针，很可能程序就会崩溃。</p>
-<p>如果我们把这个函数绑定到Rust：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> Tarball &#123; raw: *<span class="keyword">mut</span> tarball_t &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> Tarball &#123;</span><br><span class="line">    <span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">file</span></span>(&amp;<span class="keyword">self</span>, index: <span class="keyword">u32</span>) -&gt; <span class="built_in">Option</span>&lt;&amp;[<span class="keyword">u8</span>]&gt; &#123;</span><br><span class="line">        <span class="keyword">unsafe</span> &#123;</span><br><span class="line">            <span class="keyword">let</span> <span class="keyword">mut</span> size = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">let</span> data = tarball_file_data(<span class="keyword">self</span>.raw, index <span class="keyword">as</span> libc::c_uint,</span><br><span class="line">                                         &amp;<span class="keyword">mut</span> size);</span><br><span class="line">            <span class="keyword">if</span> data.is_null() &#123;</span><br><span class="line">                <span class="built_in">None</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="built_in">Some</span>(slice::from_raw_parts(data <span class="keyword">as</span> *<span class="keyword">const</span> <span class="keyword">u8</span>, size <span class="keyword">as</span> usize))</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>data</code>的声明周期默认和一个<code>Tarball</code>对象绑定在一起，如果<code>Tarball</code>已经被销毁，那么<code>data</code>由于Rust的限制也不能被使用，程序编译都不会通过，从而保证了安全。</p>
-<h3 id="FFI_u548Cpanics"><a href="#FFI_u548Cpanics" class="headerlink" title="FFI和panics"></a>FFI和panics</h3><p>需要注意的一点是，如果其他语言函数和<code>panic!</code>在同一个线程中被调用，那么结果是未定义的。如果编写的程序可能<code>panic</code>，我们就得让<code>panic</code>在另一个线程中被调用：</p>
-<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">use</span> std::thread;</span><br><span class="line"></span><br><span class="line"><span class="preprocessor">#[no_mangle]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">extern</span> <span class="function"><span class="keyword">fn</span> <span class="title">oh_no</span></span>() -&gt; <span class="keyword">i32</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> h = thread::spawn(|| &#123;</span><br><span class="line">        <span class="built_in">panic!</span>(<span class="string">"Oops!"</span>);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">match</span> h.join() &#123;</span><br><span class="line">        <span class="built_in">Ok</span>(_) =&gt; <span class="number">1</span>,</span><br><span class="line">        <span class="built_in">Err</span>(_) =&gt; <span class="number">0</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1743,7 +1759,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">36</span>
+              <span class="site-state-item-count">37</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1760,7 +1776,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">45</span>
+                <span class="site-state-item-count">46</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
